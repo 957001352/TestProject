@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.basicmodule.service.dao.MonitorDao">
+
+    <resultMap type="MonitorDetail" id="MonitorResult">
+        <result property="tenantName" column="tenantName"/>
+        <result property="dataType" column="dataType"/>
+        <result property="totalVal" column="totalVal"/>
+        <result property="dataTime" column="dataTime"/>
+        <result property="province" column="province"/>
+        <result property="dataTime" column="dataTime"/>
+        <result property="end_time" column="endTime"/>
+    </resultMap>
+
+    <select id="findDeviceCnt" parameterType="MonitorDetail" resultMap="MonitorResult">
+        SELECT COUNT(1) AS totalVal , ten_tbl.name AS tenantName
+        FROM dhlk_basic_product_devices  dev_tbl
+        INNER JOIN dhlk_basic_tenant ten_tbl ON dev_tbl.tenant_id = ten_tbl.id
+        GROUP BY ten_tbl.name
+        LIMIT 0, ${topN}
+    </select>
+
+    <select id="findTotalSize" parameterType="MonitorDetail" resultMap="MonitorResult">
+        SELECT tenant AS tenantName,SUM(totalSize) AS totalVal FROM dhlk_memory_size
+        GROUP BY tenantName
+        LIMIT 0,${topN}
+    </select>
+
+    <select id="findBiCnt" parameterType="MonitorDetail" resultMap="MonitorResult">
+        SELECT COUNT(1) AS totalVal , dev_tbl.name AS tenantName
+        FROM dhlk_basic_net_devices dev_tbl
+        INNER JOIN dhlk_basic_tenant ten_tbl ON dev_tbl.tenant_id = ten_tbl.id
+        GROUP BY tenantName
+        LIMIT 0, ${topN}
+    </select>
+
+    <select id="findCountByProvince" parameterType="MonitorDetail" resultMap="MonitorResult">
+        SELECT
+            COUNT(1) AS totalVal , func_splitString(adress,',',1) AS province
+        FROM dhlk_basic_tenant
+        GROUP BY province
+    </select>
+
+    <select id="findTenantList" parameterType="MonitorDetail" resultMap="MonitorResult">
+        SELECT
+        NAME  AS tenantName,
+        func_splitString(adress,',',1) AS province,end_time,
+        CASE WHEN totalSize IS NULL
+        THEN 0
+        ELSE totalSize
+        END AS totalVal
+        FROM dhlk_basic_tenant tbl
+        LEFT JOIN (SELECT tenant AS tenantName,SUM(totalSize) AS totalSize FROM dhlk_memory_size GROUP BY tenantName) AS
+        ten_tbl ON ten_tbl.tenantName = tbl.name
+        where 1 = 1
+        <if test="province != null and province != '' ">
+            and province = #{province}
+        </if>
+    </select>
+    <select id="findOSData" resultMap="MonitorResult">
+        SELECT dataType , totalVal FROM (
+            SELECT  'dataCnt' as dataType, sum(totalSize) as totalVal from  dhlk_memory_size
+            union all
+            SELECT 'deviceCnt' as dataType, count(1) as totalVal FROM dhlk_basic_net_devices
+            union all
+            SELECT 'allUser' as dataType, COUNT(1) totalVal FROM dhlk_basic_tenant
+            union all
+            SELECT 'currMon' as dataType , count(1) totalVal FROM dhlk_basic_tenant where DATE_FORMAT(end_time,'%Y-%c')  =  DATE_FORMAT(now(),'%Y-%c')
+            union all
+            SELECT 'validNum' dataType, COUNT(1) totalVal FROM dhlk_basic_tenant WHERE END_TIME - NOW()  &lt; 0
+        ) as data_tbl
+    </select>
+
+</mapper>

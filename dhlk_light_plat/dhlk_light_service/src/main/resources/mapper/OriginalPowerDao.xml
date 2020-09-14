@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.OriginalPowerDao">
+
+    <resultMap id="DhlkLightOriginalPowerDaoResult" type="com.dhlk.entity.light.OriginalPower">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="ledCount" jdbcType="INTEGER" column="led_count"/>
+        <result property="ledPower" jdbcType="FLOAT" column="led_power"/>
+        <result property="ledOpentime" jdbcType="FLOAT" column="led_opentime"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <result property="preBrightness" jdbcType="INTEGER" column="pre_brightness"/>
+        <result property="systemRunTime" jdbcType="VARCHAR" column="sys_runtime"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,led_count, led_power, led_opentime, tenant_id,pre_brightness,sys_runtime
+    </sql>
+
+    <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.light.OriginalPower">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_original_power where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.OriginalPower" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_original_power
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ledCount != null and  ledCount != ''">led_count,</if>
+            <if test="ledPower != null  and ledPower != ''">led_power,</if>
+            <if test="ledOpentime != null  and ledOpentime != ''">led_opentime,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+            <if test="preBrightness != null and preBrightness != ''">pre_brightness,</if>
+            <if test="systemRunTime != null and systemRunTime != ''">sys_runtime</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ledCount != null and  ledCount != ''">#{ledCount},</if>
+            <if test="ledPower != null  and ledPower != ''">#{ledPower},</if>
+            <if test="ledOpentime != null  and ledOpentime != ''">#{ledOpentime},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
+            <if test="preBrightness != null and preBrightness != ''">#{preBrightness},</if>
+            <if test="systemRunTime != null and systemRunTime != ''">#{systemRunTime}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.OriginalPower">
+        update dhlk_light_original_power
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ledCount != null and  ledCount != ''">led_count = #{ledCount},</if>
+            <if test="ledPower != null  and ledPower != ''">led_power = #{ledPower},</if>
+            <if test="ledOpentime != null  and ledOpentime != ''">led_opentime = #{ledOpentime}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findList" parameterType="OriginalPower" resultMap="DhlkLightOriginalPowerDaoResult">
+        select
+            <include refid="baseColumn"/>
+        from dhlk_light_original_power where 1=1
+        <if test="ledCount != null  and ledCount != ''">
+            and led_count = #{ledCount}
+        </if>
+        <if test=" ledPower != null and  ledPower !=''">
+            and led_power like #{ledPower}
+        </if>
+        <if test="ledOpentime != null and ledOpentime != ''">
+            and led_opentime like #{ledOpentime}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_original_power where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="selectOpByTenantId" parameterType="INTEGER" resultType="com.dhlk.entity.light.OriginalPower">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_original_power where tenant_id = #{tenantId}
+    </select>
+
+    <delete id="deleteByTenantId" parameterType="INTEGER">
+        delete from dhlk_light_original_power where tenant_id = #{tenantId}
+    </delete>
+
+    <update id="updateOriginalPower" parameterType="com.dhlk.entity.light.OriginalPower">
+        update dhlk_light_original_power
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="preBrightness != null  and preBrightness != ''">pre_brightness = #{preBrightness}</if>
+        </trim>
+        where tenant_id = #{tenantId}
+    </update>
+
+    <select id="selectOriginalPowerByTenantId" parameterType="INTEGER" resultMap="DhlkLightOriginalPowerDaoResult">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_original_power where tenant_id = #{tenantId}
+    </select>
+
+    <update id="setValues" parameterType="com.dhlk.entity.light.OriginalPower">
+        update dhlk_light_original_power
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ledOpentime != null  and ledOpentime != ''">led_opentime = #{ledOpentime},</if>
+            <if test="ledCount != null  and ledCount != ''">led_count = #{ledCount},</if>
+            <if test="ledPower != null  and ledPower != ''">led_power = #{ledPower},</if>
+            <if test="preBrightness != null  and preBrightness != ''">pre_brightness = #{preBrightness},</if>
+            <if test="systemRunTime != null  and systemRunTime != ''">sys_runtime = #{systemRunTime}</if>
+        </trim>
+        where tenant_id = #{tenantId}
+    </update>
+
+
+    <update id="updateByTenantId" parameterType="com.dhlk.entity.light.OriginalPower">
+        update dhlk_light_original_power
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ledCount != null and  ledCount != ''">led_count = #{ledCount},</if>
+            <if test="ledPower != null  and ledPower != ''">led_power = #{ledPower},</if>
+            <if test="ledOpentime != null  and ledOpentime != ''">led_opentime = #{ledOpentime}</if>
+        </trim>
+        where tenant_id = #{tenantId}
+    </update>
+</mapper>

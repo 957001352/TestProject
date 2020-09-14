@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.PeopleFeelDao">
+
+    <resultMap id="DhlkLightPeopleFeelDaoResult" type="com.dhlk.entity.light.PeopleFeel">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result column="on_off" property="on_off" jdbcType="INTEGER"/>
+        <result column="trig_delay_tm" property="trig_delay_tm" jdbcType="FLOAT"/>
+        <result column="n_ramp_tm" property="n_ramp_tm" jdbcType="FLOAT"/>
+        <result column="minvalue" property="minvalue" jdbcType="FLOAT"/>
+        <result column="maxval" property="maxvalue" jdbcType="FLOAT"/>
+        <result column="tenant_id" property="tenantId" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+          id, on_off, trig_delay_tm, n_ramp_tm, minvalue, maxval, tenant_id
+    </sql>
+
+    <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.light.PeopleFeel">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_people_feel where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.PeopleFeel" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_people_feel
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="on_off != null and  on_off != ''">on_off,</if>
+            <if test="trig_delay_tm != null  and trig_delay_tm != ''">trig_delay_tm,</if>
+            <if test="n_ramp_tm != null  and n_ramp_tm != ''">n_ramp_tm,</if>
+            <if test="minvalue != null  and minvalue != ''">minvalue,</if>
+            <if test="maxvalue != null  and maxvalue != ''">maxval,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="on_off != null and  on_off != ''">#{on_off},</if>
+            <if test="trig_delay_tm != null  and trig_delay_tm != ''">#{trig_delay_tm},</if>
+            <if test="n_ramp_tm != null  and n_ramp_tm != ''">#{n_ramp_tm},</if>
+            <if test="minvalue != null  and minvalue != ''">#{minvalue},</if>
+            <if test="maxvalue != null  and maxvalue != ''">#{maxvalue},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.PeopleFeel">
+        update dhlk_light_people_feel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="on_off != null and  on_off != ''">on_off = #{on_off},</if>
+            <if test="trig_delay_tm != null  and trig_delay_tm != ''">trig_delay_tm = #{trig_delay_tm},</if>
+            <if test="n_ramp_tm != null  and n_ramp_tm != ''">n_ramp_tm = #{n_ramp_tm},</if>
+            <if test="minvalue != null  and minvalue != ''">minvalue = #{minvalue},</if>
+            <if test="maxvalue != null  and maxvalue != ''">maxval = #{maxvalue}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_people_feel where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByTenantId" parameterType="INTEGER">
+        delete from dhlk_light_people_feel where tenant_id = #{tenantId}
+    </delete>
+
+    <select id="selectByTenantId" parameterType="INTEGER"  resultMap="DhlkLightPeopleFeelDaoResult">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_people_feel
+        <if test="tenantId != null and tenantId != ''">
+            where tenant_id = #{tenantId}
+        </if>
+    </select>
+
+</mapper>

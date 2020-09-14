@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.TenantDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.Tenant" id="DhlkBasicTenantResult">
+        <result property="id" jdbcType="INTEGER"   column="id"/>
+        <result property="code"  jdbcType="VARCHAR"  column="code"/>
+        <result property="name" jdbcType="VARCHAR"   column="name"/>
+        <result property="telephone" jdbcType="VARCHAR"   column="telephone"/>
+        <result property="adress" jdbcType="VARCHAR"   column="adress"/>
+        <result property="companyEmail" jdbcType="VARCHAR"   column="company_email"/>
+        <result property="linkman" jdbcType="VARCHAR"   column="linkman"/>
+        <result property="phone" jdbcType="VARCHAR"   column="phone"/>
+        <result property="email" jdbcType="VARCHAR"   column="email"/>
+        <result property="startTime" jdbcType="TIMESTAMP"   column="start_time"/>
+        <result property="endTime" jdbcType="TIMESTAMP"   column="end_time"/>
+        <result property="createTime" jdbcType="TIMESTAMP"   column="create_time"/>
+        <result property="devices" jdbcType="INTEGER"   column="devices"/>
+        <result property="status" jdbcType="INTEGER"   column="status"/>
+        <result property="isSystem" jdbcType="INTEGER"   column="is_system"/>
+        <result property="tbLoginname" jdbcType="VARCHAR"  column="tb_loginname"/>
+        <result property="tbPassword" jdbcType="VARCHAR"  column="tb_password"/>
+        <result property="orgId" jdbcType="INTEGER"   column="orgId"/>
+        <result property="roleId" jdbcType="INTEGER"   column="roleId"/>
+        <result property="fileId" jdbcType="VARCHAR"   column="file_id"/>
+        <result property="tbId" jdbcType="VARCHAR"   column="tb_id"/>
+        <collection property="imagePath" javaType="String"
+                    column="{id=file_id,attachPath=attachPath}" ofType="String"
+                    select="com.dhlk.basicmodule.service.dao.AttachmentDao.findWebPathByDataId"
+        ></collection>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,code, name,telephone, adress, company_email, linkman, phone,email,start_time,end_time,create_time,devices,status,is_system,tb_loginname,tb_password,file_id,tb_id
+    </sql>
+
+    <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.basicmodule.Tenant">
+        select <include refid="baseColumn"/>
+        from dhlk_basic_tenant where id = #{id}  and status = 0
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.Tenant" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_tenant
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">code,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="telephone != null  and telephone != ''">telephone,</if>
+            <if test="adress != null  and adress != ''">adress,</if>
+            <if test="companyEmail != null  and companyEmail != ''">company_email,</if>
+            <if test="linkman != null  and linkman != ''">linkman,</if>
+            <if test="phone != null  and phone != ''">phone,</if>
+            <if test="email != null  and email != ''">email,</if>
+            <if test="startTime != null">start_Time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="devices != null  and devices != ''">devices,</if>
+            <if test="status != null and status !=''">status,</if>
+            <if test="isSystem != null and isSystem !=''">is_system,</if>
+            <if test="tbLoginname != null and tbLoginname !=''">tb_loginname,</if>
+            <if test="tbPassword != null and tbPassword !=''">tb_password,</if>
+            <if test="tbId != null and tbId !=''">tb_id,</if>
+            <if test="fileId != null and fileId !=''">file_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">#{code},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="telephone != null  and telephone != ''">#{telephone},</if>
+            <if test="adress != null  and adress != ''">#{adress},</if>
+            <if test="companyEmail != null  and companyEmail != ''">#{companyEmail},</if>
+            <if test="linkman != null  and linkman != ''">#{linkman},</if>
+            <if test="phone != null  and phone != ''">#{phone},</if>
+            <if test="email != null  and email != ''">#{email},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="devices != null  and devices != ''">#{devices},</if>
+            <if test="status != null and status !=''">#{status},</if>
+            <if test="isSystem != null and isSystem !=''">#{isSystem},</if>
+            <if test="tbLoginname != null and tbLoginname !=''">#{tbLoginname},</if>
+            <if test="tbPassword != null and tbPassword !=''">#{tbPassword},</if>
+            <if test="tbId != null and tbId !=''">#{tbId},</if>
+            <if test="fileId != null and fileId !=''">#{fileId}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.Tenant">
+        update dhlk_basic_tenant
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="telephone != null  and telephone != ''">telephone = #{telephone},</if>
+            <if test="adress != null  and adress != ''">adress = #{adress},</if>
+            <if test="companyEmail != null  and companyEmail != ''">company_email = #{companyEmail},</if>
+            <if test="linkman != null  and linkman != ''">linkman = #{linkman},</if>
+            <if test="phone != null  and phone != ''">phone = #{phone},</if>
+            <if test="email != null  and email != ''">email = #{email},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="fileId != null and fileId !=''">file_id = #{fileId},</if>
+            <if test="devices != null  and devices != ''">devices = #{devices}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findList" parameterType="Tenant" resultMap="DhlkBasicTenantResult">
+        select t1.id,t1.code,right(t1.code,6) as customer, t1.name,t1.telephone, t1.adress, t1.company_email, t1.linkman, t1.phone,t1.email,t1.start_time,t1.end_time,t1.create_time,
+        t1.devices,t1.status,t1.is_system,t1.tb_loginname,t1.tb_password,t1.tb_id,t2.id as orgId,IFNULL(NULL, 2) AS roleId,t1.file_id,#{attachPath} attachPath
+        from dhlk_basic_tenant t1
+        left join  (select * from dhlk_basic_org  where parent_id = 0)  t2 on t1.id =  t2.tenant_id
+        where t1.status = 0
+        <if test="name != null  and name != ''">
+            and t1.name like concat('%/', #{name}, '%') ESCAPE '/'
+        </if>
+        <if test=" startTime != null and  startTime !=''">
+            <![CDATA[ and date_format(t1.start_time,'%Y-%m-%d') >= date_format(#{startTime},'%Y-%m-%d')]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and date_format(t1.end_time,'%Y-%m-%d') <= date_format(#{endTime},'%Y-%m-%d')]]>
+        </if>
+        <if test="expire != null and expire == 1">
+            <![CDATA[ and t1.end_time > now()]]>
+        </if>
+        <if test="expire != null and expire == 2">
+            <![CDATA[ and t1.end_time <= now()]]>
+        </if>
+        ORDER BY t1.id desc
+    </select>
+
+    <update id="updateTenantStaus" parameterType="com.dhlk.entity.basicmodule.Tenant">
+        update dhlk_basic_tenant set status = 2 where id = #{id}
+    </update>
+
+    <select id="exportExcel" parameterType="Tenant" resultType="java.util.LinkedHashMap">
+        select t1.id,t1.name,right(t1.code,6) as customer,DATE_FORMAT(t1.create_time,'%Y-%m-%d') createTime,DATE_FORMAT(t1.start_time,'%Y-%m-%d') startTime,
+        DATE_FORMAT(t1.end_time,'%Y-%m-%d') endTime ,t1.devices
+        from dhlk_basic_tenant t1
+        left join  (select * from dhlk_basic_org  where parent_id = 0) t2 on t1.id =  t2.tenant_id
+        where  t1.status = 0
+        <if test="name != null  and name != ''">
+            and t1.name like concat('%/', #{name}, '%') ESCAPE '/'
+        </if>
+        <if test=" startTime != null and  startTime !=''">
+            <![CDATA[ and date_format(t1.start_time,'%Y-%m-%d') >= date_format(#{startTime},'%Y-%m-%d')]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and date_format(t1.end_time,'%Y-%m-%d') <= date_format(#{endTime},'%Y-%m-%d')]]>
+        </if>
+        <if test="expire != null and expire == 1">
+            <![CDATA[ and t1.end_time > now()]]>
+        </if>
+        <if test="expire != null and expire == 2">
+            <![CDATA[ and t1.end_time <= now()]]>
+        </if>
+        ORDER BY t1.id desc
+    </select>
+
+    <select id="findTenantRepeat"  resultType="java.lang.Integer">
+        select count(id) from dhlk_basic_tenant where binary name = #{name} and status = 0
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+    </select>
+
+    <select id="findTenantByCode" parameterType="Tenant" resultType="com.dhlk.entity.basicmodule.Tenant">
+        select <include refid="baseColumn"/>
+        from dhlk_basic_tenant where code = #{code} and status = 0
+    </select>
+
+    <select id="findFactoryByOrgId" parameterType="String" resultType="com.dhlk.entity.basicmodule.Tenant">
+        select  <include refid="baseColumn"/>  from dhlk_basic_tenant where id = #{tenantId}
+    </select>
+</mapper>

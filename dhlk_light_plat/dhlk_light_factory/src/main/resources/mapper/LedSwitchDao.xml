@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.LedSwitchDao">
+    <resultMap type="com.dhlk.entity.light.LedSwitch" id="DhlkBasicLedSwitchResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="switchId" jdbcType="INTEGER" column="switch_id"/>
+        <result property="ledId" jdbcType="INTEGER" column="led_id"/>
+    </resultMap>
+
+    <sql id="selectDhlkBasicUserRoleVo">
+        select id, switch_id, led_id from dhlk_light_led_switch
+    </sql>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_light_led_switch
+            (id,switch_id, led_id,group_id) VALUES
+            (#{item.id},#{item.switchId},#{item.ledId},#{item.groupId})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="String">
+        delete from dhlk_light_led_switch
+    </delete>
+
+    <insert id="saveLedSwitch">
+        insert into dhlk_light_led_switch
+        (id,switch_id,group_id,led_id)
+        values
+            (
+            #{id},
+            #{switchId},
+            #{groupId},
+            #{ledId}
+            )
+    </insert>
+
+    <delete id="deleteBySwitchId" parameterType="Integer">
+        delete from dhlk_light_led_switch where switch_id = #{switchId}
+    </delete>
+
+
+</mapper>

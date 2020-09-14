@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.ApiListDao">
+    <insert id="insert" parameterType="com.dhlk.entity.api.ApiList">
+        insert into dhlk_api_list (id,title,version,content,classify_id,create_time)
+        values (#{id},#{title},#{version},#{content},#{classifyId},#{createTime})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.api.ApiList">
+        update dhlk_api_list set title=#{title},version=#{version},content=#{content},status=#{status},
+         classify_id=#{classifyId},create_time=#{createTime} where id=#{id}
+    </update>
+    <update id="isEnable" parameterType="Integer">
+        update   dhlk_api_list set status=#{status} where id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_api_list where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findList" resultType="com.dhlk.entity.api.ApiList">
+        select * from dhlk_api_list  where 1=1
+        <if test="classifyId != null and classifyId != ''">
+            and classify_id=#{classifyId}
+        </if>
+    </select>
+    <select id="isRepeatTitle" resultType="Integer">
+        SELECT count(*) FROM dhlk_api_list  WHERE title=#{title}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+    </select>
+
+
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_api_list (title,version,content) VALUES
+            (#{item.title},#{item.version},#{item.content})
+        </foreach>
+    </insert>
+    <select id="findExportList" resultType="java.util.LinkedHashMap">
+        select title,version,content from dhlk_api_list
+    </select>
+</mapper>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.LedPowerDao">
+    
+    <resultMap id="DhlkBasicLightDataModel" type="com.dhlk.entity.light.LedPower" >
+        <result property="ledSn" jdbcType="VARCHAR" column="led_sn"/>
+        <result property="electric" jdbcType="NUMERIC" column="electric"/>
+        <result property="voltage" jdbcType="NUMERIC" column="voltage"/>
+        <result property="power" jdbcType="NUMERIC" column="power"/>
+        <result property="energy" jdbcType="NUMERIC" column="energy"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="ledBrightness" jdbcType="INTEGER" column="brightness"/>
+    </resultMap>
+    
+    <resultMap id="DhlkPeopleFeelStatisticsDataModel" type="com.dhlk.entity.light.CloudPeopleFeelStatistics">
+        <result property="ledSn" jdbcType="VARCHAR" column="led_sn"/>
+        <result property="number" jdbcType="INTEGER" column="number"/> <!-- 汇总有人次数-->
+    </resultMap>
+
+    <resultMap id="DhlkOnlineDataModel" type="com.dhlk.entity.light.LedOnline">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="ledSn" jdbcType="VARCHAR" column="led_sn"/>
+        <result property="onlineTime" jdbcType="INTEGER" column="online_time"/>
+    </resultMap>
+    <insert id="insert">
+        insert into dhlk_light_led_power
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            led_sn,electric,voltage,power,energy,brightness,create_time
+        </trim>
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.ledSn},#{item.electric},#{item.voltage},#{item.power},#{item.energy},#{item.ledBrightness},#{item.createTime}
+            </trim>
+        </foreach>
+    </insert>
+
+    <!-- 本地人感数据统计 存集合-->
+    <insert id="insertPeopleFeelStatistics">
+        insert into dhlk_light_local_people_feel_statistics
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                led_sn,status,create_time
+            </trim>
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.ledSn},#{item.status},#{item.createTime}
+            </trim>
+        </foreach>
+    </insert>
+
+    <!-- 本地人感数据统计 存对象 -->
+    <insert id="savePeopleFeelStatistics" parameterType="com.dhlk.entity.light.LocalPeopleFeelStatistics">
+        insert into dhlk_light_local_people_feel_statistics
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            led_sn,status,create_time
+        </trim>
+        values
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{ledSn},#{status},#{createTime}
+            </trim>
+    </insert>
+
+
+
+    <!--根据时间查询人感数据(定时每天晚上11点汇总)-->
+    <select id="peopleFeelStatistics" resultMap="DhlkPeopleFeelStatisticsDataModel">
+           SELECT
+	            led_sn,
+	            COUNT(id) as number
+            FROM
+	            dhlk_light_local_people_feel_statistics
+            WHERE
+	            DATE_FORMAT( create_time, '%Y-%m-%d' ) = CURDATE()
+            GROUP BY
+                led_sn
+    </select>
+    
+    <!--灯能耗统计 （10分钟统计一次,并且是该10分钟内的净能耗（最大能耗减去最小能耗））-->
+    <select id="ledEnergyStatistics" resultMap="DhlkBasicLightDataModel">
+        SELECT
+            led_sn ,(IFNULL(MAX(t1.energy),0) - IFNULL(MIN(t1.energy),0)) as energy
+        from dhlk_light_led_power t1
+        where 1=1
+        <if test="startTime !=null and startTime !='' ">
+            <![CDATA[ and create_time >= #{startTime}]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and create_time <= #{endTime}]]>
+        </if>
+        GROUP BY
+        t1.led_sn
+    </select>
+
+    <!--将每小时汇总的能耗存入数据库-->
+    <insert id="insertBySumEnergy">
+        insert into dhlk_light_led_power_summarizing
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            led_sn,energy,isSend
+        </trim>
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.ledSn},#{item.energy},0
+            </trim>
+        </foreach>
+    </insert>
+
+    <!-- 灯在线时长统计（1个小时统计一次） -->
+    <select id="ledOnLinTime" resultType="com.dhlk.entity.light.LedOnline">
+        select
+        ceiling((count(*)*4)/60) as onlineTime
+        ,led_sn as ledSn
+        from dhlk_light_led_power
+        where 1=1
+        <if test="startTime !=null and startTime !='' ">
+            <![CDATA[ and create_time >= #{startTime}]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and create_time <= #{endTime}]]>
+        </if>
+        GROUP BY led_sn
+    </select>
+
+    <!--将汇总后的数据存入数据库-->
+    <insert id="insertOnlineList">
+        insert into dhlk_light_led_online
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            led_sn,online_time,create_time,isSend
+        </trim>
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.ledSn},#{item.onlineTime},NOW(),0
+            </trim>
+        </foreach>
+    </insert>
+
+
+    <!--删除当前一周之前的灯能耗数据-->
+    <delete id="delete">
+        delete from dhlk_light_led_power where  <![CDATA[create_time < #{date}]]>
+    </delete>
+
+    <!--每个月一号删除上个月的灯能耗数据-->
+    <!--<delete id="delete">
+         delete
+         from
+            dhlk_light_led_power
+         where
+         date_format(create_time,'%Y-%m') = date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+    </delete>-->
+
+    <!-- 查询往云端发送失败的能耗数据 前100条 -->
+    <select id="findSendCloudErrorEnergyList" resultMap="DhlkBasicLightDataModel" >
+        SELECT
+            id,
+	        led_sn,
+	        energy,
+	        create_time
+        FROM
+	        dhlk_light_led_power_summarizing
+        WHERE
+	        isSend = 0
+        ORDER BY id
+        LIMIT 100
+    </select>
+
+    <!--更新能耗统计表状态-->
+    <update id="updateEnergyStatus">
+        update
+           dhlk_light_led_power_summarizing
+        set isSend = 1
+        where id in
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <foreach collection="list" item="item" index="index" separator="," >
+                    #{item.id}
+                </foreach>
+            </trim>
+    </update>
+
+
+    <!-- 查询往云端发送失败的灯在线数据 前100条 -->
+    <select id="findSendCloudErrorOnLineList" resultMap="DhlkOnlineDataModel" >
+        SELECT
+            id,
+	        led_sn,
+	        online_time
+        FROM
+	        dhlk_light_led_online
+        WHERE
+	        isSend = 0
+        ORDER BY id
+        LIMIT 100
+    </select>
+
+    <!--更新灯在线计表状态-->
+    <update id="updateOnLineStatus">
+        update
+        dhlk_light_led_online
+        set isSend = 1
+        where id in
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <foreach collection="list" item="item" index="index" separator="," >
+                #{item.id}
+            </foreach>
+        </trim>
+    </update>
+
+</mapper>

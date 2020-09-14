@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.service.dao.TaskSchedulerDao">
+    
+    <resultMap type="TaskScheduler" id="TaskSchedulerResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="note"    column="note"    />
+        <result property="status"    column="status"    />
+        <result property="areaId"    column="area_id"    />
+        <result property="switchId"    column="switch_id"    />
+        <result property="scheduleCycle"    column="schedule_cycle"    />
+        <collection property="taskSchedulerDetailList" ofType="TaskSchedulerDetail" select="getTaskSchedulerDetails" column="id">
+        </collection>
+    </resultMap>
+
+    <sql id="selectTaskSchedulerVo">
+        select id, name, note, status, area_id, switch_id, schedule_cycle from dhlk_light_task_scheduler
+    </sql>
+
+    <select id="selectTaskSchedulerList" parameterType="TaskScheduler" resultMap="TaskSchedulerResult">
+        SELECT dlts.id, dlts.name, dlts.note, dlts.status, dlts.area_id,dla.area areaName, dlts.switch_id,dls.name switchName, dlts.schedule_cycle
+        FROM dhlk_light_task_scheduler dlts
+        LEFT JOIN dhlk_light_area dla ON dlts.area_id=dla.id
+        LEFT JOIN  dhlk_light_switch dls ON dlts.switch_id=dls.id
+        <where>  
+            <if test="name != null  and name != ''">
+                and dlts.name like concat('%', #{name}, '%')
+            </if>
+            <if test="tenantId != null ">
+                and dlts.tenant_id = #{tenantId}
+            </if>
+           <!-- <if test="note != null  and note != ''"> and note = #{note}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="areaId != null "> and area_id = #{areaId}</if>
+            <if test="switchId != null "> and switch_id = #{switchId}</if>
+            <if test="scheduleCycle != null  and scheduleCycle != ''"> and dlts.schedule_cycle = #{scheduleCycle}</if>-->
+        </where>
+        order by dlts.id desc
+    </select>
+
+    <select id="getTaskSchedulerDetails" parameterType="Integer" resultType="TaskSchedulerDetail">
+        select id, schedule_id, time, expression, on_off, brightness from dhlk_light_task_scheduler_detail
+        where schedule_id = #{id}
+    </select>
+
+    <select id="selectTaskSchedulerById" parameterType="Integer" resultMap="TaskSchedulerResult">
+        <include refid="selectTaskSchedulerVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectTaskSchedulerByNameAndId"  resultType="TaskScheduler">
+        <include refid="selectTaskSchedulerVo"/>
+        <where> name=#{name}
+            <if test="id != null ">
+                and id != #{id}
+             </if>
+            <if test="tenantId != null ">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+    <insert id="insertTaskScheduler" parameterType="TaskScheduler" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_task_scheduler
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null  and name != ''">name,</if>
+            <if test="note != null  and note != ''">note,</if>
+            <if test="status != null ">status,</if>
+            <if test="areaId != null and areaId != ''">area_id,</if>
+            <if test="switchId != null ">switch_id,</if>
+            <if test="scheduleCycle != null  and scheduleCycle != ''">schedule_cycle,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="note != null  and note != ''">#{note},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="areaId != null and areaId != '' ">#{areaId},</if>
+            <if test="switchId != null ">#{switchId},</if>
+            <if test="scheduleCycle != null  and scheduleCycle != ''">#{scheduleCycle},</if>
+            <if test="tenantId != null ">#{tenantId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTaskScheduler" parameterType="TaskScheduler">
+        update dhlk_light_task_scheduler
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="note != null  and note != ''">note = #{note},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="areaId != null and areaId != ''">area_id = #{areaId},</if>
+            <if test="switchId != null ">switch_id = #{switchId},</if>
+            <if test="scheduleCycle != null  and scheduleCycle != ''">schedule_cycle = #{scheduleCycle},</if>
+        </trim>
+        where id = #{id}
+    </update>
+    <update id="updateTaskStatus">
+        update dhlk_light_task_scheduler set status=#{status} where id=#{id}
+    </update>
+    <delete id="deleteTaskSchedulerById" parameterType="Integer">
+        delete from dhlk_light_task_scheduler where id = #{id}
+    </delete>
+
+    <delete id="deleteTaskSchedulerByIds" parameterType="String">
+        delete from dhlk_light_task_scheduler where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="selectTaskSchedulerLogList" parameterType="Integer" resultType="java.util.HashMap">
+        SELECT dlts.name,dltsd.on_off onOff,dltsl.create_time createTime,dltsl.result FROM dhlk_light_task_scheduler dlts
+        LEFT JOIN dhlk_light_task_scheduler_detail dltsd ON dlts.id=dltsd.schedule_id
+        LEFT JOIN dhlk_light_task_scheduler_log  dltsl ON dltsl.scheduler_detail_id=dltsd.id
+        WHERE dlts.id=#{id} and dltsl.result is not null
+    </select>
+
+    <select id="selectTaskSchedulerByTenantId" parameterType="Integer" resultType="com.dhlk.entity.light.TaskScheduler">
+        <include refid="selectTaskSchedulerVo"/>
+        where tenant_id = #{tenantId}
+    </select>
+
+    <select id="findListByTenantId" parameterType="INTEGER" resultMap="TaskSchedulerResult">
+        select id, name, note,status, area_id, switch_id, schedule_cycle,tenant_id from dhlk_light_task_scheduler where 1=1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+</mapper>

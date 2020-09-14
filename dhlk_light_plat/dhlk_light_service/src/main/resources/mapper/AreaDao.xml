@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.AreaDao">
+
+    <resultMap id="DhlkBasicConstructionResult" type="com.dhlk.entity.light.Area">
+        <result property="id" jdbcType="VARCHAR" column="id"/>
+        <result property="area" jdbcType="VARCHAR" column="area"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <result property="imagePath" jdbcType="VARCHAR" column="image_path"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,area, tenant_id, image_path
+    </sql>
+
+    <select id="selectTenantById" parameterType="String" resultType="com.dhlk.entity.light.Area">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_area where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Area" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_area
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="area != null  and area != ''">area,</if>
+            <if test="imagePath != null  and imagePath != ''">image_path,</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="area != null  and area != ''">#{area},</if>
+            <if test="imagePath != null  and imagePath != ''">#{imagePath},</if>
+            <if test="tenantId != null  and tenantId != ''">#{tenantId}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Area">
+        update dhlk_light_area
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="area != null  and area != ''">area = #{area},</if>
+            <if test="imagePath != null  and imagePath != ''">image_path = #{imagePath}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findList" parameterType="INTEGER" resultMap="DhlkBasicConstructionResult">
+        select
+        t1.id,t1.area, t1.tenant_id,replace(image_path,#{attachPath},'/attach/') as image_path,t2.create_time
+        from dhlk_light_area t1 LEFT JOIN dhlk_basic_attachment t2 on t1.id = t2.data_id
+        where 1=1
+        <if test="tenantId != null  and tenantId != ''">
+            and t1.tenant_id = #{tenantId}
+        </if>
+        order by  t2.create_time desc
+    </select>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_area where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findAreasByLed" resultMap="DhlkBasicConstructionResult">
+        select id,area, tenant_id,replace(image_path,#{attachPath},'/attach/') as image_path from dhlk_light_area where id in(
+        select area_id from dhlk_light_led
+        <if test="tenantId != null  and tenantId != ''">
+            where tenant_id =#{tenantId}
+        </if>
+        )
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id =#{tenantId}
+        </if>
+        order by area
+    </select>
+
+    <delete id="deleteByDataId" parameterType="java.util.List">
+        delete from dhlk_basic_attachment where data_id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findListByTenantId" parameterType="INTEGER" resultMap="DhlkBasicConstructionResult">
+        select
+        t1.id,t1.area, t1.tenant_id,replace(t1.image_path,#{attachPath},'/attach/') as image_path,t2.create_time
+        from dhlk_light_area t1 LEFT JOIN dhlk_basic_attachment t2 on t1.id = t2.data_id
+        where 1=1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+        order by  t2.create_time desc
+    </select>
+
+    <select id="findAreaRepeat"  resultType="java.lang.Integer">
+        select count(id) from dhlk_light_area where binary area = #{name}
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+</mapper>

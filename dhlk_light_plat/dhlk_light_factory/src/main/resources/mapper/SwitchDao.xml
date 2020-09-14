@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.SwitchDao">
+    <resultMap type="com.dhlk.entity.light.Switch" id="DhlkBasicSwitchResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="sn" jdbcType="VARCHAR" column="sn"/>
+        <result property="ip" jdbcType="VARCHAR" column="ip"/>
+        <result property="areaId" jdbcType="VARCHAR" column="area_id"/>
+        <result property="computerId" jdbcType="INTEGER" column="computer_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <collection property="leds" column="id" select="com.dhlk.light.factory.dao.LedDao.findLedsBySwitchId"/>
+    </resultMap>
+
+    <sql id="selectDhlkBasicSwitchVo">
+        select id, `name`, sn, ip,area_id,computer_id,create_time,tenant_id from dhlk_light_switch
+    </sql>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_light_switch
+            (id,name, sn, ip,area_id,computer_id,create_time,tenant_id) VALUES
+            (#{item.id},#{item.name},#{item.sn},#{item.ip},#{item.areaId},#{item.computerId},#{item.createTime},#{item.tenantId})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="String">
+        delete from dhlk_light_switch
+    </delete>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Switch" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_switch
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="sn != null and sn != ''">sn,</if>
+            <if test="ip != null and ip != ''">ip,</if>
+            <if test="areaI != null and areaId != ''">area_id,</if>
+            <if test="computerId != null and computerId != ''">computer_id,</if>
+            <if test="createTime != null and createTime != ''">create_time,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">#{id},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="sn != null and sn != ''">#{sn},</if>
+            <if test="ip != null and ip != ''">#{ip},</if>
+            <if test="areaId != null and areaId != ''">#{areaId},</if>
+            <if test="computerId != null and computerId != ''">#{computerId},</if>
+            <if test="createTime != null and createTime != ''">#{createTime},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
+        </trim>
+    </insert>
+
+    <select id="findList" resultMap="DhlkBasicSwitchResult">
+        <include refid="selectDhlkBasicSwitchVo"/> order by create_time desc
+    </select>
+
+    <delete id="deteleById" parameterType="String">
+        delete from dhlk_light_switch where id =#{id}
+    </delete>
+
+    <select id="getSwitchById"  resultMap="DhlkBasicSwitchResult" parameterType="Integer">
+        select  id, `name`, sn, ip,area_id,computer_id,create_time,tenant_id
+        from dhlk_light_switch
+        where id = #{id}
+    </select>
+
+    <select id="findListByAreaId" resultMap="DhlkBasicSwitchResult">
+        <include refid="selectDhlkBasicSwitchVo"/> where 1=1
+        <if test="areaId != null and areaId != ''">
+            and area_id = #{areaId}
+        </if>
+        order by create_time desc
+    </select>
+</mapper>

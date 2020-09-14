@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.LightQueryDao">
+
+    <select id="ledIntallQuery" resultType="java.lang.String">
+        select count(0) count from dhlk_basic_tenant t where t.status=0
+        <if test="province != null  and province != ''">
+            and substring_index(adress,',',1)=#{province}
+        </if>
+        union all
+        select count(0) count from  dhlk_light_switch s
+          left join dhlk_basic_tenant t on t.id=s.tenant_id
+        where t.status=0
+        <if test="province != null  and province != ''">
+            and substring_index(adress,',',1)=#{province}
+        </if>
+        union all
+        select count(0) count from  dhlk_light_led l
+          left join dhlk_basic_tenant t on t.id=l.tenant_id
+        where t.status=0
+        <if test="province != null  and province != ''">
+            and substring_index(adress,',',1)=#{province}
+        </if>
+    </select>
+    <select id="provinceQuery" resultType="java.util.LinkedHashMap">
+        select
+        <choose>
+            <when test="province != null  and province != ''">
+                substring_index(substring_index(adress,',',2),',',-1) province,
+            </when>
+            <otherwise>
+                substring_index(adress,',',1) province,
+            </otherwise>
+        </choose>
+        sum((select count(0) from dhlk_light_led l where l.tenant_id=t.id)) count
+        from dhlk_basic_tenant t  where t.status=0
+        <if test="province != null  and province != ''">
+            and substring_index(adress,',',1) =#{province}
+        </if>
+        group by
+        <choose>
+            <when test="province != null  and province != ''">
+                substring_index(substring_index(adress,',',2),',',-1)
+            </when>
+            <otherwise>
+                substring_index(adress,',',1)
+            </otherwise>
+        </choose>
+    </select>
+    <select id="lastCompanyQuery" resultType="java.util.LinkedHashMap">
+        select  t.id,t.name
+        from dhlk_basic_tenant t where t.status=0
+        <if test="province != null  and province != ''">
+            and substring_index(adress,',',1)=#{province}
+        </if>
+        order by create_time desc limit ${limit}
+    </select>
+    <!-- 节能企业排行查询-->
+    <select id="energyComRanking" resultType="java.util.LinkedHashMap">
+        SELECT
+            IFNULL(t1.energySum,0) - IFNULL(t2.energySum, 0 ) AS energy,
+            t1.name
+        FROM
+	    (
+	    <!-- 企业原始消耗的能耗 -->
+	        SELECT
+                p.tenant_id,
+                t.name,
+                <!-- 每盏灯一个月消耗的能耗 w转化成kw -->
+		        ( IFNULL( SUM( led_count ), 0 ) * IFNULL( sum( led_power ), 0 )  * IFNULL(sum( led_opentime),0) * ${dayNum} ) / 1000 AS energySum
+
+	        FROM
+		        dhlk_light_original_power p join dhlk_basic_tenant t on p.tenant_id = t.id
+		    where
+                t.status=0
+                <if test="province != null  and province != ''">
+                    AND substring_index(t.adress,',',1)=#{province}
+                </if>
+	        GROUP BY
+		        p.tenant_id
+	    ) t1
+	    LEFT JOIN (
+	        <!-- 企业上个月灯消耗的能耗 -->
+	        SELECT
+                b.tenant_id,
+                SUM(IFNULL( c.energy,0) )energySum
+	        FROM
+		        dhlk_basic_tenant a
+                JOIN dhlk_light_led b ON a.id = b.tenant_id
+                JOIN dhlk_light_led_power c ON b.sn = c.led_sn
+	           WHERE
+                <!-- 筛选当前时间减去创建时间等于1的  表示上个月的（例如：202006-202005 = 1）-->
+                   PERIOD_DIFF( date_format( NOW( ), '%Y%m' ), date_format( c.create_time, '%Y%m' ) ) = 1
+	        GROUP BY
+            b.tenant_id) t2
+        ON t1.tenant_id = t2.tenant_id
+        ORDER BY energy DESC LIMIT ${limit}
+    </select>
+
+    <!--获取灯运行的天数-->
+    <select id="findLightRunDays" resultType="java.lang.Integer">
+        select DATEDIFF(max(create_time) ,min(create_time)) as runDays from dhlk_light_led_power
+    </select>
+
+    <!--获取该省份下所有的租户-->
+    <select id="findTenantIds" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+            id
+        from
+            dhlk_basic_tenant t
+        where
+            1=1
+        <if test="province != null and province != '' ">
+            and substring_index(t.adress,',',1) = #{province}
+        </if>
+        and t.status=0
+    </select>
+
+    <!--获取所有企业消耗能耗-->
+    <select id="companyConsumeEnergy" resultType="java.math.BigDecimal">
+        <!--企业原始消耗的能耗-->
+        SELECT
+        IFNULL(SUM( t.energySum )/1000,0) AS energy
+        FROM (
+                SELECT
+                (
+                IFNULL( SUM( led_count ), 0 ) * IFNULL( SUM( led_power ), 0 ) * IFNULL( SUM( led_opentime ), 0 )
+                ) * #{runDays} AS energySum
+                FROM
+                dhlk_light_original_power
+                where 1 =1
+                <if test="tenantIds != null and tenantIds.size > 0">and tenant_id in
+                    <foreach
+                            collection="tenantIds" index="index" item="item" open="(" separator="," close=")">
+                                #{item}
+                            </foreach>
+                        </if>
+                    GROUP BY
+                        tenant_id
+                ) t
+    </select>
+
+    <!--现在灯消耗的能耗-->
+    <select id="lightConsumeEnergy" resultType="java.math.BigDecimal">
+        SELECT
+            IFNULL(SUM( lp.energy ),0)
+         FROM
+            dhlk_light_led_power lp
+        <if test="tenantIds != null and tenantIds.size > 0">
+            join (
+                select
+                    sn
+                from
+                    dhlk_light_led
+                where tenant_id in
+                    <foreach collection="tenantIds" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                ) led
+            on lp.led_sn = led.sn
+        </if>
+    </select>
+</mapper>

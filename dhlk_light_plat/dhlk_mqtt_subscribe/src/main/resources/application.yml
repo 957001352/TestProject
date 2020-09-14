@@ -1,0 +1,7 @@
+mqtt:
+ host: tcp://mq.dahanglink.com:1883
+ topic: machines
+ username: dhlk
+ password: dhlktech
+server:
+  port: 10053

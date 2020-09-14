@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.DmNetTypeDao">
+    <insert id="insert" parameterType="com.dhlk.entity.dm.DmNetType">
+        insert into dhlk_dm_net_type (id,name) values (#{id},#{name})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.dm.DmNetType">
+        update dhlk_dm_net_type set name=#{name} where id=#{id}
+    </update>
+    <update id="delete"  parameterType="java.util.List">
+        update   dhlk_dm_net_type set status=2 where id  in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </update>
+    <select id="findList" resultType="com.dhlk.entity.dm.DmNetType">
+        select * from dhlk_dm_net_type  where status=0
+        <if test="name != null and name != ''">
+            and name like concat('%',#{NetId},'%')
+        </if>
+    </select>
+    <select id="isRepeatName" resultType="Integer">
+        SELECT count(*) FROM dhlk_dm_net_type  WHERE name=#{name}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+    </select>
+</mapper>

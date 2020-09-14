@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.NetDevicesDao">
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.NetDevices" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_net_devices (id,name,ip,gateway,mask,license,type_id,note,tenant_id,tb_id,credentials)
+        values (#{id},#{name},#{ip},#{gateway},#{mask},#{license},#{typeId},#{note},#{tenantId},#{tbId},#{credentials})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.NetDevices">
+        update dhlk_basic_net_devices set name=#{name},ip=#{ip},gateway=#{gateway},mask=#{mask},
+        license=#{license},type_id=#{typeId},note=#{note},credentials=#{credentials}
+        where id=#{id}
+    </update>
+
+    <update id="isEnable" parameterType="Integer">
+        update   dhlk_basic_net_devices set status=#{status} where id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_basic_net_devices where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <resultMap type="com.dhlk.entity.basicmodule.NetDevices" id="netDevicesListResult">
+        <result property="id" jdbcType="VARCHAR"    column="id"    />
+        <collection property="softList" column="id" select="com.dhlk.basicmodule.service.dao.NetDevicesSoftDao.findList" />
+        <collection property="productDevicesList" column="{netId=id,tenantId=tenant_id}" select="com.dhlk.basicmodule.service.dao.ProductNetDao.findProductList" />
+        <collection property="netDevicesList" column="{netId=id,typeId=type_id}" select="findBiList" />
+    </resultMap>
+
+    <select id="findBiList" resultType="com.dhlk.entity.basicmodule.NetDevices">
+        <choose>
+            <!-- type=1 大数据一体机关联BI控制器-->
+            <when test="typeId ==1">
+                select t.* from dhlk_basic_net_devices t
+                left join  dhlk_basic_product_net n on t.id=n.product_id
+                where n.type=1 and n.net_id=#{netId}
+            </when>
+            <!-- type=2,3,4 Bi控制器查询关联的大数据一体机-->
+            <otherwise>
+                select t.* from dhlk_basic_net_devices t
+                left join  dhlk_basic_product_net n on t.id=n.net_id
+                where n.type=1 and n.product_id=#{netId}
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findList" resultMap="netDevicesListResult">
+        select n.*,t.name type_name from dhlk_basic_net_devices n left join dhlk_dm_net_type t on n.type_id=t.id where 1=1
+        <if test="name != null and name != ''">
+            and n.name like concat('%',#{name},'%')
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id=#{tenantId}
+        </if>
+    </select>
+    <delete id="deleteById"  parameterType="Integer">
+        delete  from dhlk_basic_net_devices   where id=#{id}
+    </delete>
+    <select id="findPruductDevicesList" resultType="com.dhlk.entity.basicmodule.ProductDevices">
+        select p.* from dhlk_basic_product_net t,dhlk_basic_product_devices  p where t.product_id=p.id
+        <if test="netDevicesId != null and netDevicesId != ''">
+            and t.net_id=#{netDevicesId}
+        </if>
+    </select>
+    <select id="findProductNetDevicesById" parameterType="Integer" resultType="com.dhlk.entity.basicmodule.NetDevices">
+         select * from dhlk_basic_net_devices where id = #{id}
+    </select>
+    <select id="findTbIdsListbyIds" parameterType="java.util.List" resultType="com.dhlk.entity.basicmodule.NetDevices">
+        select * from dhlk_basic_net_devices where id in
+        <foreach collection="list" open="(" separator="," close=")" item="ids">
+            #{ids}
+        </foreach>
+    </select>
+    <select id="isRepeatName" resultType="Integer">
+        SELECT count(*) FROM dhlk_basic_net_devices  WHERE name=#{name}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id=#{tenantId}
+        </if>
+    </select>
+</mapper>

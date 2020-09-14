@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.MonitoringLogDao">
+    <resultMap id="DhlkMonitoringLogResult" type="com.dhlk.entity.light.MonitoringLog">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="sn" jdbcType="VARCHAR" column="sn"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <result property="status" jdbcType="INTEGER" column="status"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id, sn, tenant_id, status, create_time
+    </sql>
+
+    <insert id="insert">
+        insert into dhlk_light_monitoring_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null  and createTime != ''">create_time,</if>
+            <if test="sn != null  and sn != ''">sn,</if>
+            <if test="status != null ">status,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null  and createTime != ''">#{createTime},</if>
+            <if test="sn != null  and sn != ''">#{sn},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="tenantId != null ">#{tenantId},</if>
+        </trim>
+    </insert>
+
+    <select id="findList" resultMap="DhlkMonitoringLogResult">
+        select * from dhlk_light_monitoring_log where 1=1
+        <if test="sn != null and sn != ''">
+            and sn=#{sn}
+        </if>
+        <if test="status != null and status != ''">
+            and status=#{status}
+        </if>
+        <if test="startime != null and startime != ''">
+            and create_time >= #{startime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+            and create_time <![CDATA[<=]]> #{endtime}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertList" parameterType="java.util.List">
+        insert into dhlk_light_monitoring_log(sn,status)
+        values
+        <foreach collection ="list" item="monitoringLog" index= "index" separator =",">
+            (
+                #{monitoringLog.sn},
+                #{monitoringLog.status}
+            )
+        </foreach >
+    </insert>
+</mapper>

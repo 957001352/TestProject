@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.QuestionDao">
+
+    <resultMap id="DhlkLightQuestionResult" type="com.dhlk.entity.light.Question">
+        <result property="id" jdbcType="VARCHAR" column="id"/>
+        <result property="sn" jdbcType="VARCHAR" column="sn"/>
+        <result property="title" jdbcType="VARCHAR" column="title"/>
+        <result property="content" jdbcType="VARCHAR" column="content"/>
+        <result property="linkMan" jdbcType="VARCHAR" column="link_man"/>
+        <result property="phone" jdbcType="VARCHAR" column="phone"/>
+        <result property="createUser" jdbcType="VARCHAR" column="create_user"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="status" jdbcType="INTEGER" column="status"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <result property="fileId" jdbcType="VARCHAR" column="file_id"/>
+        <collection property="questionAnswer" column="id" select="findQuestionAnswer"/>
+    </resultMap>
+
+    <resultMap type="com.dhlk.entity.basicmodule.Tenant" id="DhlkTenantResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="code" jdbcType="VARCHAR" column="code"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+    </resultMap>
+
+    <select id="findQuestionAnswer" parameterType="String" resultType="com.dhlk.entity.light.QuestionAnswer">
+        SELECT
+            t1.id,
+            t1.answer,
+            t1.deal_user,
+            t1.deal_time,
+            t1.question_id,
+            t2.NAME AS userName
+        FROM
+            dhlk_light_question_answer t1
+            LEFT JOIN dhlk_basic_user t2 ON t1.deal_user = t2.id
+        WHERE
+            t1.question_id = #{id}
+        ORDER BY
+            t1.deal_time DESC
+    </select>
+
+    <sql id="baseColumn">
+         id,sn, title, content, link_man, phone, create_user,create_time,status,tenant_id,file_id
+    </sql>
+
+    <select id="selectTenantById" parameterType="String" resultType="com.dhlk.entity.light.Question">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_question where id = #{id} and status = 0
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Question" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_question
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="sn != null and sn != ''">sn,</if>
+            <if test="title != null  and title != ''">title,</if>
+            <if test="content != null  and content != ''">content,</if>
+            <if test="linkMan != null and linkMan != ''">link_man,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="createUser != null  and createUser != ''">create_user,</if>
+            <if test="createTime != null  and createTime != ''">create_time,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+            <if test="fileId != null and fileId != ''">file_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="sn != null and sn != ''">#{sn},</if>
+            <if test="title != null  and title != ''">#{title},</if>
+            <if test="content != null  and content != ''">#{content},</if>
+            <if test="linkMan != null and linkMan != ''">#{linkMan},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="createUser != null  and createUser != ''">#{createUser},</if>
+            <if test="createTime != null  and createTime != ''">#{createTime},</if>
+            <if test="status != null  and status != ''">#{status},</if>
+            <if test="tenantId != null  and tenantId != ''">#{tenantId},</if>
+            <if test="fileId != null  and fileId != ''">#{fileId}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Question">
+        update dhlk_light_question
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sn != null and sn != ''">sn = #{sn},</if>
+            <if test="title != null  and title != ''">title = #{title},</if>
+            <if test="content != null  and content != ''">content = #{content},</if>
+            <if test="linkMan != null  and linkMan != ''">link_man = #{linkMan},</if>
+            <if test="title != null  and title != ''">title = #{title},</if>
+            <if test="phone != null  and phone != ''">phone = #{phone}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findList" parameterType="Question" resultMap="DhlkLightQuestionResult">
+        SELECT
+        t1.id,
+        t1.sn,
+        t1.title,
+        t1.content,
+        t1.link_man,
+        t1.phone,
+        t1.create_user,
+        t1.create_time,
+        t1.STATUS,
+        t1.tenant_id,
+        t2.name,
+        t1.file_id,
+        t3.name as fileName,
+        t3.path as filePath,
+        t3.suffix
+        from dhlk_light_question t1
+        LEFT JOIN dhlk_basic_tenant t2
+        on t1.tenant_id = t2.id
+        LEFT JOIN dhlk_basic_attachment t3 on t1.file_id = t3.data_id
+        where 1 = 1 and t1.status = 0
+        <if test="sn != null  and sn != ''">
+            and t1.title like concat('%/', #{sn}, '%') ESCAPE '/'
+        </if>
+        <if test="tenantId != null  and tenantId != ''">
+            and t1.tenant_id = #{tenantId}
+        </if>
+        <if test=" startDate != null and  startDate !=''">
+            <![CDATA[ and t1.create_time >= #{startDate}]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[ and t1.create_time <= #{endDate}]]>
+        </if>
+        ORDER BY create_time desc
+    </select>
+
+    <update id="delete" parameterType="java.util.List">
+        update dhlk_light_question set status=2 where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getCompanyList" parameterType="Question" resultMap="DhlkTenantResult">
+        select t1.id,t1.code, t1.name
+        from dhlk_basic_tenant t1
+        where t1.status = 0 and t1.id = #{tenantId} order by t1.create_time desc
+    </select>
+
+    <select id="findQuestionDetail" parameterType="String" resultMap="DhlkLightQuestionResult">
+        SELECT
+	        t1.id,
+	        t1.sn,
+	        t1.title,
+	        t1.content,
+	        t1.link_man,
+	        t1.phone,
+	        t1.create_user,
+	        t1.create_time,
+	        t1.STATUS,
+	        t1.tenant_id,
+	        t1.file_id,
+            replace(t2.path,#{attachPath},'/attach/') as filePath,
+	        t2.suffix
+        FROM
+	        dhlk_light_question  t1
+	    LEFT JOIN dhlk_basic_attachment	t2 on t1.file_id = t2.data_id
+	    WHERE t1.id = #{id} and t1.status = 0
+    </select>
+
+</mapper>

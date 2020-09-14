@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.QuestionAnswerDao">
+
+    <resultMap id="DhlkLightQuestionAnswerResult" type="com.dhlk.entity.light.QuestionAnswer">
+        <result property="id" jdbcType="VARCHAR" column="id"/>
+        <result property="answer" jdbcType="VARCHAR" column="answer"/>
+        <result property="dealUser" jdbcType="VARCHAR" column="deal_user"/>
+        <result property="dealTime" jdbcType="TIMESTAMP" column="deal_time"/>
+        <result property="questionId" jdbcType="VARCHAR" column="question_id"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,answer, deal_user, deal_time, question_id
+    </sql>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.QuestionAnswer" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_question_answer
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="answer != null and answer != ''">answer,</if>
+            <if test="dealUser != null  and dealUser != ''">deal_user,</if>
+            <if test="dealTime != null  and dealTime != ''">deal_time,</if>
+            <if test="questionId != null and questionId != ''">question_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="answer != null and answer != ''">#{answer},</if>
+            <if test="dealUser != null  and dealUser != ''">#{dealUser},</if>
+            <if test="dealTime != null  and dealTime != ''">#{dealTime},</if>
+            <if test="questionId != null and questionId != ''">#{questionId}</if>
+        </trim>
+    </insert>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_question_answer where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

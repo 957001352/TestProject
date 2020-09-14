@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.ProductNetDao">
+    <insert id="insert">
+        insert into dhlk_basic_product_net (net_id,product_id,type) values (#{netId},#{productId},#{type}
+    </insert>
+    <insert id="insertBatch" parameterType="java.util.List" >
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_basic_product_net (net_id,product_id,type,tenant_id) values (#{item.netId},#{item.productId},#{item.type},#{item.tenantId})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.ProductNet">
+        update dhlk_basic_product_net set name=#{name},net_id=#{netId},product_id=#{topicList},type=#{type},tb_id=#{tbId}  where id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_basic_product_net where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+    <delete id="deleteByNetId">
+        delete from  dhlk_basic_product_net where net_id=#{netId}
+    </delete>
+
+
+
+    <select id="findListByNetId" resultType="java.lang.Integer">
+         select count(1) from dhlk_basic_product_net t where net_id=#{netId}
+    </select>
+
+    <select id="findList" resultType="com.dhlk.entity.basicmodule.NetDevices">
+        select t.* from dhlk_basic_net_devices t where t.id in
+        (select net_id from dhlk_basic_product_net n)
+        <if test="type != null and type != ''">
+            and t.type_id=#{type}
+        </if>
+        <if test="name != null and name != ''">
+            and n.name like concat('%',#{name},'%')
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and t.tenant_id=#{tenantId}
+        </if>
+
+    </select>
+
+    <select id="findBiList" resultType="com.dhlk.entity.basicmodule.NetDevices">
+        select t.* from dhlk_basic_net_devices t
+          left join  dhlk_basic_product_net n on t.id=n.product_id
+         where n.type=1 and n.net_id=#{netId}
+        <if test="tenantId != null and tenantId != ''">
+            and t.tenant_id=#{tenantId}
+        </if>
+    </select>
+
+    <select id="findNotBiList" resultType="com.dhlk.entity.basicmodule.NetDevices">
+        select t.* from dhlk_basic_net_devices t
+         where t.id not in(
+            select product_id from dhlk_basic_product_net n where  n.type=1
+        ) and t.type_id in (2,3,4)
+        <if test="tenantId != null and tenantId != ''">
+            and t.tenant_id=#{tenantId}
+        </if>
+    </select>
+
+
+    <select id="findProductList" resultType="com.dhlk.entity.basicmodule.ProductDevices">
+        select t.* from dhlk_basic_product_devices t
+          left join  dhlk_basic_product_net n on t.id=n.product_id
+         where  status!=2
+           and  n.type in (2,3,4)
+           and n.net_id=#{netId}
+        <if test="tenantId != null and tenantId != ''">
+           and t.tenant_id=#{tenantId}
+        </if>
+    </select>
+    <select id="findNotProductList" resultType="com.dhlk.entity.basicmodule.ProductDevices">
+        select t.* from dhlk_basic_product_devices t
+         where t.id not in(
+            select product_id from dhlk_basic_product_net n where  n.type in (2,3,4)
+        )
+           and status!=2
+        <if test="tenantId != null and tenantId != ''">
+           and t.tenant_id=#{tenantId}
+        </if>
+    </select>
+
+
+
+
+    <select id="findBiIsBand" resultType="java.lang.Integer">
+     select count(1) from(
+        select id from dhlk_basic_product_net n
+         where n.type=1
+           and (net_id in
+                <foreach collection="list" open="(" separator="," close=")" item="ids">
+                    #{ids}
+                </foreach>
+               or product_id in
+                <foreach collection="list" open="(" separator="," close=")" item="ids">
+                    #{ids}
+                </foreach>
+                )
+        union all
+        select id from dhlk_basic_product_net n
+         where n.type in (2,3,4)
+           and net_id in
+           <foreach collection="list" open="(" separator="," close=")" item="ids">
+            #{ids}
+           </foreach>
+     ) t
+    </select>
+    <select id="findProductIsBand" resultType="java.lang.Integer">
+        select count(1) from dhlk_basic_product_net n
+        where n.type in (2,3,4)
+        and product_id in
+        <foreach collection="list" open="(" separator="," close=")" item="ids">
+            #{ids}
+        </foreach>
+    </select>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.LedRecordDao">
+    <insert id="insert" parameterType="com.dhlk.entity.light.LedRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_led_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="operator != null  and operator != ''">operator,</if>
+            <if test="timeKey != null  and timeKey != ''">time_key,</if>
+            <if test="commandInfo != null  and commandInfo != ''">command_info,</if>
+            <if test="ledSn != null  and ledSn != ''">led_sn,</if>
+            <if test="operateResult != null  and operateResult != ''">operate_result,</if>
+            <if test="source != null  and source != ''">source,</if>
+            <if test="operateTime != null  and operateTime != ''">operate_time,</if>
+            <if test="backTime != null  and backTime != ''">back_time,</if>
+            <if test="backResult != null  and backResult != ''">back_result,</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="operator != null  and operator != ''">#{operator},</if>
+            <if test="timeKey != null  and timeKey != ''">#{timeKey},</if>
+            <if test="commandInfo != null  and commandInfo != ''">#{commandInfo},</if>
+            <if test="ledSn != null  and ledSn != ''">#{ledSn},</if>
+            <if test="operateResult != null  and operateResult != ''">#{operateResult},</if>
+            <if test="source != null  and source != ''">#{source},</if>
+            <if test="operateTime != null  and operateTime != ''">#{operateTime},</if>
+            <if test="backTime != null  and backTime != ''">#{backTime},</if>
+            <if test="backResult != null  and backResult != ''">#{backResult},</if>
+            <if test="tenantId != null  and tenantId != ''">#{tenantId}</if>
+        </trim>
+    </insert>
+    <update id="updateBackResultByTs" parameterType="com.dhlk.entity.light.LedRecord">
+        update dhlk_light_led_record set
+        <if test="backResult != null  and backResult != ''">back_result=#{backResult},</if>
+        back_time=#{backTime}
+        where led_sn=#{sn} and time_key=#{ts}
+    </update>
+    <update id="updateBackResultByCmdType" parameterType="com.dhlk.entity.light.LedRecord">
+        update dhlk_light_led_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="backResult != null  and backResult != ''">back_result=#{backResult},</if>
+            <if test="backTime != null  and backTime != ''">back_time=#{backTime}</if>
+        </trim>
+        where led_sn=#{sn} and operator=#{commond} and back_time is null
+    </update>
+
+    <select id="findList" resultType="com.dhlk.entity.light.LedRecord">
+        select  * from dhlk_light_led_record  where 1 = 1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id =#{tenantId}
+        </if>
+        <if test="sn != null  and sn != ''">
+            and led_sn like concat('%', #{sn}, '%')
+        </if>
+        <if test="sendResult != null  and sendResult != ''">
+            and operate_result =#{sendResult}
+        </if>
+        <if test="backResult != null  and backResult != ''">
+            and back_result =#{backResult}
+        </if>
+        <if test="commond != null  and commond != ''">
+            and command_info like concat('%', #{commond}, '%')
+        </if>
+        <if test="startTime != null  and startTime != ''">
+            and date_format(operate_time,'%Y-%m-%d') &gt;=#{startTime}
+        </if>
+        <if test="endTime != null  and endTime != ''">
+            and date_format(operate_time,'%Y-%m-%d') &lt;=#{endTime}
+        </if>
+        order by operate_time desc
+    </select>
+    <delete id="delete">
+        delete from dhlk_light_led_record where  <![CDATA[date_format(operate_time,'%Y-%m-%d') < #{date}]]>
+    </delete>
+
+</mapper>

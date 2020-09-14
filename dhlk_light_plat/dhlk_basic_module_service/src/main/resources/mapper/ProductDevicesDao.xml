@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.ProductDevicesDao">
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.ProductDevices">
+       insert into dhlk_basic_product_devices (id,code,name,org_id,create_time,note,tenant_id,classify_id,tb_id,credentials)
+        values (#{id},#{code},#{name},#{orgId},#{createTime},#{note},#{tenantId},#{classifyId},#{tbId},#{credentials})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.ProductDevices">
+        update dhlk_basic_product_devices set name=#{name},org_id=#{orgId},
+        create_time=#{createTime},note=#{note},classify_id=#{classifyId},tb_id=#{tbId},credentials=#{credentials}  where id=#{id}
+    </update>
+    <update id="delete"  parameterType="java.util.List">
+        update   dhlk_basic_product_devices set status=2 where id  in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="deleteById"  parameterType="Integer">
+        update   dhlk_basic_product_devices set status=2,tb_id=null  where id=#{id}
+    </update>
+    <resultMap type="com.dhlk.entity.basicmodule.ProductDevices" id="productDevicesResult">
+        <result property="id" jdbcType="INTEGER"    column="id"    />
+        <result property="classifyId"     column="classify_id"    />
+        <result property="orgId"     column="org_id"    />
+        <collection property="attrSet" column="classify_id" select="com.dhlk.basicmodule.service.dao.DevicesClassifyDao.findAttrSetByClassifyById" />
+        <collection property="classifySet" column="{classifyId=classify_id,attachPath=attachPath}" select="findClassifyByPruductId" />
+        <collection property="netDevicesList" column="id" select="findBiList" />
+        <collection property="orgName" column="org_id" select="findOrgList" />
+    </resultMap>
+
+    <select id="findBiList" resultType="com.dhlk.entity.basicmodule.NetDevices">
+                select t.* from dhlk_basic_net_devices t
+                left join  dhlk_basic_product_net n on t.id=n.net_id
+                where n.type in(2,3,4) and n.product_id=#{netId}
+    </select>
+    <select id="findOrgList" resultType="java.lang.String">
+        SELECT GROUP_CONCAT(name separator '/') FROM(
+        SELECT T2.id, T2.name,T2.parent_id parentId
+        FROM (SELECT @r AS _id,
+             (SELECT @r := parent_id FROM dhlk_basic_org WHERE id = _id) AS parent_id,
+             @l := @l + 1 AS lvl
+             FROM (SELECT @r := #{orgId}, @l := 0) vars,dhlk_basic_org h
+        WHERE @r != 0) T1 JOIN dhlk_basic_org T2 ON T1._id = T2.id where status=0
+        ORDER BY T1.lvl DESC) o
+    </select>
+
+
+    <resultMap type="java.util.LinkedHashMap" id="devicesClassifyResult">
+        <id column="id" property="id"/>
+        <collection property="imagePath" javaType="String"
+                    column="{id=id,attachPath=attachPath}" ofType="String"
+                    select="com.dhlk.basicmodule.service.dao.AttachmentDao.findWebPathByDataId"
+        ></collection>
+    </resultMap>
+    <select id="findClassifyByPruductId" resultMap="devicesClassifyResult">
+        select id, classify_name, `describe`, classify_id classifyId,#{attachPath} attachPath
+          from dhlk_basic_devices_classify
+         where id=#{classifyId}
+    </select>
+    <select id="findList" resultMap="productDevicesResult">
+        select t.*,#{attachPath} attachPath,d.classify_name,b.code tenant_code
+        from dhlk_basic_product_devices t
+        left join dhlk_basic_devices_classify d on t.classify_id=d.id
+        left join dhlk_basic_tenant b on t.tenant_id=b.id
+        where t.status!=2
+        <if test="name != null and name != ''">
+            and t.name like concat('%',#{name},'%')
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and t.tenant_id=#{tenantId}
+        </if>
+    </select>
+    <select id="findProductDevicesById" parameterType="Integer" resultType="com.dhlk.entity.basicmodule.ProductDevices">
+         select * from dhlk_basic_product_devices where id = #{id}
+    </select>
+    <select id="findTbIdsListbyIds" parameterType="java.util.List" resultType="com.dhlk.entity.basicmodule.ProductDevices">
+        select * from dhlk_basic_product_devices where id in
+        <foreach collection="list" open="(" separator="," close=")" item="ids">
+            #{ids}
+        </foreach>
+    </select>
+
+    <select id="isBoundClassify" parameterType="java.lang.String" resultType="Integer">
+        select count(*) from dhlk_basic_product_devices where classify_id = #{classifyId} and status = 0
+    </select>
+    <select id="findDevicesCountByTenant" resultType="Integer">
+        select count(*) from dhlk_basic_product_devices where tenant_id = #{tenantId} and status = 0
+    </select>
+    <select id="findTenantById" resultType="Integer">
+        select devices from dhlk_basic_tenant where id = #{tenantId} and status = 0
+    </select>
+    <select id="findProductDevicesByOrgId"  resultMap="productDevicesResult">
+        select t.*,#{attachPath} attachPath,d.classify_name,b.code tenant_code
+        from dhlk_basic_product_devices t
+        left join dhlk_basic_devices_classify d on t.classify_id=d.id
+        left join dhlk_basic_tenant b on t.tenant_id=b.id
+        where t.status!=2
+        <if test="orgId != null and orgId != ''">
+            and t.org_id = #{orgId}
+        </if>
+    </select>
+    <select id="findProductDevicesCountByOrgId"  resultType="java.lang.Integer">
+       	select   count(1) from dhlk_basic_product_devices where org_id in(
+            select t3.id from (
+                  select t1.id,IF(FIND_IN_SET(parent_id, @pids) > 0, @pids := CONCAT(@pids, ',', id), 0) AS ischild
+                  from (select id,parent_id from dhlk_basic_org t order by parent_id, id) t1,
+                       (select @pids := #{orgId}) t2
+             ) t3 where ischild != 0
+            union all select id from dhlk_basic_org where id =#{orgId}
+		)
+    </select>
+    <select id="isRepeatName" resultType="Integer">
+        SELECT count(*) FROM dhlk_basic_product_devices  WHERE name=#{name}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id=#{tenantId}
+        </if>
+    </select>
+    <select id="isRepeatCode" resultType="Integer">
+        SELECT count(*) FROM dhlk_basic_product_devices  WHERE code=#{code}
+    </select>
+</mapper>

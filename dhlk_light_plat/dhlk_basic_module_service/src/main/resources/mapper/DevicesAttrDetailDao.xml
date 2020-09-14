@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.DevicesAttrDetailDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.DevicesAttrDetail" id="DhlkBasicDevicesAttrDetailResult">
+        <result property="id" jdbcType="INTEGER"    column="id"    />
+        <result property="attr" jdbcType="VARCHAR"   column="attr"    />
+        <result property="dataType"  jdbcType="VARCHAR"  column="data_type"    />
+        <result property="dataLength" jdbcType="INTEGER"   column="data_length"    />
+        <result property="unit"  jdbcType="VARCHAR"  column="unit"    />
+        <result property="attrSetId"  jdbcType="INTEGER"  column="attr_set_id"    />
+        <result property="code" jdbcType="VARCHAR" column="code" />
+    </resultMap>
+
+    <sql id="selectDhlkBasicDevicesAttrDetailVo">
+        select id, attr, code, data_type, data_length, unit,attr_set_id from dhlk_basic_devices_attr_detail
+    </sql>
+
+    <select id="findAttrDetailsByAttrSetId" parameterType="Integer" resultMap="DhlkBasicDevicesAttrDetailResult">
+        <include refid="selectDhlkBasicDevicesAttrDetailVo"/>
+        where attr_set_id = #{attrSetId}
+    </select>
+
+    <select id="findList" parameterType="Integer" resultMap="DhlkBasicDevicesAttrDetailResult">
+        <include refid="selectDhlkBasicDevicesAttrDetailVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDevicesAttrDetails" parameterType="com.dhlk.entity.basicmodule.DevicesAttrDetail">
+        insert into dhlk_basic_devices_attr_detail
+        (attr,code,data_type,data_length,unit,attr_set_id)
+        values
+        <foreach collection="devicesAttrDetails" item="devicesAttrDetail" index="i" separator=",">
+            (
+            #{devicesAttrDetail.attr},
+            #{devicesAttrDetail.code},
+            #{devicesAttrDetail.dataType},
+            #{devicesAttrDetail.dataLength},
+            #{devicesAttrDetail.unit},
+            #{id}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.DevicesAttrDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_devices_attr_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="attr != null  and attr != ''">attr,</if>
+            <if test="code != null  and attr != ''">code,</if>
+            <if test="dataType != null  and dataType != ''">data_type,</if>
+            <if test="dataLength != null ">data_length,</if>
+            <if test="unit != null ">unit,</if>
+            <if test="attrSetId != null ">attr_set_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="attr != null  and attr != ''">#{attr},</if>
+            <if test="code != null  and code != ''">#{code},</if>
+            <if test="dataType != null  and dataType != ''">#{dataType},</if>
+            <if test="dataLength != null ">#{dataLength},</if>
+            <if test="unit != null ">#{unit},</if>
+            <if test="attrSetId != null ">#{attrSetId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.DevicesAttrDetail">
+        update dhlk_basic_devices_attr_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="attr != null  and attr != ''">attr = #{attr},</if>
+            <if test="code != null  and code != ''">code = #{code},</if>
+            <if test="dataType != null  and dataType != ''">data_type = #{dataType},</if>
+            <if test="dataLength != null ">data_length = #{dataLength},</if>
+            <if test="attrSetId != null ">attr_set_id = #{attrSetId},</if>
+            <if test="unit != null ">unit = #{unit},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_basic_devices_attr_detail where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+
+    </delete>
+
+    <delete id="deleteByAttrSetId">
+        delete from dhlk_basic_devices_attr_detail where attr_set_id = #{attrSetId}
+    </delete>
+
+</mapper>

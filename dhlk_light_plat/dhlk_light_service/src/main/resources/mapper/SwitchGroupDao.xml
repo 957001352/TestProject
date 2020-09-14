@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.service.dao.SwitchGroupDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.dhlk.entity.light.SwitchGroup">
+        <result column="id" property="id" jdbcType="INTEGER" />
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="group_id" property="groupId" jdbcType="INTEGER"/>
+        <result column="switch_id" property="switchId" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumn">
+        id,status, group_id,switch_id
+    </sql>
+
+    <select id="selectSwitchGroupById" parameterType="INTEGER" resultType="com.dhlk.entity.light.SwitchGroup">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_switch_group where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.SwitchGroup" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_switch_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="status != null and status != ''">status,</if>
+            <if test="groupId != null and groupId != ''">group_id,</if>
+            <if test="switchId != null and switchId != ''">switch_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="groupId != null and groupId != ''">#{groupId},</if>
+            <if test="switchId != null and switchId != ''">#{switchId}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.SwitchGroup">
+        update dhlk_light_switch_group
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">`status` = #{status},</if>
+            <if test="groupId != null and  groupId != ''">group_id = #{groupId},</if>
+            <if test="switchId != null and  switchId != ''">switch_id = #{switchId}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findSwitchGroupRepeat"  resultType="java.lang.Integer">
+        select <include refid="baseColumn"/> from dhlk_light_switch_group where group_id = #{groupId}
+    </select>
+
+    <select id="findList"  resultMap="BaseResultMap">
+        select <include refid="baseColumn"/> from dhlk_light_switch_group where group_id in
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="findSwitchGroupBySwitchId"  resultMap="BaseResultMap">
+        select <include refid="baseColumn"/> from dhlk_light_switch_group where switch_id = #{switchId}
+    </select>
+
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.service.dao.TaskSchedulerLogDao">
+    
+    <resultMap type="TaskSchedulerLog" id="TaskSchedulerLogResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="result"    column="result"    />
+        <result property="scheduleId"    column="schedule_id"    />
+        <result property="schedulerDetailId"    column="scheduler_detail_id"    />
+    </resultMap>
+
+    <sql id="selectTaskSchedulerLogVo">
+        select id, create_time, result, schedule_id, scheduler_detail_id from dhlk_light_task_scheduler_log
+    </sql>
+
+    <select id="selectTaskSchedulerLogList" parameterType="TaskSchedulerLog" resultMap="TaskSchedulerLogResult">
+        <include refid="selectTaskSchedulerLogVo"/>
+        <where>  
+            <if test="result != null  and result != ''"> and result = #{result}</if>
+            <if test="scheduleId != null "> and schedule_id = #{scheduleId}</if>
+            <if test="schedulerDetailId != null "> and scheduler_detail_id = #{schedulerDetailId}</if>
+        </where>
+    </select>
+    
+    <select id="selectTaskSchedulerLogById" parameterType="Long" resultMap="TaskSchedulerLogResult">
+        <include refid="selectTaskSchedulerLogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTaskSchedulerLog" parameterType="TaskSchedulerLog" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_task_scheduler_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">create_time,</if>
+            <if test="result != null  and result != ''">result,</if>
+            <if test="scheduleId != null ">schedule_id,</if>
+            <if test="schedulerDetailId != null ">scheduler_detail_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="result != null  and result != ''">#{result},</if>
+            <if test="scheduleId != null ">#{scheduleId},</if>
+            <if test="schedulerDetailId != null ">#{schedulerDetailId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTaskSchedulerLog" parameterType="TaskSchedulerLog">
+        update dhlk_light_task_scheduler_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="result != null  and result != ''">result = #{result},</if>
+            <if test="scheduleId != null ">schedule_id = #{scheduleId},</if>
+            <if test="schedulerDetailId != null ">scheduler_detail_id = #{schedulerDetailId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTaskSchedulerLogById" parameterType="Long">
+        delete from dhlk_light_task_scheduler_log where id = #{id}
+    </delete>
+    <delete id="deleteTaskSchedulerLogBySchedulerId" parameterType="Integer">
+        delete from dhlk_light_task_scheduler_log where schedule_id = #{schedulerId}
+    </delete>
+    <delete id="deleteTaskSchedulerLogByIds" parameterType="String">
+        delete from dhlk_light_task_scheduler_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findListByScheduleId" parameterType="INTEGER" resultMap="TaskSchedulerLogResult">
+        select id, create_time, result, schedule_id, scheduler_detail_id from dhlk_light_task_scheduler_log
+        where 1=1
+        <if test="scheduleId != null  and scheduleId != ''">
+            and schedule_id = #{scheduleId}
+        </if>
+    </select>
+    
+</mapper>

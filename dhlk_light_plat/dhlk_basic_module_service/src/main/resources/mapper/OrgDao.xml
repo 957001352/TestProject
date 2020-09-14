@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.OrgDao">
+    <resultMap type="com.dhlk.entity.basicmodule.Org" id="DhlkBasicOrgResult">
+        <result property="id" jdbcType="INTEGER"    column="id"    />
+        <result property="code" jdbcType="VARCHAR"   column="code"    />
+        <result property="name"  jdbcType="VARCHAR"  column="name"    />
+        <result property="parentId" jdbcType="INTEGER"   column="parent_id"    />
+        <result property="status"  jdbcType="INTEGER"  column="status"    />
+        <result property="tenantId"  jdbcType="INTEGER"  column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectDhlkBasicOrgVo">
+        select id, code, name, parent_id, status from dhlk_basic_org
+    </sql>
+
+    <select id="isTopOrg" resultType="java.lang.Integer">
+        select count(*) from dhlk_basic_org where id = #{orgId}
+        <choose>
+            <when test="tenantId != null and tenantId != ''">
+                and tenant_id = #{tenantId} and parent_id = 0
+            </when>
+            <otherwise>
+                and tenant_id is not null
+            </otherwise>
+        </choose>
+
+
+    </select>
+
+    <select id="findFactoryByOrgId" parameterType="String" resultMap="DhlkBasicOrgResult">
+        SELECT T2.*
+        FROM (
+        SELECT
+        @r AS _id,
+        (SELECT @r := parent_id FROM dhlk_basic_org WHERE id = _id) AS parent1_id,
+        @l := @l + 1 AS lvl
+        FROM
+        (SELECT @r := (SELECT func_splitString(#{orgId},',',1)), @l := 0) vars,
+        dhlk_basic_org h
+        WHERE @r  &lt;&gt;  0) T1
+        JOIN dhlk_basic_org T2
+        ON T1._id = T2.id
+        WHERE parent_id = 0
+        ORDER BY T1.lvl DESC
+    </select>
+
+    <select id="findUnderOrgById" parameterType="Integer" resultMap="DhlkBasicOrgResult">
+        SELECT u2.id,u2.code,u2.name,u2.parent_id,u2.status,u2.tenant_id
+        FROM(
+        SELECT
+        @ids AS p_ids,
+        (SELECT @ids := GROUP_CONCAT(id) FROM dhlk_basic_org WHERE FIND_IN_SET(parent_id, @ids)) AS c_ids,
+        @l := @l+1 AS LEVEL
+        FROM dhlk_basic_org, (SELECT @ids := #{id}, @l := 0 ) b
+        WHERE @ids IS NOT NULL
+        ) u1
+        JOIN dhlk_basic_org u2
+        ON FIND_IN_SET(u2.id, u1.p_ids) and u2.status = 0
+    </select>
+
+    <select id="findList" parameterType="Integer" resultMap="DhlkBasicOrgResult">
+        <include refid="selectDhlkBasicOrgVo"/>
+        where status = 0
+        <if test="tenantId!= null and tenantId != ''">
+            AND tenant_id != #{tenantId}
+        </if>
+        <if test="parentId!= null and parentId != ''">
+            AND parent_id = #{parentId}
+        </if>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultMap="DhlkBasicOrgResult">
+        <include refid="selectDhlkBasicOrgVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="findOrgByUserId" parameterType="Integer" resultMap="DhlkBasicOrgResult">
+        select id, code, name, parent_id, status from dhlk_basic_org
+        where FIND_IN_SET(id,(select org_id from dhlk_basic_user where id = #{userId}))
+    </select>
+
+    <select id="treeList" resultMap="DhlkBasicOrgResult">
+        <include refid="selectDhlkBasicOrgVo"/>
+        where status = #{status}
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id=#{tenantId}
+        </if>
+    </select>
+
+    <select id="isRepeatName" resultType="java.lang.Integer">
+        select count(*) from dhlk_basic_org
+        where name = #{name} and parent_id = #{parentId} and status = 0
+        <if test="id!= null and id != ''">
+            AND id != #{id}
+        </if>
+        <if test="tenantId!= null and tenantId != ''">
+            AND tenant_id != #{tenantId}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.Org" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_org
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">code,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="parentId != null ">parent_id,</if>
+            <if test="status != null ">status,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">#{code},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="parentId != null ">#{parentId},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="tenantId != null ">#{tenantId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.Org">
+        update dhlk_basic_org
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null  and code != ''">code = #{code},</if>
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="parentId != null ">parent_id = #{parentId},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="tenantId != null ">tenant_id = #{tenantId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="delete" parameterType="java.awt.List">
+        update dhlk_basic_org set status = 2 where id in
+        <foreach collection="orgs" item="org" separator="," open="(" close=")">
+            #{org.id}
+        </foreach>
+    </update>
+
+    <select id="findParentOrgId" resultType="String">
+        SELECT GROUP_CONCAT(T2.name ORDER BY id SEPARATOR ' > ')
+        FROM (
+        SELECT
+        @r AS _id,
+        (SELECT @r := parent_id FROM dhlk_basic_org WHERE id = _id) AS parent_id,
+        @l := @l + 1 AS lvl
+        FROM
+        (SELECT @r := #{orgId}, @l := 0) vars,
+        dhlk_basic_org h
+        WHERE @r &lt;&gt; 0) T1
+        JOIN dhlk_basic_org T2
+        ON T1._id = T2.id  AND `status` = 0
+        ORDER BY T1.lvl DESC
+    </select>
+
+    <select id="findByTenantId" parameterType="Integer" resultMap="DhlkBasicOrgResult">
+        select id, code, name, parent_id, status,tenant_id from dhlk_basic_org
+        where tenant_id != #{tenantId}
+    </select>
+
+    <update id="updataStatusByTenantId">
+        update dhlk_basic_org set status = 2 where tenant_id = #{tenantId}
+    </update>
+
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.FaultCodeDao">
+
+    <resultMap id="DhlkBasicFaultCodeResult" type="com.dhlk.entity.light.FaultCode">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="code" jdbcType="INTEGER" column="code"/>
+        <result property="content" jdbcType="TIMESTAMP" column="content"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,name, code, content
+    </sql>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.FaultCode" useGeneratedKeys="true" keyProperty="id">
+         insert into dhlk_light_fault_code
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="name != null and name != '' ">name,</if>
+                <if test="code != null  and code != ''">code,</if>
+                <if test="content != null  and content != ''">content,</if>
+            </trim>
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="name != null and name != ''" >#{name},</if>
+                <if test="code != null  and code != ''">#{code},</if>
+                <if test="content != null  and content != ''">#{content}</if>
+            </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.FaultCode" >
+        update dhlk_light_fault_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != '' ">name=#{name},</if>
+            <if test="code != null  and code != ''">code=#{code},</if>
+            <if test="content != null  and content != ''">content=#{content}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findList" parameterType="com.dhlk.entity.light.FaultCode" resultMap="DhlkBasicFaultCodeResult">
+        select
+            <include refid="baseColumn"></include>
+        from
+            dhlk_light_fault_code
+        where 1=1
+        <choose> <!-- falg 1是正常查询，0是校验保存时名称和code不能重复 2是校验更新时除自己之外是否还存在-->
+            <when test="flag == 0">
+                <if test="name !=null and name !='' ">and (name = #{name}</if>
+                <if test="code !=null and code !='' ">or code = #{code})</if>
+            </when>
+            <when test="flag == 1">
+                <if test="name !=null and name !='' ">and name = #{name}</if>
+                <if test="code !=null and code !='' ">and code = #{code}</if>
+            </when>
+            <when test="flag == 2">
+                <if test="id != null"> and id not in(#{id})</if>
+                <if test="name !=null and name !='' ">and (name = #{name}</if>
+                <if test="code !=null and code !='' ">or code = #{code})</if>
+            </when>
+        </choose>
+        order by id desc
+    </select>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_fault_code where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="findByCode" resultMap="DhlkBasicFaultCodeResult">
+        select
+        <include refid="baseColumn"></include>
+        from dhlk_light_fault_code
+        where code = #{code}
+    </select>
+</mapper>

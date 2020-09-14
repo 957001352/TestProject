@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.UserDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.User" id="DhlkBasicUserResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="loginName" jdbcType="VARCHAR" column="login_name"/>
+        <result property="password" jdbcType="VARCHAR" column="password"/>
+        <result property="status" jdbcType="INTEGER" column="status"/>
+        <result property="orgId" jdbcType="VARCHAR" column="org_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="phone" jdbcType="VARCHAR" column="phone"/>
+        <result property="email" jdbcType="VARCHAR" column="email"/>
+        <result property="isAdmin" jdbcType="INTEGER" column="is_admin"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.User" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="loginName != null  and loginName != ''">login_name,</if>
+            <if test="password != null  and password != ''">password,</if>
+            <if test="status != null ">status,</if>
+            <if test="orgId != null ">org_id,</if>
+            <if test="isAdmin != null ">is_admin,</if>
+            <if test="phone != null ">phone,</if>
+            <if test="email != null ">email,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="loginName != null  and loginName != ''">#{loginName},</if>
+            <if test="password != null  and password != ''">#{password},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="orgId != null ">#{orgId},</if>
+            <if test="isAdmin != null ">#{isAdmin},</if>
+            <if test="phone != null ">#{phone},</if>
+            <if test="email != null ">#{email},</if>
+            <if test="tenantId != null ">#{tenantId},</if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_basic_user (id,name,login_name,password,status,org_id,is_admin,phone,email,tenant_id) VALUES
+            (#{item.id},#{item.name},#{item.loginName},#{item.password},#{item.status},#{item.orgId},#{item.isAdmin},#{item.phone},#{item.email},#{item.tenantId})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="INTEGER">
+        delete from dhlk_basic_user
+    </delete>
+
+    <select id="findUserByLoginName" parameterType="String" resultMap="DhlkBasicUserResult">
+        SELECT u.id, u.name, u.login_name, u.password, u.status, u.org_id, u.create_time,u.email,u.phone,u.is_admin,u.tenant_id,t.tb_loginname,t.tb_password FROM dhlk_basic_user u
+        WHERE u.login_name = #{loginName}
+    </select>
+
+    <select id="checkUserExist" resultType="Integer">
+        SELECT count(*) FROM dhlk_basic_user
+    </select>
+
+    <select id="loginCheck" resultMap="DhlkBasicUserResult">
+        SELECT id,name,login_name,password,status,org_id,create_time,email,phone,is_admin,tenant_id FROM dhlk_basic_user
+        where login_name = #{loginName} and password = #{password}
+    </select>
+
+    <select id="findAll" resultMap="DhlkBasicUserResult">
+        SELECT  id,name,login_name,password,status,org_id,create_time,email,phone,is_admin,tenant_id  FROM dhlk_basic_user
+    </select>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.User">
+        update dhlk_basic_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="loginName != null  and loginName != ''">login_name = #{loginName},</if>
+            <if test="password != null  and password != ''">password = #{password},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="orgId != null ">org_id = #{orgId},</if>
+            <if test="isAdmin != null ">is_admin = #{isAdmin},</if>
+            <if test="phone != null ">phone = #{phone},</if>
+            <if test="email != null ">email = #{email},</if>
+            <if test="tenantId != null ">tenant_id = #{tenantId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
+        delete from dhlk_basic_user where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

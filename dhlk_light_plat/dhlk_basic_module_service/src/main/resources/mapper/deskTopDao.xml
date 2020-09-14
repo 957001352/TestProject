@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.basicmodule.service.dao.DeskTopDao">
+    <resultMap id="MenuTop" type="com.dhlk.entity.basicmodule.DeskTop">
+        <result property="id"    jdbcType="INTEGER" column="id"  />
+        <result property="menuId"   jdbcType="INTEGER" column="menu_id"    />
+        <result property="userId"    jdbcType="INTEGER" column="user_id"    />
+        <result property="parentId"    jdbcType="INTEGER" column="parent_id"    />
+    </resultMap>
+
+    <sql id="selectMenuTop">
+        id, menu_id,user_id,parent_id
+    </sql>
+
+    <select id="findList" parameterType="java.lang.Integer" resultMap="MenuTop">
+        select
+            <include refid="selectMenuTop"></include>
+         from dhlk_basic_desktop
+         where 1=1
+            <if test="userId != null  and userId != ''"> and user_id = #{userId}</if>
+
+    </select>
+    
+
+<!--    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.DeskTop" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_desktop
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="menuId != null">menu_id,</if>
+            <if test="userId != null ">user_id</if>
+            <if test="parentId != null ">parent_id</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="menuId != null">#{menuId},</if>
+            <if test="parentId != null ">#{parentId}</if>
+         </trim>
+    </insert>-->
+
+    <insert id="insert">
+        insert into dhlk_basic_desktop
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            menu_id,user_id,parent_id
+        </trim>
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.menuId},#{item.userId},#{item.parentId}
+            </trim>
+        </foreach>
+    </insert>
+
+
+    <!-- 删除版本信息-->
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_basic_desktop where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 删除用户下所有的ID-->
+    <delete id="deleteAllByUserId" parameterType="java.lang.Integer">
+        delete from dhlk_basic_desktop where user_id = #{userId}
+    </delete>
+</mapper>

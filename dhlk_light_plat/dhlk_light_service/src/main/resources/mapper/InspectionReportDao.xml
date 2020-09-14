@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.InspectionReportDao">
+
+    <resultMap id="DhlkLightInspectionReportDaoResult" type="com.dhlk.entity.light.InspectionReport">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="off" jdbcType="VARCHAR" column="off"/>
+        <result property="ons" jdbcType="VARCHAR" column="ons"/>
+        <result property="dimming" jdbcType="VARCHAR" column="dimming"/>
+        <result property="timedControl" jdbcType="VARCHAR" column="timed_control"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <result property="sn" jdbcType="VARCHAR" column="sn"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,off, dimming, timed_control, create_time,tenant_id.sn
+    </sql>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.InspectionReport" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_inspection_report
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ons != null and  ons != ''">ons,</if>
+            <if test="off != null and  off != ''">off,</if>
+            <if test="dimming != null  and dimming != ''">dimming,</if>
+            <if test="timedControl != null  and timedControl != ''">timed_control,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+            <if test="sn != null and sn != ''">sn</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ons != null and  ons != ''">#{ons},</if>
+            <if test="off != null and  off != ''">#{off},</if>
+            <if test="dimming != null  and dimming != ''">#{dimming},</if>
+            <if test="timedControl != null  and timedControl != ''">#{timedControl},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
+            <if test="sn != null and sn != ''">#{sn}</if>
+        </trim>
+    </insert>
+
+    <delete id="deleteByTenantId" parameterType="INTEGER">
+        delete from dhlk_light_inspection_report where tenant_id = #{tenantId}
+    </delete>
+
+    <select id="findList"  resultMap="DhlkLightInspectionReportDaoResult">
+        SELECT t1.sn,t2.area,t1.off,t1.dimming,t1.timed_control,t1.ons
+        FROM dhlk_light_inspection_report t1
+        LEFT JOIN dhlk_light_led t3 ON t3.sn = t1.sn and t3.tenant_id = #{tenantId}
+        LEFT JOIN dhlk_light_area t2 ON t2.id = t3.area_id and t2.tenant_id = #{tenantId}
+        WHERE 1=1
+        <if test="tenantId != null  and tenantId != ''">
+            and t1.tenant_id = #{tenantId}
+        </if>
+        <if test="areaId != null  and areaId != ''">
+            and t2.id = #{areaId}
+        </if>
+        <if test="sn != null  and sn != ''">
+            and t1.sn like  concat('%/',#{sn}, '%') ESCAPE '/'
+        </if>
+        <if test="map != null ">
+            <foreach collection="map.entrySet()"  index="key" item="value" >
+                and ${key}= #{value}
+            </foreach>
+        </if>
+        <if test="flag =='true' ">
+            <if test="result != null  and result != ''">
+                <choose>
+                    <when test="result == 1">
+                        and t1.ons = 1 and t1.off = 1 and t1.dimming  = 1
+                    </when>
+                    <when test="result == 0">
+                        and t1.ons = 0 and t1.off = 0 and t1.dimming  = 0
+                    </when>
+                </choose>
+            </if>
+        </if>
+
+        ORDER BY t1.id DESC
+    </select>
+
+    <select id="exportExcel" parameterType="com.dhlk.entity.light.InspectionReport" resultType="java.util.LinkedHashMap">
+        SELECT
+            (@rowNum := @rowNum + 1) AS num,
+            res.sn,
+            res.area,
+            res.ons,
+            res.dimming,
+            res.off
+        FROM
+        (SELECT  t1.sn,t2.area,t1.ons,t1.dimming,t1.off
+        FROM dhlk_light_inspection_report t1
+        LEFT JOIN dhlk_light_led t3 ON t3.sn = t1.sn and t3.tenant_id = #{tenantId}
+        LEFT JOIN dhlk_light_area t2 ON t2.id = t3.area_id and t2.tenant_id = #{tenantId},(SELECT (@rowNum := 0)) b
+        WHERE 1=1
+        <if test="tenantId != null  and tenantId != ''">
+            and t1.tenant_id = #{tenantId}
+        </if>
+        <if test="areaId != null  and areaId != ''">
+            and t2.id = #{areaId}
+        </if>
+        <if test="sn != null  and sn != ''">
+            and t1.sn like  concat('%/',#{sn}, '%') ESCAPE '/'
+        </if>
+        <if test="map != null ">
+            <foreach collection="map.entrySet()"  index="key" item="value" >
+                and ${key}= #{value}
+            </foreach>
+        </if>
+        <if test="flag =='true' ">
+            <if test="result != null  and result != ''">
+                <choose>
+                    <when test="result == 1">
+                        and t1.ons = 1 and t1.off = 1 and t1.dimming  = 1
+                    </when>
+                    <when test="result == 0">
+                        and t1.ons = 0 and t1.off = 0 and t1.dimming  = 0
+                    </when>
+                </choose>
+            </if>
+        </if>
+        ORDER BY t1.id DESC) res
+    </select>
+
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_light_inspection_report (id,off,dimming,timed_control,create_time,tenant_id,sn,ons) VALUES
+            (#{item.id},#{item.off},#{item.dimming},#{item.timedControl},#{item.createTime},#{item.tenantId},#{item.sn},#{item.ons})
+        </foreach>
+    </insert>
+
+    <select id="onOffQualified" parameterType="INTEGER" resultType="INTEGER">
+        SELECT count(*)  FROM dhlk_light_inspection_report
+        WHERE 1 =1 and off = 1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="dimmingQualified" parameterType="INTEGER"  resultType="INTEGER">
+        SELECT count(*)  FROM dhlk_light_inspection_report
+        WHERE 1 =1 and dimming = 1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="timedQualified" parameterType="INTEGER" resultType="INTEGER">
+        SELECT count(*)  FROM dhlk_light_inspection_report
+        WHERE 1 =1 and timed_control = 1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+</mapper>

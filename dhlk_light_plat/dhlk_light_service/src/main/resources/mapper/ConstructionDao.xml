@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.ConstructionDao">
+
+    <resultMap id="DhlkBasicConstructionResult" type="com.dhlk.entity.light.Construction">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="signDate" jdbcType="TIMESTAMP" column="sign_date"/>
+        <result property="businessPeople" jdbcType="VARCHAR" column="business_people"/>
+        <result property="packCount" jdbcType="INTEGER" column="pack_count"/>
+        <result property="startDate" jdbcType="TIMESTAMP" column="start_date"/>
+        <result property="endDate" jdbcType="TIMESTAMP" column="end_date"/>
+        <result property="implPeople" jdbcType="VARCHAR" column="impl_people"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,sign_date, business_people, pack_count, start_date, end_date, impl_people,tenant_id,create_time
+    </sql>
+
+    <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.light.Construction">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_construction where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Construction" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_construction
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="signDate != null">sign_date,</if>
+            <if test="businessPeople != null  and businessPeople != ''">business_people,</if>
+            <if test="packCount != null  and packCount != ''">pack_count,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="implPeople != null  and implPeople != ''">impl_people,</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id,</if>
+            <if test="createTime != null">create_time</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="signDate != null">#{signDate},</if>
+            <if test="businessPeople != null  and businessPeople != ''">#{businessPeople},</if>
+            <if test="packCount != null  and packCount != ''">#{packCount},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="implPeople != null  and implPeople != ''">#{implPeople},</if>
+            <if test="tenantId != null  and tenantId != ''">#{tenantId},</if>
+            <if test="createTime != null">#{createTime}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Construction">
+        update dhlk_light_construction
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="signDate != null">sign_date = #{signDate},</if>
+            <if test="businessPeople != null  and businessPeople != ''">business_people = #{businessPeople},</if>
+            <if test="packCount != null  and packCount != ''">pack_count = #{packCount},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="implPeople != null  and implPeople != ''">impl_people = #{implPeople}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findList" parameterType="Construction" resultMap="DhlkBasicConstructionResult">
+        select t2.id,t1.name,DATE_FORMAT(t2.sign_date,'%Y-%m-%d') sign_date,
+        DATE_FORMAT(t2.end_date,'%Y-%m-%d') end_date,t2.create_time, t2.pack_count,
+        t2.impl_people,t2.business_people,DATE_FORMAT(t2.start_date,'%Y-%m-%d') start_date,t2.tenant_id
+        from dhlk_basic_tenant t1 join dhlk_light_construction t2 on t1.id = t2.tenant_id
+        where 1 = 1
+        <if test="implPeople != null  and implPeople != ''">
+            and t2.impl_people like concat('%/', #{implPeople}, '%') ESCAPE '/'
+        </if>
+        <if test=" startDate != null and  startDate !=''">
+            <![CDATA[ and t2.start_date >= #{startDate}]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[ and t2.end_date <= #{endDate}]]>
+        </if>
+        <if test="tenantId != null  and tenantId != ''">
+            and t2.tenant_id = #{tenantId}
+        </if>
+        ORDER BY t2.create_time desc
+    </select>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_construction where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

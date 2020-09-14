@@ -1,0 +1,94 @@
+debug: true
+server:
+  port: 90
+  tomcat:
+    max-threads: 500
+#  ssl:
+#    key-store: C:\home\tomcat.keystore
+#    key-store-password: dhlktech
+#    keyStoreType: JKS
+#    key-alias: tomcat
+spring:
+  application:
+    name: dhlk-zuul
+  cloud:
+    consul:
+      host: 127.0.0.1
+      port: 8500
+      discovery:
+        register: true
+        hostname: 127.0.0.1
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        tags: urlprefix-/${spring.application.name}
+        instance-id: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+#通过网关避免跨域问题
+zuul:
+  semaphore:
+    max-semaphores: 1000 #可根据系统需要支持的并发数适当增加信号量的大小
+  ignored-services: "*"
+  sensitive-headers:
+  routes:
+    basicmodule-service:
+      path: /basicmodule-service/**
+      serviceId: basicmodule-service #权限服务
+      sensitiveHeaders: "*"
+    dhlk-hive:
+      path: /dhlk-hive/**
+      serviceId: dhlk-hive # hive服务
+      sensitiveHeaders: "*"
+    dhlk-web:
+      path: /dhlk-web/**
+      serviceId: dhlk-web #web展示服务
+      sensitiveHeaders: "*"
+    dhlk-hadoop:
+      path: /dhlk-hadoop/**
+      serviceId: dhlk-hadoop #hadoop服务
+      sensitiveHeaders: "*"
+    light-service:
+      path: /light-service/**
+      serviceId: light-service #灯联网服务
+      sensitiveHeaders: "*"
+    proxy-service:
+      path: /proxy-service/**
+      serviceId: proxy-service
+      sensitiveHeaders: "*"
+
+
+    jsonserver:
+      path: /json/**
+      url: http://192.168.2.226:8082/swagger-ui.html
+  host:
+    maxTotalConnections : 1000  #总连接数
+    maxPerRouteConnections: 200  #每个路由连接数
+    connect-timeout-millis: 10000
+    socket-timeout-millis: 10000
+  servlet-path: /
+
+
+ribbon:
+  OkToRetryOnAllOperations: true    #全部请求开启重试机制  默认true
+  ReadTimeout: 10000                 #请求处理超时时间
+  ConnectTimeout: 15000             #请求连接超时时间
+  MaxTotalHttpConnections: 1000     #最大http连接数
+  MaxConnectionsPerHost: 200        #每个host最大连接数
+  MaxAutoRetries: 1                 #最大重试次数 默认0
+  MaxAutoRetriesNextServer: 1       #切换实例的重试次数  默认0
+
+
+hystrix:
+  threadpool:
+    default:
+      coreSize: 500   #线程池数量 　确保zuul.semaphore.max-semaphores属性值大于server.tomcat.max-threads
+  command:
+    default:
+      fallback:
+        isolation:
+          semaphore:
+            maxConcurrentRequests: 500
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 100000

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.basicmodule.service.dao.RoleDao">
+
+    <resultMap type="Role" id="RoleResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="note"    column="note"    />
+        <result property="tenantId"    column="tenant_id"    />
+        <result property="isSystem"    column="is_system"    />
+    </resultMap>
+
+    <sql id="selectRoleVo">
+        select id, name, note,tenant_id,is_system from dhlk_basic_role
+    </sql>
+
+    <select id="findList" parameterType="Role" resultMap="RoleResult">
+        <include refid="selectRoleVo"/>
+        <where>
+            and is_system = 1
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="note != null  and note != ''"> and note = #{note}</if>
+            <if test="tenantId != null  and tenantId != ''"> and tenant_id = #{tenantId}</if>
+        </where>
+    </select>
+
+    <select id="selectRoleById" parameterType="Integer" resultMap="RoleResult">
+        <include refid="selectRoleVo"/>
+        where id = #{id} <!--and is_system = 1-->
+    </select>
+    <select id="selectRoleByName" parameterType="String" resultMap="RoleResult">
+        <include refid="selectRoleVo"/>
+        where name = #{name}
+        <if test="tenantId != null  and tenantId != ''">
+          and tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="Role" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null  and name != ''">name,</if>
+            <if test="note != null  and note != ''">note,</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id,</if>
+            <if test="isSystem != null  and isSystem != ''">is_system,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="note != null  and note != ''">#{note},</if>
+            <if test="tenantId != null  and tenantId != ''">#{tenantId},</if>
+            <if test="isSystem != null  and isSystem != ''">#{isSystem},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="Role">
+        update dhlk_basic_role
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="note != null  and note != ''">note = #{note},</if>
+            <if test="isSystem != null  and isSystem != ''">is_system = #{isSystem},</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id = #{tenantId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        delete from dhlk_basic_role where id = #{id}
+    </delete>
+
+    <delete id="deleteRoleByIds" parameterType="java.util.List">
+        delete from dhlk_basic_role where id in
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="selectRoleByUserId" parameterType="Integer" resultMap="RoleResult">
+        SELECT DISTINCT dbr.id,dbr.name,dbr.is_system FROM `dhlk_basic_user` dbu
+        LEFT JOIN `dhlk_basic_user_role` dbur ON dbu.id=dbur.`user_id`
+        LEFT JOIN `dhlk_basic_role` dbr ON dbur.`role_id`=dbr.`id`
+        WHERE dbr.is_system = 1 AND dbu.id=#{userId}
+    </select>
+    <select id="selectableRoleByUserId" parameterType="Integer" resultMap="RoleResult">
+        SELECT dbr1.id,dbr1.name,dbr1.is_system FROM `dhlk_basic_role` dbr1 WHERE dbr1.id NOT IN (
+        SELECT dbr.id FROM `dhlk_basic_user` dbu
+        LEFT JOIN `dhlk_basic_user_role` dbur ON dbu.id=dbur.`user_id`
+        LEFT JOIN `dhlk_basic_role` dbr ON dbur.`role_id`=dbr.`id`
+        WHERE dbr.is_system = 1 AND dbu.id=#{userId})
+    </select>
+    <select id="selectUserByRoleId" parameterType="Integer" resultType="com.dhlk.entity.basicmodule.User">
+        SELECT id, `name`, login_name, `password`, `status`, org_id, create_time,email,phone,is_admin,tenant_id FROM dhlk_basic_user WHERE id IN(
+        SELECT user_id FROM dhlk_basic_user_role WHERE role_id = #{roleId})
+    </select>
+
+
+    <select id="findListByTenantId" parameterType="Integer" resultMap="RoleResult">
+       select id, name, note,tenant_id,is_system from dhlk_basic_role where tenant_id = #{tenantId}
+    </select>
+
+    <delete id="deleteByTenantId" parameterType="Integer">
+        delete from dhlk_basic_role where tenant_id = #{tenantId}
+    </delete>
+
+</mapper>

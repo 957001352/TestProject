@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.dhlk.product.plat</groupId>
+    <artifactId>dhlk.light.plat</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <!--项目中包含的模块-->
+        <!--公共模块-->
+        <module>dhlk_commons</module>
+        <!--大航联科产品的实体类-->
+        <module>dhlk_entity</module>
+        <!-- Zuul服务  -->
+        <module>dhlk_zuul</module>
+        <!--  shiro认证 -->
+        <module>dhlk_shiro</module>
+
+        <!--================================采集===========================-->
+        <!--BI控制器中的项目 start-->
+        <module>dhlk_bicontroller_config</module>
+        <!-- 实现flume从客户方的flume区(Kafka)中获取信息的source  -->
+        <module>dhlk_flume_interceptor</module>
+        <!--================================================================-->
+
+        <module>dhlk_proxy</module>
+
+
+
+        <!--==================================大数据==========================-->
+        <!-- mqtt消息订阅  -->
+        <module>dhlk_mqtt_subscribe</module>
+        <!-- hadoop的微服务  -->
+        <module>dhlk_hadoop</module>
+        <!--  hive微服务 -->
+        <module>dhlk_hive</module>
+        <!--===================================================================-->
+
+        <!--企业、工厂、车间、人员、权限等具备公共性质的服务-->
+        <module>dhlk_basic_module_service</module>
+
+        <!--  大航联科WEB -->
+        <module>dhlk_web</module>
+        <!--  灯联网 -->
+        <module>dhlk_light_service</module>
+        <!-- 灯联网本地程序 -->
+        <module>dhlk_light_factory</module>
+        <!--一体机运维系统-->
+        <module>dhlk_server_manage</module>
+        <!--等联网云端订阅服务-->
+        <module>dhlk_light_subscribe</module>
+
+    </modules>
+    <properties>
+        <jdk.version>1.8</jdk.version>
+        <lombok.version>1.18.12</lombok.version>
+        <utf8.version>UTF-8</utf8.version>
+        <junit.version>4.12</junit.version>
+        <fastjson.version>1.2.62</fastjson.version>
+        <pinyin4jversion>2.5.0</pinyin4jversion>
+        <jsoup.version>1.11.3</jsoup.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <okhttp.version>3.12.0</okhttp.version>
+        <spring-cloud.version>Greenwich.SR4</spring-cloud.version>
+    </properties>
+
+    <dependencyManagement>
+        <!--可能用到的依赖,在具体的模块若使用，则引入，以下依赖只在非spring boot的项目中起作用-->
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-core</artifactId>
+                <version>RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>com.belerweb</groupId>
+                <artifactId>pinyin4j</artifactId>
+                <version>${pinyin4jversion}</version>
+            </dependency>
+            <!--HTML解析 -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
+
+            <!-- XML解析 -->
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${dom4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>RELEASE</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+
+
+        </dependencies>
+    </dependencyManagement>
+
+    <!--模块中都使用的依赖-->
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

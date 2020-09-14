@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.basicmodule.service.dao.MenuDao">
+    
+    <resultMap type="Menu" id="MenuResult">
+        <result property="id"    column="id"    />
+        <result property="code"    column="code"    />
+        <result property="name"    column="name"    />
+        <result property="url"    column="url"    />
+        <result property="status"    column="status"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="perms"    column="perms"    />
+    </resultMap>
+
+    <sql id="selectMenuVo">
+        select id, code, name, url,perms, status, parent_id from dhlk_basic_menu
+    </sql>
+
+    <select id="findList" parameterType="Menu" resultMap="MenuResult">
+        <include refid="selectMenuVo"/>
+        <where>  
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="parentId != null "> and parent_id = #{parentId}</if>
+        </where>
+    </select>
+    
+    <select id="selectMenuById" parameterType="Integer" resultMap="MenuResult">
+        <include refid="selectMenuVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectMenuByCode" parameterType="String" resultMap="MenuResult">
+        <include refid="selectMenuVo"/>
+        where code = #{code}
+    </select>
+        
+    <insert id="insert" parameterType="Menu" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_menu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">code,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="url != null  and url != ''">url,</if>
+            <if test="status != null ">status,</if>
+            <if test="parentId != null ">parent_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">#{code},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="url != null  and url != ''">#{url},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="parentId != null ">#{parentId},</if>
+         </trim>
+    </insert>
+    <update id="deleteMenuByIds" parameterType="java.util.List">
+        update  dhlk_basic_menu set status=2 where id  in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="update" parameterType="Menu">
+        update dhlk_basic_menu
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null  and code != ''">code = #{code},</if>
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="url != null  and url != ''">url = #{url},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="parentId != null ">parent_id = #{parentId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        delete from dhlk_basic_menu where id = #{id}
+    </delete>
+
+   <!-- <delete id="deleteMenuByIds" parameterType="Integer">
+        delete from dhlk_basic_menu where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>-->
+    <select id="findTreeByUserId" parameterType="Integer" resultMap="MenuResult">
+        SELECT m.* FROM  dhlk_basic_user  u LEFT JOIN dhlk_basic_user_role ur ON u.id=ur. user_id
+        LEFT JOIN dhlk_basic_role r ON ur. role_id =r. id
+        LEFT JOIN  dhlk_basic_permissions  p ON r. id =p. role_id
+        LEFT JOIN  dhlk_basic_menu  m ON p. menu_id =m. id
+        WHERE u.id=#{id} and  m.status = 0
+    </select>
+    <select id="getMenuCheckedList" parameterType="Integer" resultType="Menu">
+        SELECT *
+            , CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM dhlk_basic_permissions dbp
+                    WHERE dbp.menu_id = dbm.id
+                        AND dbp.role_id = #{roleId}
+                ) THEN 'true'
+                ELSE 'false'
+            END AS checked
+        FROM dhlk_basic_menu dbm where dbm.status = 0
+        <if test="tenantId!= null and tenantId != ''">
+            and dbm.id in(select menu_id from  dhlk_basic_tenant_menu  dbp  where tenant_id = #{tenantId})
+        </if>
+        ORDER BY dbm.id ASC
+    </select>
+    <select id="getMenuCheckedListByTeanantId" parameterType="Integer" resultType="Menu">
+        SELECT *
+            , CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM dhlk_basic_tenant_menu dbp
+                    WHERE dbp.menu_id = dbm.id
+                        AND dbp.tenant_id = #{TeanantId}
+                ) THEN 'true'
+                ELSE 'false'
+            END AS checked
+        FROM dhlk_basic_menu dbm where dbm.status = 0
+        ORDER BY dbm.id ASC
+    </select>
+    <insert id="insertTenantAndMenu" parameterType="java.util.List" >
+        insert into dhlk_basic_tenant_menu
+        (menu_id,tenant_id)
+        values
+        <foreach collection="list" item="tenantMenu" index="index"
+                 separator=",">
+            (#{tenantMenu.menuId},#{tenantMenu.tenantId})
+        </foreach>
+    </insert>
+    <delete id="deleteByTenantId" parameterType="Integer">
+        delete from dhlk_basic_tenant_menu where tenant_id = #{tenantId}
+    </delete>
+</mapper>

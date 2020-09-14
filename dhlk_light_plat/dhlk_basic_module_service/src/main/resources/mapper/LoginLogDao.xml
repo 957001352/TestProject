@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.LoginLogDao">
+    <resultMap type="com.dhlk.entity.basicmodule.LoginLog" id="DhlkBasicLoginLogResult">
+        <result property="id"   jdbcType="INTEGER"   column="id"    />
+        <result property="userId"   jdbcType="INTEGER"   column="user_id"    />
+        <result property="ip"   jdbcType="VARCHAR"   column="ip"    />
+        <result property="loginTime"   jdbcType="TIMESTAMP"   column="login_time"    />
+        <result property="tenantId"   jdbcType="INTEGER"   column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectDhlkBasicLoginLogVo">
+        select id, user_id, ip, login_time,tenant_id from dhlk_basic_login_log
+    </sql>
+
+    <select id="findList" resultMap="DhlkBasicLoginLogResult">
+        <include refid="selectDhlkBasicLoginLogVo"/>
+        <where>
+            <if test="tenantId != null "> and tenant_id = #{tenantId},</if>
+            <if test="userName != null "> and user_id = (select user_id from dhlk_basic_user where name = #{userName})</if>
+            <if test="ip != null  and ip != ''"> and ip = #{ip}</if>
+            <if test="startTime != null and endTime !=null"> and (login_time between #{startTime} and #{endTime})</if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.LoginLog" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_login_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null ">user_id,</if>
+            <if test="ip != null  and ip != ''">ip,</if>
+            <if test="loginTime != null ">login_time,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null ">#{userId},</if>
+            <if test="ip != null  and ip != ''">#{ip},</if>
+            <if test="loginTime != null ">#{loginTime},</if>
+            <if test="tenantId != null ">tenant_id=#{tenantId},</if>
+        </trim>
+    </insert>
+</mapper>

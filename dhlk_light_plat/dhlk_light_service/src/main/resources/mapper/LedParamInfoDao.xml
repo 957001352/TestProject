@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.LedParamInfoDao">
+
+    <resultMap id="DhlkLedParamInfoResult" type="com.dhlk.entity.light.LedParamInfo">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="sn" jdbcType="VARCHAR" column="sn"/>
+        <result property="light_on_off" jdbcType="INTEGER" column="light_on_off"/>
+        <result property="illumi_top" jdbcType="INTEGER" column="illumi_top"/>
+        <result property="illumi_top_min" jdbcType="INTEGER" column="illumi_top_min"/>
+        <result property="illumi_flr" jdbcType="INTEGER" column="illumi_flr"/>
+        <result property="illumi_flr_max" jdbcType="INTEGER" column="illumi_flr_max"/>
+        <result property="people_on_off" jdbcType="INTEGER" column="people_on_off"/>
+        <result property="trig_delay_tm" jdbcType="INTEGER" column="trig_delay_tm"/>
+        <result property="n_ramp_tm" jdbcType="INTEGER" column="n_ramp_tm"/>
+        <result property="minval" jdbcType="INTEGER" column="minval"/>
+        <result property="maxval" jdbcType="INTEGER" column="maxval"/>
+        <result property="ssid" jdbcType="VARCHAR" column="ssid"/>
+        <result property="ip" jdbcType="VARCHAR" column="ip"/>
+        <result property="password" jdbcType="VARCHAR" column="password"/>
+        <result property="wf_dev" jdbcType="INTEGER" column="wf_dev"/>
+        <result property="wf_mode" jdbcType="INTEGER" column="wf_mode"/>
+        <result property="version" jdbcType="VARCHAR" column="version"/>
+
+        <collection property="alias" column="sn" select="findAliasBySn"/>
+<!--        <collection property="group_id" column="sn" select="findGroupBySn"/>-->
+        <collection property="switchNames" column="sn" select="findSwitchNamesBySn"/>
+    </resultMap>
+
+    <select id="findSwitchNamesBySn" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT GROUP_CONCAT(name)
+        FROM dhlk_light_switch
+        WHERE id IN
+        (SELECT switch_id FROM dhlk_light_led_switch WHERE led_id IN
+        (SELECT id FROM dhlk_light_led WHERE sn = #{sn}))
+    </select>
+
+    <select id="findGroupBySn" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT group_id
+        FROM dhlk_light_switch_group
+        WHERE switch_id IN
+        (SELECT switch_id FROM dhlk_light_led_switch WHERE led_id IN
+        (SELECT id FROM dhlk_light_led WHERE sn = #{sn})) LIMIT 0,1
+    </select>
+
+    <select id="findAliasBySn" parameterType="java.lang.String" resultType="java.lang.String">
+        select alias
+        from dhlk_light_led
+        where sn = #{sn}
+    </select>
+
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.LedParamInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_led_param
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sn != null  and sn != ''">sn,</if>
+            <if test="light_on_off != null">light_on_off,</if>
+            <if test="illumi_top != null">illumi_top,</if>
+            <if test="illumi_top_min != null">illumi_top_min,</if>
+            <if test="illumi_flr != null">illumi_flr,</if>
+            <if test="illumi_flr_max != null">illumi_flr_max,</if>
+            <if test="people_on_off != null">people_on_off,</if>
+            <if test="trig_delay_tm != null">trig_delay_tm,</if>
+            <if test="n_ramp_tm != null">n_ramp_tm,</if>
+            <if test="minval != null">minval,</if>
+            <if test="maxval != null">maxval,</if>
+            <if test="ssid != null  and ssid != ''">ssid,</if>
+            <if test="ip != null  and ip != ''">ip,</if>
+            <if test="password != null  and password != ''">password,</if>
+            <if test="wf_dev != null">wf_dev,</if>
+            <if test="wf_mode != null">wf_mode,</if>
+            <if test="version != null  and version != ''">version</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sn != null  and sn != ''">#{sn},</if>
+            <if test="light_on_off != null">#{light_on_off},</if>
+            <if test="illumi_top != null">#{illumi_top},</if>
+            <if test="illumi_top_min != null">#{illumi_top_min},</if>
+            <if test="illumi_flr != null">#{illumi_flr},</if>
+            <if test="illumi_flr_max != null">#{illumi_flr_max},</if>
+
+            <if test="people_on_off != null">#{people_on_off},</if>
+            <if test="trig_delay_tm != null">#{trig_delay_tm},</if>
+            <if test="n_ramp_tm != null">#{n_ramp_tm},</if>
+            <if test="minval != null">#{minval},</if>
+            <if test="maxval != null">#{maxval},</if>
+
+            <if test="ssid != null  and ssid != ''">#{ssid},</if>
+            <if test="ip != null  and ip != ''">#{ip},</if>
+            <if test="password != null  and password != ''">#{password},</if>
+            <if test="wf_dev != null">#{wf_dev},</if>
+            <if test="wf_mode != null">#{wf_mode},</if>
+
+            <if test="version != null  and version != ''">#{version}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.LedParamInfo">
+        update dhlk_light_led_param
+        <trim prefix="SET" suffixOverrides=",">
+<!--            <if test="sn != null  and sn != ''">sn = #{sn},</if>-->
+            <if test="light_on_off != null">light_on_off = #{light_on_off},</if>
+            <if test="illumi_top != null">illumi_top = #{illumi_top},</if>
+            <if test="illumi_top_min != null">illumi_top_min = #{illumi_top_min},</if>
+            <if test="illumi_flr != null">illumi_flr = #{illumi_flr},</if>
+            <if test="illumi_flr_max != null">illumi_flr_max = #{illumi_flr_max},</if>
+            <if test="people_on_off != null">people_on_off = #{people_on_off},</if>
+            <if test="trig_delay_tm != null">trig_delay_tm = #{trig_delay_tm},</if>
+            <if test="n_ramp_tm != null">n_ramp_tm = #{n_ramp_tm},</if>
+            <if test="minval != null">minval = #{minval},</if>
+            <if test="maxval != null">maxval = #{maxval},</if>
+            <if test="ssid != null  and ssid != ''">ssid = #{ssid},</if>
+            <if test="ip != null  and ip != ''">ip = #{ip},</if>
+            <if test="password != null  and password != ''">password = #{password},</if>
+            <if test="wf_dev != null">wf_dev = #{wf_dev},</if>
+            <if test="wf_mode != null">wf_mode = #{wf_mode},</if>
+            <if test="version != null  and version != ''">version = #{version}</if>
+        </trim>
+        where sn = #{sn}
+    </update>
+
+    <select id="findList" resultMap="DhlkLedParamInfoResult">
+        select *
+        from dhlk_light_led_param
+        <if test="sns != null and sns != ''">
+            where sn in
+            <foreach collection="sns" separator="," open="(" close=")" item="sn">
+                #{sn}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="isExistSn" resultType="java.lang.Integer">
+        select id
+        from dhlk_light_led_param where sn = #{sn}
+    </select>
+
+    <insert id="insertList" parameterType="java.util.List">
+        insert into dhlk_light_led_param(sn,light_on_off,illumi_top,illumi_top_min,illumi_flr,illumi_flr_max,people_on_off,
+        trig_delay_tm,n_ramp_tm,minval,maxval,ssid,ip,password,wf_dev,wf_mode,version) values
+        <foreach collection="list" item="param" separator=",">
+            (
+            #{param.sn},
+            #{param.light_on_off},
+            #{param.illumi_top},
+            #{param.illumi_top_min},
+            #{param.illumi_flr},
+            #{param.illumi_flr_max},
+
+            #{param.people_on_off},
+            #{param.trig_delay_tm},
+            #{param.n_ramp_tm},
+            #{param.minval},
+            #{param.maxval},
+
+            #{param.ssid},
+            #{param.ip},
+            #{param.password},
+            #{param.wf_dev},
+            #{param.wf_mode},
+
+            #{param.version}
+            )
+
+        </foreach>
+    </insert>
+
+    <update id="updateList" parameterType="java.util.List">
+        <foreach collection="list" item="param" index="index">
+            update dhlk_light_led_param dllp
+            <trim prefix="SET" suffixOverrides=",">
+                <!--            <if test="sn != null  and sn != ''">sn = #{sn},</if>-->
+                <if test="param.light_on_off != null">dllp.light_on_off = #{param.light_on_off},</if>
+                <if test="param.illumi_top != null">dllp.illumi_top = #{param.illumi_top},</if>
+                <if test="param.illumi_top_min != null">dllp.illumi_top_min = #{param.illumi_top_min},</if>
+                <if test="param.illumi_flr != null">dllp.illumi_flr = #{param.illumi_flr},</if>
+                <if test="param.illumi_flr_max != null">dllp.illumi_flr_max = #{param.illumi_flr_max},</if>
+                <if test="param.people_on_off != null">dllp.people_on_off = #{param.people_on_off},</if>
+                <if test="param.trig_delay_tm != null">dllp.trig_delay_tm = #{param.trig_delay_tm},</if>
+                <if test="param.n_ramp_tm != null">dllp.n_ramp_tm = #{param.n_ramp_tm},</if>
+                <if test="param.minval != null">dllp.minval = #{param.minval},</if>
+                <if test="param.maxval != null">dllp.maxval = #{param.maxval},</if>
+                <if test="param.ssid != null  and param.ssid != ''">dllp.ssid = #{param.ssid},</if>
+                <if test="param.ip != null  and param.ip != ''">dllp.ip = #{param.ip},</if>
+                <if test="param.password != null  and param.password != ''">dllp.password = #{param.password},</if>
+                <if test="param.wf_dev != null">dllp.wf_dev = #{param.wf_dev},</if>
+                <if test="param.wf_mode != null">dllp.wf_mode = #{param.wf_mode},</if>
+                <if test="param.version != null  and param.version != ''">dllp.version = #{param.version}</if>
+            </trim>
+            where dllp.sn = #{param.sn};
+        </foreach>
+    </update>
+</mapper>

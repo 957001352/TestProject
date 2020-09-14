@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.factory.dao.TaskSchedulerDetailDao">
+    
+    <resultMap type="TaskSchedulerDetail" id="TaskSchedulerDetailResult">
+        <result property="id"    column="id"    />
+        <result property="scheduleId"    column="schedule_id"    />
+        <result property="time"    column="time"    />
+        <result property="expression"    column="expression"    />
+        <result property="onOff"    column="on_off"    />
+        <result property="brightness"    column="brightness"    />
+    </resultMap>
+
+    <sql id="selectTaskSchedulerDetailVo">
+        select id, schedule_id, time, expression, on_off, brightness from dhlk_light_task_scheduler_detail
+    </sql>
+
+    <select id="selectTaskSchedulerDetailList" parameterType="TaskSchedulerDetail"
+            resultMap="TaskSchedulerDetailResult">
+        <include refid="selectTaskSchedulerDetailVo"/>
+        <where>
+            <if test="scheduleId != null ">and schedule_id = #{scheduleId}</if>
+            <if test="time != null  and time != ''">and time = #{time}</if>
+            <if test="expression != null  and expression != ''">and expression = #{expression}</if>
+            <if test="onOff != null ">and on_off = #{onOff}</if>
+            <if test="brightness != null ">and brightness = #{brightness}</if>
+        </where>
+    </select>
+
+    <select id="selectTaskSchedulerDetailById" parameterType="Long" resultMap="TaskSchedulerDetailResult">
+        <include refid="selectTaskSchedulerDetailVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTaskSchedulerDetail" parameterType="TaskSchedulerDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_task_scheduler_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null ">id,</if>
+            <if test="scheduleId != null ">schedule_id,</if>
+            <if test="time != null  and time != ''">time,</if>
+            <if test="expression != null  and expression != ''">expression,</if>
+            <if test="onOff != null ">on_off,</if>
+            <if test="brightness != null ">brightness,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null ">#{id},</if>
+            <if test="scheduleId != null ">#{scheduleId},</if>
+            <if test="time != null  and time != ''">#{time},</if>
+            <if test="expression != null  and expression != ''">#{expression},</if>
+            <if test="onOff != null ">#{onOff},</if>
+            <if test="brightness != null ">#{brightness},</if>
+        </trim>
+    </insert>
+
+    <update id="updateTaskSchedulerDetail" parameterType="TaskSchedulerDetail">
+        update dhlk_light_task_scheduler_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="scheduleId != null ">schedule_id = #{scheduleId},</if>
+            <if test="time != null  and time != ''">time = #{time},</if>
+            <if test="expression != null  and expression != ''">expression = #{expression},</if>
+            <if test="onOff != null ">on_off = #{onOff},</if>
+            <if test="brightness != null ">brightness = #{brightness},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTaskSchedulerDetailById" parameterType="Long">
+        delete from dhlk_light_task_scheduler_detail where id = #{id}
+    </delete>
+
+    <delete id="deleteTaskSchedulerDetailBySchedulerId" parameterType="Integer">
+        delete from dhlk_light_task_scheduler_detail where schedule_id = #{schedulerId}
+    </delete>
+
+    <delete id="deleteTaskSchedulerDetailByIds" parameterType="String">
+        delete from dhlk_light_task_scheduler_detail where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_light_task_scheduler_detail
+            (id,schedule_id, time, expression,on_off,brightness) VALUES
+            (#{item.id},#{item.scheduleId},#{item.time},#{item.expression},#{item.onOff},#{item.brightness})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="String">
+        delete from dhlk_light_task_scheduler_detail
+    </delete>
+    <select id="findListByScheduleId" parameterType="INTEGER" resultMap="TaskSchedulerDetailResult">
+        select id, schedule_id, time, expression, on_off, brightness from dhlk_light_task_scheduler_detail
+        where 1=1
+        <if test="scheduleId != null  and scheduleId != ''">
+            and schedule_id = #{scheduleId}
+        </if>
+    </select>
+</mapper>

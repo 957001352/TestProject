@@ -1,0 +1,54 @@
+debug: true
+server:
+  port: 110
+
+spring:
+  application:
+    name: proxy-service
+  cloud:
+    consul:
+      host: 127.0.0.1
+      port: 8500
+      discovery:
+        register: true
+        hostname: 127.0.0.1
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        tags: urlprefix-/${spring.application.name}
+        instance-id: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+
+
+proxy:
+  server[0]:
+    name: localserver161
+    publicHost: ztang.com
+    host: localhost
+    port: 8090
+    proxyPort: 4993
+    username: admin
+    password: admin
+    minProxyPort: 11000
+    maxProxyPort: 11999
+#  server[1]:
+#    name: localserver114
+#    host: 192.168.2.114
+#    port: 8090
+#    proxyPort: 4993
+#    username: admin
+#    password: admin
+#    minProxyPort: 12000
+#    maxProxyPort: 12999
+
+  localUrl: 127.0.0.1:80
+
+ribbon:
+  ReadTimeout: 30000000
+  ConnectTimeout: 30000000
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000000000

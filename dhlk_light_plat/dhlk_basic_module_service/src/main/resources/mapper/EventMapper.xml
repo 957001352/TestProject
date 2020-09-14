@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.basicmodule.service.dao.EventDao">
+    
+    <resultMap type="Event" id="EventResult">
+        <result property="id"    column="id"    />
+        <result property="alarmId"    column="alarmId"    />
+        <result property="tenantid"    column="tenantId"    />
+        <result property="type"    column="type"    />
+        <result property="originator"    column="originator"    />
+        <result property="severity"    column="severity"    />
+        <result property="status"    column="status"    />
+        <result property="startts"    column="startTs"    />
+        <result property="endts"    column="endTs"    />
+        <result property="ackts"    column="ackTs"    />
+        <result property="clearts"    column="clearTs"    />
+        <result property="details"    column="details"    />
+        <result property="propagate"    column="propagate"    />
+        <result property="tbid"    column="tbId"    />
+        <result property="createdtime"    column="createdTime"    />
+        <result property="name"    column="name"    />
+    </resultMap>
+
+    <sql id="selectEventVo">
+        select id, alarmId,tenantId, type, originator, severity, status, startTs, endTs, ackTs, clearTs, details, propagate, tbId, createdTime, name from dhlk_basic_event
+    </sql>
+
+    <select id="selectEventList" resultMap="EventResult">
+        <include refid="selectEventVo"/>
+        <where>
+            <if test="severity != null  and severity != ''"> and severity = #{severity}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="startts != null "> and startTs  &gt;= #{startts}</if>
+            <if test="endts != null "> and endTs &lt;= #{endts}</if>
+            <if test="tbId != null  and tbId != ''"> and tbId = #{tbId}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectEventById" parameterType="Long" resultMap="EventResult">
+        <include refid="selectEventVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertEvent" parameterType="Event"  useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_event
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="alarmId != null  and alarmId != ''">alarmId,</if>
+            <if test="tenantid != null  and tenantid != ''">tenantId,</if>
+            <if test="type != null  and type != ''">type,</if>
+            <if test="originator != null  and originator != ''">originator,</if>
+            <if test="severity != null  and severity != ''">severity,</if>
+            <if test="status != null  and status != ''">status,</if>
+            <if test="startts != null ">startTs,</if>
+            <if test="endts != null ">endTs,</if>
+            <if test="ackts != null ">ackTs,</if>
+            <if test="clearts != null ">clearTs,</if>
+            <if test="details != null  and details != ''">details,</if>
+            <if test="propagate != null ">propagate,</if>
+            <if test="tbid != null  and tbid != ''">tbId,</if>
+            <if test="createdtime != null ">createdTime,</if>
+            <if test="name != null  and name != ''">name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="alarmId != null  and alarmId != ''">#{alarmId},</if>
+            <if test="tenantid != null  and tenantid != ''">#{tenantid},</if>
+            <if test="type != null  and type != ''">#{type},</if>
+            <if test="originator != null  and originator != ''">#{originator},</if>
+            <if test="severity != null  and severity != ''">#{severity},</if>
+            <if test="status != null  and status != ''">#{status},</if>
+            <if test="startts != null ">#{startts},</if>
+            <if test="endts != null ">#{endts},</if>
+            <if test="ackts != null ">#{ackts},</if>
+            <if test="clearts != null ">#{clearts},</if>
+            <if test="details != null  and details != ''">#{details},</if>
+            <if test="propagate != null ">#{propagate},</if>
+            <if test="tbid != null  and tbid != ''">#{tbid},</if>
+            <if test="createdtime != null ">#{createdtime},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEvent" parameterType="Event">
+        update dhlk_basic_event
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="tenantid != null  and tenantid != ''">tenantId = #{tenantid},</if>
+            <if test="type != null  and type != ''">type = #{type},</if>
+            <if test="originator != null  and originator != ''">originator = #{originator},</if>
+            <if test="severity != null  and severity != ''">severity = #{severity},</if>
+            <if test="status != null  and status != ''">status = #{status},</if>
+            <if test="startts != null ">startTs = #{startts},</if>
+            <if test="endts != null ">endTs = #{endts},</if>
+            <if test="ackts != null ">ackTs = #{ackts},</if>
+            <if test="clearts != null ">clearTs = #{clearts},</if>
+            <if test="details != null  and details != ''">details = #{details},</if>
+            <if test="propagate != null ">propagate = #{propagate},</if>
+            <if test="tbid != null  and tbid != ''">tbId = #{tbid},</if>
+            <if test="createdtime != null ">createdTime = #{createdtime},</if>
+            <if test="name != null  and name != ''">name = #{name},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEventById" parameterType="String">
+        delete from dhlk_basic_event where id = #{id}
+    </delete>
+
+    <delete id="deleteEventByIds" parameterType="String">
+        delete from dhlk_basic_event where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

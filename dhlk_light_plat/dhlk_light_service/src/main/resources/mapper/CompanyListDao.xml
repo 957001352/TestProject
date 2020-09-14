@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.CompanyListDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.Tenant" id="DhlkTenantResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="code" jdbcType="VARCHAR" column="code"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="telephone" jdbcType="VARCHAR" column="telephone"/>
+        <result property="adress" jdbcType="VARCHAR" column="adress"/>
+        <result property="companyEmail" jdbcType="VARCHAR" column="company_email"/>
+        <result property="linkman" jdbcType="VARCHAR" column="linkman"/>
+        <result property="phone" jdbcType="VARCHAR" column="phone"/>
+        <result property="email" jdbcType="VARCHAR" column="email"/>
+        <result property="startTime" jdbcType="TIMESTAMP" column="start_time"/>
+        <result property="endTime" jdbcType="TIMESTAMP" column="end_time"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="devices" jdbcType="INTEGER" column="devices"/>
+        <result property="status" jdbcType="INTEGER" column="status"/>
+        <result property="isSystem" jdbcType="INTEGER" column="is_system"/>
+        <result property="tbLoginname" jdbcType="VARCHAR" column="tb_loginname"/>
+        <result property="tbPassword" jdbcType="VARCHAR" column="tb_password"/>
+        <result property="orgId" jdbcType="INTEGER" column="orgId"/>
+        <result property="roleId" jdbcType="INTEGER" column="roleId"/>
+        <result property="fileId" jdbcType="VARCHAR" column="file_id"/>
+        <result property="tbId" jdbcType="VARCHAR" column="tb_id"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,code, telephone, adress, company_email, linkman, phone,email,start_time,end_time,create_time,devices,status,is_system,tb_loginname,tb_password,file_id,tb_id
+    </sql>
+
+    <select id="findCompanyList" parameterType="com.dhlk.entity.basicmodule.Tenant" resultMap="DhlkTenantResult">
+        select t1.id,t1.code, t1.name,t1.telephone, t1.adress, t1.company_email, t1.linkman,
+                t1.phone,t1.email,t1.start_time,t1.end_time,t1.create_time,
+                t1.devices,t1.status,t1.is_system,t1.tb_loginname,t1.tb_password,t1.tb_id,<!--t2.id as orgId,-->IFNULL(NULL, 2) AS
+                roleId,t1.file_id
+        from dhlk_basic_tenant t1
+        <!--left join (select * from dhlk_basic_org where parent_id = 0) t2 on t1.id = t2.tenant_id-->
+        where t1.status = 0
+        <if test="name != null  and name != ''">
+           and t1.name like concat('%/', #{name}, '%') ESCAPE '/'
+        </if>
+        <if test=" address != null and  address !=''">
+             and t1.adress like concat('%/', #{address}, '%') ESCAPE '/'
+        </if>
+        ORDER BY t1.create_time desc
+    </select>
+
+    <select id="isCompanyExist" parameterType="INTEGER"  resultType="INTEGER">
+       select  COUNT(1) from dhlk_basic_tenant where id = #{id} and status = 0
+    </select>
+
+</mapper>

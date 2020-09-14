@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.HiveMetaDao">
+
+    <select id="findList" resultType="java.util.LinkedHashMap">
+        select * from ${table}
+    </select>
+
+
+    <select id="findColumnList" resultType="java.util.LinkedHashMap">
+         select column_name,column_comment from information_schema.columns
+        where TABLE_SCHEMA='dhlk_platdb' and TABLE_NAME=#{table}
+    </select>
+
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.WifiDao">
+
+    <resultMap id="DhlkLightWifiDaoResult" type="com.dhlk.entity.light.Wifi">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="ssid" property="ssid" jdbcType="VARCHAR"/>
+        <result column="wf_dev" property="wf_dev" jdbcType="INTEGER"/>
+        <result column="wf_mode" property="wf_mode" jdbcType="INTEGER"/>
+        <result column="tenant_id" property="tenantId" jdbcType="INTEGER"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+          id,ip, password, ssid,wf_dev,wf_mode,tenant_id,type
+    </sql>
+
+    <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.light.Wifi">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_wifi where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Wifi" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_wifi
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ip != null and  ip != ''">ip,</if>
+            <if test="password != null and  password != ''">password,</if>
+            <if test="ssid != null and  ssid != ''">ssid,</if>
+            <if test="wf_dev != null and  wf_dev != ''">wf_dev,</if>
+            <if test="wf_mode != null and  wf_mode != ''">wf_mode,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+            <if test="type != null and type != ''">type</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ip != null and  ip != ''">#{ip},</if>
+            <if test="password != null and  password != ''">#{password},</if>
+            <if test="ssid != null and  ssid != ''">#{ssid},</if>
+            <if test="wf_dev != null and  wf_dev != ''">#{wf_dev},</if>
+            <if test="wf_mode != null and  wf_mode != ''">#{wf_mode},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
+            <if test="type != null and type != ''">#{type}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Wifi">
+        update dhlk_light_wifi
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ip != null and  ip != ''">ip = #{ip},</if>
+            <if test="password != null and  password != ''">password = #{password},</if>
+            <if test="ssid != null and  ssid != ''">ssid = #{ssid},</if>
+            <if test="wf_dev != null and  wf_dev != ''">wf_dev = #{wf_dev},</if>
+            <if test="wf_mode != null and  wf_mode != ''">wf_mode = #{wf_mode},</if>
+            <if test="type != null and  type != ''">type = #{type}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_wifi where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByTenantId" parameterType="INTEGER">
+        delete from dhlk_light_wifi where tenant_id = #{tenantId}
+    </delete>
+
+    <select id="selectByTenantId" parameterType="INTEGER" resultMap="DhlkLightWifiDaoResult">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_wifi
+        <if test="tenantId != null and tenantId != ''">
+            where tenant_id = #{tenantId}
+        </if>
+    </select>
+
+</mapper>

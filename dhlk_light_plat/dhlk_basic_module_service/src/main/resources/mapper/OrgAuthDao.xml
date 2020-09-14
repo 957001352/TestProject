@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.OrgAuthDao">
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.OrgAuth">
+        insert into dhlk_basic_org_auth (id,auth,tenant_id) values (#{id},#{auth},#{tenantId})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.OrgAuth">
+        update dhlk_basic_org_auth set auth=#{auth} where id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_basic_org_auth where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+    <select id="findList" resultType="com.dhlk.entity.basicmodule.OrgAuth">
+        select * from dhlk_basic_org_auth
+        <if test="tenantId != null and tenantId != ''">
+            where t.tenant_id=#{tenantId}
+        </if>
+    </select>
+    <select id="findAuthByOrg" resultType="com.dhlk.entity.basicmodule.OrgAuth">
+        select a.* from dhlk_basic_org_auth a
+          left join dhlk_basic_tenant t
+            on a.tenant_id=t.id
+         where t.code=#{tenantCode}
+    </select>
+
+</mapper>

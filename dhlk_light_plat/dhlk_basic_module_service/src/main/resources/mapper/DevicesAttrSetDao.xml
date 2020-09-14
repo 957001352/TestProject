@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.DevicesAttrSetDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.DevicesAttrSet" id="DhlkBasicDevicesAttrSetResult">
+        <result property="id" jdbcType="INTEGER"    column="id"    />
+        <result property="name" jdbcType="VARCHAR"   column="name"    />
+        <result property="describe"  jdbcType="VARCHAR"  column="describe"    />
+        <result property="tenantId" jdbcType="INTEGER"   column="tenant_id"    />
+        <result property="attrSetId"  jdbcType="VARCHAR"  column="attr_set_id"    />
+        <collection property="attrDetails" column="id" select="com.dhlk.basicmodule.service.dao.DevicesAttrDetailDao.findAttrDetailsByAttrSetId" />
+    </resultMap>
+
+    <sql id="selectDhlkBasicDevicesAttrSetVo">
+        select id, `name`, `describe`, tenant_id, attr_set_id from dhlk_basic_devices_attr_set
+    </sql>
+
+    <select id="isRepeatAttr" resultType="Integer">
+        select count(*) from dhlk_basic_devices_attr_set
+        where name = #{name}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id=#{tenantId}
+        </if>
+    </select>
+
+    <select id="findList" parameterType="String" resultMap="DhlkBasicDevicesAttrSetResult">
+        <include refid="selectDhlkBasicDevicesAttrSetVo"/>
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="tenantId != null and tenantId != ''">
+                and tenant_id=#{tenantId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.DevicesAttrSet" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_devices_attr_set
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null  and name != ''">`name`,</if>
+            <if test="describe != null  and describe != ''">`describe`,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+            <if test="attrSetId != null ">attr_set_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="describe != null  and describe != ''">#{describe},</if>
+            <if test="tenantId != null ">#{tenantId},</if>
+            <if test="attrSetId != null ">#{attrSetId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.DevicesAttrSet">
+        update dhlk_basic_devices_attr_set
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">`name` = #{name},</if>
+            <if test="describe != null  and describe != ''">`describe` = #{describe},</if>
+            <if test="attrSetId != null   and attrSetId != ''">attr_set_id = #{attrSetId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        delete from dhlk_basic_devices_attr_set where id = #{id}
+    </delete>
+
+</mapper>

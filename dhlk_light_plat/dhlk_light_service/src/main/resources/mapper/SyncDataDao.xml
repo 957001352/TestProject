@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.SyncDataDao">
+
+    <resultMap id="DhlkSyncDataResult" type="com.dhlk.entity.light.SyncDataResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="tableName" jdbcType="VARCHAR" column="table_name"/>
+        <result property="operate" jdbcType="VARCHAR" column="operate"/>
+        <result property="ts" jdbcType="VARCHAR" column="ts"/>
+        <result property="dataId" jdbcType="INTEGER" column="data_id"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.SyncDataResult" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_sync_data
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tableName != null  and tableName != ''">table_name,</if>
+            <if test="operate != null  and operate != ''">operate,</if>
+            <if test="ts != null  and ts != ''">ts,</if>
+            <if test="dataId != null  and dataId != ''">data_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tableName != null  and tableName != ''">#{tableName},</if>
+            <if test="operate != null  and operate != ''">#{operate},</if>
+            <if test="ts != null  and ts != ''">#{ts},</if>
+            <if test="dataId != null  and dataId != ''">#{dataId}</if>
+        </trim>
+    </insert>
+
+    <delete id="delete">
+        delete from dhlk_light_sync_data where id in (#{id})
+    </delete>
+</mapper>

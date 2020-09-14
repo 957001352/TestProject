@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.LedVersionInfoDao">
+
+    <resultMap id="DhlkLedVersionInfo" type="com.dhlk.entity.light.LedVersionInfo">
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="version" jdbcType="VARCHAR" column="version"/>
+        <result property="address" jdbcType="VARCHAR" column="address"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="creator" jdbcType="TIMESTAMP" column="creator"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+        <result property="updatePerson" jdbcType="TIMESTAMP" column="update_person"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,name,version,address,create_time,creator
+    </sql>
+    <!-- 新增版本信息-->
+    <insert id="insert" parameterType="com.dhlk.entity.light.LedVersionInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_version_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and  name != ''">name,</if>
+            <if test="version != null  and version != ''">version,</if>
+            <if test="address != null  and address != ''">address,</if>
+            <if test="creator != null and creator != ''">creator</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and  name != ''">#{name},</if>
+            <if test="version != null  and version != ''">#{version},</if>
+            <if test="address != null  and address != ''">#{address},</if>
+            <if test="creator != null and creator != ''">#{creator}</if>
+        </trim>
+    </insert>
+
+    <!-- 更新版本信息-->
+    <update id="update" parameterType="com.dhlk.entity.light.LedVersionInfo">
+        update dhlk_light_version_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and  name != ''">name = #{name},</if>
+            <if test="version != null  and version != ''">version = #{version},</if>
+            <if test="address != null  and address != ''">address = #{address},</if>
+            <if test="updatePerson != null and updatePerson != ''">update_person = #{updatePerson},</if>
+            update_time = now()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!-- 删除版本信息-->
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_version_info where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--查询列表-->
+    <select id="findList" parameterType="com.dhlk.entity.light.LedVersionInfo" resultMap="DhlkLedVersionInfo">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_version_info
+         <choose>
+             <when test="flag == 0">
+                 where 1=1
+                 <if test="name != null  and name != ''">
+                     and name like concat('%', #{name}, '%')
+                 </if>
+                 <if test=" creator != null and  creator !=''">
+                     and creator = #{creator}
+                 </if>
+                 <if test="createTime != null and createTime != ''">
+                     and DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{createTime}
+                 </if>
+                 <if test="version != null and version != ''">
+                     and version = #{version}
+                 </if>
+             </when>
+             <when test="flag == 1">
+                 where
+                  id not in(#{id})
+                 <if test="name != null  and name != ''">
+                     and name = #{name}
+                 </if>
+                 <if test="version != null and version != ''">
+                     and version = #{version}
+                 </if>
+             </when>
+         </choose>
+
+    </select>
+
+
+</mapper>

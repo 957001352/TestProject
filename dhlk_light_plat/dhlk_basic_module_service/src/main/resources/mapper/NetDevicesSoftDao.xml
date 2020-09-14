@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.NetDevicesSoftDao">
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.NetDevicesSoft">
+        insert into dhlk_basic_net_devices_soft (id,name,version,url,port,net_device_id)
+        values (#{id},#{name},#{version},#{url},#{port},#{netDeviceId})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.NetDevicesSoft">
+        update dhlk_basic_net_devices_soft set name=#{name},version=#{version},
+        url=#{url},port=#{port},net_device_id=#{netDeviceId} where id=#{id}
+    </update>
+
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_basic_net_devices_soft where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_basic_net_devices_soft (name,version,url,port,net_device_id)
+            values (#{item.name},#{item.version},#{item.url},#{item.port},#{netDevicesId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByNetDevicesId">
+        delete from  dhlk_basic_net_devices_soft where net_device_id=#{id}
+    </delete>
+
+
+
+    <select id="findList" resultType="com.dhlk.entity.basicmodule.NetDevicesSoft">
+        select * from dhlk_basic_net_devices_soft where net_device_id=#{id}
+    </select>
+</mapper>

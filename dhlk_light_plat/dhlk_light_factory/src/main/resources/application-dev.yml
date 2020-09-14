@@ -1,0 +1,80 @@
+#debug配置是否调试模式，如果打包发布的话，需要设置为false。
+#默认情况下，spring boot从控制台打印出来的日志级别有error，warn，info，如果你要打印debug级别的日志，可设置debug=true
+debug: false
+#server.port配置的是 Spring Boot 服务的端口
+server:
+  port: 10051
+spring:
+  application:
+    name: light-factory
+  servlet:
+    multipart:
+      max-file-size: 100MB #  设置单个文件最大内存 -1为不限制
+      max-request-size: 1024MB # 设置所有文件最大内存 -1为不限制
+  #mysql配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.2.222:3306/dhlk_light_factory?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true&allowMultiQueries=true
+    username: root
+    password: Dhlk~!@#123
+    hikari:
+      minimum-idle: 5 # 连接池中维护的最小空闲连接数
+      maximum-pool-size: 150  # 配置最大池大小
+      auto-commit: true # 配置从池返回的连接的默认自动提交行为。默认值为true
+      idle-timeout: 30000 # 允许连接在连接池中空闲的最长时间（以毫秒为单位）
+      pool-name: DatebookHikariCP # 连接池的用户定义名称，主要出现在日志记录和JMX管理控制台中以识别池和池配置
+      max-lifetime: 1800000 # 池中连接关闭后的最长生命周期（以毫秒为单位）
+      connection-timeout: 10000 # 客户端等待连接池连接的最大毫秒数
+      connection-test-query: SELECT 1
+  aop:
+    proxy-target-class: true
+    auto: false
+  #redis配置
+  redis:
+    database: 0 # Redis数据库索引（默认为0）
+    host: 127.0.0.1 # Redis服务器地址
+    port: 6379 # Redis服务器连接端口
+    password: # Redis服务器连接密码（默认为空）
+    jedis:
+      pool:
+        max-active: 8 # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1ms  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 8   # 连接池中的最大空闲连接
+        min-idle: 0   # 连接池中的最小空闲连接
+      timeout: 5000 # 连接超时时间（毫秒）
+mybatis:
+  mapperLocations: classpath:/mapper/*.xml
+  type-aliases-package: com.dhlk.entity.light
+  configuration:
+    use-generated-keys: true
+    use-column-label: true
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true
+logging:
+  config: classpath:logback-spring.xml
+swagger: ##给swagger设置开关
+  ebable: true
+#附件路径
+attachment:
+  path: C:\attachment\
+#云端MQTT配置信息
+mqttcloud:
+  username: dhlk #MQTT-用户名
+  password: dhlktech #MQTT-密码
+  host: tcp://192.168.2.162:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+  saveHdfs: true
+#云端MQTT配置信息
+mqttlocal:
+  username: dhlk #MQTT-用户名
+  password: dhlktech #MQTT-密码
+  host: tcp://192.168.2.222:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+cloud:
+  baseUrl: https://192.168.2.162:90/dhlk-web
+local:
+  savePath: D:\test\
+
+#能耗保存一周的数据  data:7代表7天    currentTime: 记录每次项目启动的当前时间
+task:
+  date: 7
+  currentTime:

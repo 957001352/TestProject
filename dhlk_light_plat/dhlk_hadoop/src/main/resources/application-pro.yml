@@ -1,0 +1,41 @@
+﻿debug: false
+server:
+  port: 8087
+spring:
+  application:
+    name: dhlk-hadoop
+  cloud:
+    consul:
+      host: 127.0.0.1
+      port: 8500
+      discovery:
+        register: true
+        hostname: 127.0.0.1
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        tags: urlprefix-/${spring.application.name}
+        instance-id: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+  #mysql配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://172.31.16.9:3306/dhlk_platdb_dev?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    username: root
+    password: dhlktech
+    hikari:
+      minimum-idle: 5 # 连接池中维护的最小空闲连接数
+      maximum-pool-size: 15  # 配置最大池大小
+      auto-commit: true # 配置从池返回的连接的默认自动提交行为。默认值为true
+      idle-timeout: 30000 # 允许连接在连接池中空闲的最长时间（以毫秒为单位）
+      pool-name: DatebookHikariCP # 连接池的用户定义名称，主要出现在日志记录和JMX管理控制台中以识别池和池配置
+      max-lifetime: 1800000 # 池中连接关闭后的最长生命周期（以毫秒为单位）
+      connection-timeout: 10000 # 客户端等待连接池连接的最大毫秒数
+      connection-test-query: SELECT 1
+  aop:
+    proxy-target-class: true
+    auto: false
+hdfs:
+  path: hdfs://ip-172-31-16-9.cn-northwest-1.compute.internal:8020
+  username: root
+  token: d5fb8bdacbd6291e0a3fd7a1cd489d5a,84b8d40e2f1fdca5e9144910a60579de
+  directory: /dhlk/hive_meta

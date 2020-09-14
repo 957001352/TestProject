@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.GraphicStatisticsDao">
+
+
+    <!--获取今日能耗-->
+    <select id="getTodayEnergy" resultType="java.math.BigDecimal">
+          SELECT
+	        IFNULL(SUM( lp.energy ),0) AS totalEnergy
+          FROM
+              dhlk_basic_tenant tenant
+              JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+              JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+          WHERE
+	          DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = date( NOW( ) )
+	          AND tenant.id = #{tenantId}
+    </select>
+
+    <!--获取昨日能耗-->
+    <select id="getYesterdayEnergy" resultType="java.math.BigDecimal">
+          SELECT
+            IFNULL(SUM( lp.energy ),0) AS yesterdayEnergy
+          FROM
+              dhlk_basic_tenant tenant
+              JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+              JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+          WHERE
+              DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = date_sub(curdate(),interval 1 day)
+              AND tenant.id = #{tenantId}
+    </select>
+
+    <!--获取累计能耗 所有灯累计能耗-->
+    <select id="getEnergyTotal" resultType="java.math.BigDecimal">
+
+          SELECT
+            IFNULL( SUM( lp.energy ), 0 ) AS energyTotal
+          FROM
+               dhlk_basic_tenant tenant
+               JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+               JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+          WHERE
+              tenant.id = #{tenantId}
+    </select>
+
+    <!--获取所有灯数-->
+    <select id="getLightTotal" resultType="integer">
+
+          SELECT
+            COUNT(led.id)  AS lightCount
+          FROM
+               dhlk_basic_tenant tenant
+               JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+          WHERE
+              tenant.id = #{tenantId}
+    </select>
+
+    <!--获取所有灯SN-->
+    <select id="getAllLightSn" resultType="java.lang.String">
+        	SELECT
+		        led.sn
+	        from
+	            dhlk_basic_tenant tenant
+                JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+            where
+		       tenant.id = #{tenantId}
+    </select>
+
+    <!--获取今日能耗，按小时进行分组-->
+    <select id="getTodayEnergyByHourGroup" resultType="java.util.LinkedHashMap">
+         SELECT
+                IFNULL(SUM( lp.energy ),0) AS totalEnergy,
+                DATE_FORMAT(lp.create_time,'%H') hours
+         FROM
+                dhlk_basic_tenant tenant
+         JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+         JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+         WHERE
+                DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = CURDATE( )
+                and  tenant.id = #{tenantId}
+        GROUP BY
+            hours
+    </select>
+
+    <!--获取昨日能耗，按小时进行分组-->
+    <select id="getYesterdayEnergyByHourGroup" resultType="java.util.LinkedHashMap">
+
+        SELECT
+                IFNULL(SUM( lp.energy ),0) AS totalEnergy,
+                DATE_FORMAT(lp.create_time,'%H') hours
+        FROM
+                dhlk_basic_tenant tenant
+         JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+         JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+        WHERE
+                DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = date_sub( curdate( ), INTERVAL 1 DAY )
+                and tenant.id = #{tenantId}
+        GROUP BY
+			hours
+	</select>
+    
+    <!--获取当月每天消耗能耗-->
+    <select id="getEveryDayEnergyByCurrentMonth" resultType="java.util.LinkedHashMap">
+         SELECT
+            IFNULL(SUM( lp.energy ),0) AS totalEnergy,
+            DATE_FORMAT(lp.create_time,'%d') day
+        FROM
+            dhlk_basic_tenant tenant
+            JOIN dhlk_light_led led ON tenant.id = led.tenant_id
+            JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+        WHERE
+            DATE_FORMAT( lp.create_time, '%Y-%m' ) = #{date}
+			and tenant.id = ${tenantId}
+        GROUP BY
+        day
+
+    </select>
+
+
+    <!--查询单租户灯原始功率-->
+    <select id="selectPower" resultType="java.lang.Float" parameterType="java.lang.Integer">
+        SELECT
+	        led_power
+        FROM
+	        dhlk_light_original_power
+	    where tenant_id = #{tenantId}
+        ORDER BY id DESC
+	    LIMIT 1
+    </select>
+
+    <!--查询灯在线时长-->
+    <select id="selectLightOnline" resultType="java.lang.Float" parameterType="java.lang.String">
+        SELECT
+            IFNULL(SUM( online_time ),0)/60 AS OnLineTimeTotal
+        FROM
+            dhlk_light_led_online
+        WHERE
+            led_sn = #{ledSn}
+    </select>
+
+    <!--查询灯消耗的总能耗-->
+    <select id="searchTotalEnergyBySn" parameterType="java.lang.String" resultType="java.lang.Float">
+         SELECT
+            IFNULL(SUM( energy ),0) AS totalEnergy
+        FROM
+            dhlk_light_led_power
+        WHERE
+            led_sn = #{ledSn}
+    </select>
+
+    <!--获取全国所有灯-->
+    <select id="getAllLightSnNation" resultType="java.lang.String">
+        	SELECT
+		        sn
+	        from
+                dhlk_light_led
+    </select>
+
+    <!--获取租户下所有灯消耗能耗-->
+    <select id="searchTotalEnergyByTenantId"  resultType="java.lang.Float" parameterType="java.lang.Integer">
+         SELECT
+	        IFNULL(sum(led_power.energy),0) totalEnergy
+         FROM
+	        dhlk_light_led led
+	    JOIN
+	        dhlk_light_led_power led_power ON  led.sn = led_power.led_sn
+	    where led.tenant_id = #{tenantId}
+    </select>
+
+    <!--获取租户下所有灯在线时长-->
+    <select id="selectTotalOnlineTimeByTenantId" resultType="java.lang.Float" parameterType="java.lang.Integer" >
+	    SELECT
+	        IFNULL(sum(led_online.online_time)/60,0) totalOnlineTime
+        FROM
+	        dhlk_light_led led
+	    JOIN dhlk_light_led_online led_online ON led.sn = led_online.led_sn
+	    where led.tenant_id = #{tenantId}
+    </select>
+
+</mapper>

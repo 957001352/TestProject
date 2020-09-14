@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.IntensityDao">
+
+    <resultMap id="DhlkLightWifiDaoResult" type="com.dhlk.entity.light.Intensity">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result column="on_off" property="on_off" jdbcType="INTEGER"/>
+        <result column="illumi_top" property="illumi_top" jdbcType="FLOAT"/>
+        <result column="illumi_top_min" property="illumi_top_min" jdbcType="FLOAT"/>
+        <result column="illumi_flr" property="illumi_flr" jdbcType="FLOAT"/>
+        <result column="illumi_flr_max" property="illumi_flr_max" jdbcType="FLOAT"/>
+        <result column="tenant_id" property="tenantId" jdbcType="INTEGER"/>
+        <result column="control_param" property="controlParam" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+          id,illumi_top, illumi_top_min, illumi_flr, illumi_flr_max, tenant_id,control_param
+    </sql>
+
+    <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.light.Intensity">
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_intensity where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Intensity" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_intensity
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="on_off != null and  on_off != ''">on_off,</if>
+            <if test="illumi_top != null and  illumi_top != ''">illumi_top,</if>
+            <if test="illumi_top_min != null and  illumi_top_min != ''">illumi_top_min,</if>
+            <if test="illumi_flr != null">illumi_flr,</if>
+            <if test="illumi_flr_max != null and  illumi_flr_max != ''">illumi_flr_max,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+            <if test="controlParam != null">control_param</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="on_off != null and  on_off != ''">#{on_off},</if>
+            <if test="illumi_top != null and  illumi_top != ''">#{illumi_top},</if>
+            <if test="illumi_top_min != null and  illumi_top_min != ''">#{illumi_top_min},</if>
+            <if test="illumi_flr != null">#{illumi_flr},</if>
+            <if test="illumi_flr_max != null and  illumi_flr_max != ''">#{illumi_flr_max},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
+            <if test="controlParam != null">#{controlParam}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Intensity">
+        update dhlk_light_intensity
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="on_off != null and  on_off != ''">on_off = #{on_off},</if>
+            <if test="illumi_top != null and  illumi_top != ''">illumi_top = #{illumi_top},</if>
+            <if test="illumi_top_min != null and  illumi_top_min != ''">illumi_top_min = #{illumi_top_min},</if>
+            <if test="illumi_flr != null">illumi_flr = #{illumi_flr},</if>
+            <if test="illumi_flr_max != null and  illumi_flr_max != ''">illumi_flr_max = #{illumi_flr_max},</if>
+            <if test="controlParam != null">control_param = #{controlParam}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from dhlk_light_intensity where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByTenantId" parameterType="INTEGER">
+        delete from dhlk_light_intensity where tenant_id = #{tenantId}
+    </delete>
+
+    <select id="selectByTenantId" parameterType="INTEGER"  resultMap="DhlkLightWifiDaoResult" >
+        select
+        <include refid="baseColumn"/>
+        from dhlk_light_intensity
+        <if test="tenantId != null and tenantId != ''">
+            where tenant_id = #{tenantId}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.basicmodule.service.dao.PermissionsDao">
+
+    <resultMap type="Permissions" id="PermissionsResult">
+        <result property="id"    column="id"    />
+        <result property="menuId"    column="menu_id"    />
+        <result property="roleId"    column="role_id"    />
+    </resultMap>
+
+    <sql id="selectPermissionsVo">
+        select id, menu_id, role_id from dhlk_basic_permissions
+    </sql>
+
+    <select id="selectList" parameterType="Permissions" resultMap="PermissionsResult">
+        <include refid="selectPermissionsVo"/>
+        <where>
+            <if test="menuId != null "> and menu_id = #{menuId}</if>
+            <if test="roleId != null "> and role_id = #{roleId}</if>
+        </where>
+    </select>
+
+    <select id="selectPermissionsById" parameterType="Integer" resultMap="PermissionsResult">
+        <include refid="selectPermissionsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="java.util.List" >
+        insert into dhlk_basic_permissions
+        (menu_id,role_id)
+        values
+        <foreach collection="list" item="permissions" index="index"
+                 separator=",">
+            (#{permissions.menuId},#{permissions.roleId})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="Permissions">
+        update dhlk_basic_permissions
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="menuId != null ">menu_id = #{menuId},</if>
+            <if test="roleId != null ">role_id = #{roleId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteByRoleId" parameterType="Integer">
+        delete from dhlk_basic_permissions where role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteByRoleIds" parameterType="java.util.List">
+        delete from dhlk_basic_permissions where role_id in
+        <foreach item="roleId" collection="list" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+    </delete>
+    <select id="selectListByRoleIds" parameterType="java.util.List" resultMap="PermissionsResult">
+    <include refid="selectPermissionsVo"/>
+        where role_id in
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+</select>
+</mapper>

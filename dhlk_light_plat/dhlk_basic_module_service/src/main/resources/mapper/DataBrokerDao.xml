@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.DataBrokerDao">
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.DataBroker">
+        insert into dhlk_basic_data_broker (id,name,ip,topic_list) values (#{id},#{name},#{ip},#{topicList})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.DataBroker">
+        update dhlk_basic_data_broker set name=#{name},ip=#{ip},topic_list=#{topicList}  where id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_basic_data_broker where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findList" resultType="com.dhlk.entity.basicmodule.DataBroker">
+        select * from dhlk_basic_data_broker  
+    </select>
+</mapper>

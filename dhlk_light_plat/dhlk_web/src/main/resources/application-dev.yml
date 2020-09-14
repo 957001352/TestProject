@@ -1,0 +1,68 @@
+debug: false
+server:
+  port: 8082
+  tomcat:
+    max-swallow-size: -1
+spring:
+  application:
+    name: dhlk-web
+  servlet:
+    multipart:
+      max-file-size: 100MB #  设置单个文件最大内存 -1为不限制  150MB
+      max-request-size: 1024MB # 设置所有文件最大内存 -1为不限制
+      resolve-lazily: true
+  cloud:
+    consul:
+      host: 127.0.0.1
+      port: 8500
+      discovery:
+        register: true
+        hostname: 127.0.0.1
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        tags: urlprefix-/${spring.application.name}
+        instance-id: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+#http请求客户端负载均衡各项配置
+feign:
+  #开启客户端熔断机制
+  hystrix:
+    enabled: true
+  #替换掉JDK默认HttpURLConnection实现的 Http Client
+  httpclient:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 10000 #10s就超时
+        readTimeout: 10000
+#高版本的时间控制有两个地方ribbon，hystrix 先ribbon 后hystrix
+#请求处理的超时时间,超时则进行熔断降级处理
+ribbon:
+  #OkToRetryOnAllOperations: true    #全部请求开启重试机制  默认true
+  ReadTimeout: 10000                 #请求处理超时时间
+  ConnectTimeout: 15000             #请求连接超时时间
+  MaxTotalHttpConnections: 1000     #最大http连接数
+  MaxConnectionsPerHost: 200        #每个host最大连接数
+  MaxAutoRetries: 1                 #最大重试次数 默认0
+  MaxAutoRetriesNextServer: 1       #切换实例的重试次数  默认0
+
+#hystrix 配置
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 40000
+#文件路径
+attachment:
+  path: C:\attachment\
+
+log:
+  path: C:\log\
+swagger: ##给swagger设置开关
+  ebable: true

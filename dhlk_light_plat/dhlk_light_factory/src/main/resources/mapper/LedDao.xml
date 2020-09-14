@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.LedDao">
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_light_led
+            (id,sn,ip,xaxis,yaxis,brightness,ind_bright,ind_time,unind_bright,ind_status,tenant_id,area_id,alias) VALUES
+            (#{item.id},#{item.sn},#{item.ip},#{item.xaxis},#{item.yaxis},#{item.brightness},#{item.indBright},#{item.unindBright},#{item.indTime},
+            #{item.indStatus},#{item.tenantId},#{item.areaId},#{item.alias})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="String">
+         update dhlk_light_led set status = 1 where id =#{id}
+    </delete>
+
+    <select id="findLedsByArea" resultType="com.dhlk.entity.light.Led">
+        select * from dhlk_light_led where status = 0 and area_id = #{id}
+    </select>
+
+    <select id="findList" resultType="com.dhlk.entity.light.Led">
+        select  * from dhlk_light_led
+        where status = 0
+        <if test="sn != null  and sn != ''">
+            and sn like concat('%', #{sn}, '%')
+        </if>
+        <if test="areaId != null  and areaId != ''">
+            and area_id =#{areaId}
+        </if>
+        <if test="switchId != null  and switchId != ''">
+            and id in (select led_id from dhlk_light_led_switch where switch_id = #{switchId})
+        </if>
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id =#{tenantId}
+        </if>
+        ORDER BY sn
+    </select>
+
+    <insert id="save" parameterType="com.dhlk.entity.light.Led" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_led
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="sn != null  and sn != ''">sn,</if>
+            <if test="ip != null  and ip != ''">ip,</if>
+            <if test="xaxis != null  and xaxis != ''">xaxis,</if>
+            <if test="yaxis != null  and yaxis != ''">yaxis,</if>
+            <if test="brightness != null">brightness,</if>
+            <if test="indBright != null">ind_bright,</if>
+            <if test="unindBright != null">unind_bright,</if>
+            <if test="indTime != null">ind_time,</if>
+            <if test="indStatus != null">ind_status,</if>
+            <if test="tenantId != null">tenant_id,</if>
+            <if test="areaId != null">area_id,</if>
+            <if test="alias != null">alias</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="sn != null  and sn != ''">#{sn},</if>
+            <if test="ip != null  and ip != ''">#{ip},</if>
+            <if test="xaxis != null  and xaxis != ''">#{xaxis},</if>
+            <if test="yaxis != null  and yaxis != ''">#{yaxis},</if>
+            <if test="brightness != null">#{brightness},</if>
+            <if test="indBright != null">#{indBright},</if>
+            <if test="unindBright != null">#{unindBright},</if>
+            <if test="indTime != null">#{indTime},</if>
+            <if test="indStatus != null">#{indStatus},</if>
+            <if test="tenantId != null">#{tenantId},</if>
+            <if test="areaId != null">#{areaId},</if>
+            <if test="alias != null">#{alias}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Led">
+        update dhlk_light_led
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sn != null  and sn != ''">sn=#{sn},</if>
+            <if test="ip != null  and ip != ''">ip=#{ip},</if>
+            <if test="xaxis != null  and xaxis != ''">xaxis=#{xaxis},</if>
+            <if test="yaxis != null  and yaxis != ''">yaxis=#{yaxis},</if>
+            <if test="brightness != null">brightness=#{brightness},</if>
+            <if test="indBright != null">ind_bright=#{indBright},</if>
+            <if test="unindBright != null">unind_bright=#{unindBright},</if>
+            <if test="indTime != null">ind_time=#{indTime},</if>
+            <if test="indStatus != null">ind_status=#{indStatus},</if>
+            <if test="areaId != null">area_id=#{areaId},</if>
+            <if test="alias != null">alias=#{alias},</if>
+            <if test="status != null">status=#{status}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deteleById" parameterType="integer">
+        update dhlk_light_led set status = 1 where id =#{id}
+    </update>
+    <delete id="deleteLed" parameterType="integer">
+        delete from  dhlk_light_led  where id =#{id}
+    </delete>
+    <select id="findLedsBySwitchId" resultType="com.dhlk.entity.light.Led">
+        select * from dhlk_light_led where status = 0 and id in(
+        select led_id from dhlk_light_led_switch where switch_id = #{switchId}
+        )
+    </select>
+    <select id="findGroupLedSns" resultType="java.util.LinkedHashMap">
+        SELECT
+        ls.switch_id switchId,
+        GROUP_CONCAT(l.`sn`) sns
+        FROM
+        `dhlk_light_led` l
+        INNER JOIN
+        `dhlk_light_led_switch` ls ON l.`id` = ls.led_id
+        where l.status = 0
+        GROUP BY switch_id
+    </select>
+
+
+    <select id="findLed" resultType="com.dhlk.entity.light.Led">
+        select * from dhlk_light_led where  sn =#{sn} and status =1 and  tenant_id =#{tenantId}
+    </select>
+</mapper>

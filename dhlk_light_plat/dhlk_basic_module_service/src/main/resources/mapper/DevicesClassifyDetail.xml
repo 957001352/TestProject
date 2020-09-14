@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.DevicesClassifyDetailDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.DevicesClassifyDetail" id="DhlkBasicDevicesClassifyDetailResult">
+        <result property="id" jdbcType="INTEGER"    column="id"    />
+        <result property="attrSetId" jdbcType="INTEGER"   column="attr_set_id"    />
+        <result property="attrSubName"  jdbcType="VARCHAR"  column="attr_sub_name"    />
+        <result property="attrDetailId" jdbcType="INTEGER"   column="attr_detail_id"    />
+        <result property="devicesClassifyId"  jdbcType="VARCHAR"  column="devices_classify_id"    />
+    </resultMap>
+
+    <sql id="selectDhlkBasicDevicesClassifyDetailVo">
+        select id, attr_set_id, attr_sub_name, attr_detail_id, devices_classify_id from dhlk_basic_devices_classify_detail
+    </sql>
+
+    <select id="findDevicesClassifyDetailByAttrSetId" resultType="Integer">
+        select count(*) from dhlk_basic_devices_classify_detail
+        where attr_set_id = #{attrSetId}
+    </select>
+
+    <select id="findDevicesClassifyDetailByDetail" parameterType="list" resultType="Integer">
+        select count(*) from dhlk_basic_devices_classify_detail
+        where attr_detail_id in
+        <foreach collection="devicesAttrDetailIds" item="devicesAttrDetailId" separator="," open="(" close=")">
+            #{devicesAttrDetailId}
+        </foreach>
+    </select>
+
+    <select id="findDevicesClassifyDetailByDevicesClassifyId" resultMap="DhlkBasicDevicesClassifyDetailResult">
+        select id,attr_set_id, attr_sub_name, attr_detail_id, devices_classify_id from dhlk_basic_devices_classify_detail
+        where devices_classify_id = #{devicesClassifyId}
+    </select>
+
+
+
+
+
+    <select id="findList" parameterType="Integer" resultMap="DhlkBasicDevicesClassifyDetailResult">
+        <include refid="selectDhlkBasicDevicesClassifyDetailVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDevicesClassifyDetails" parameterType="com.dhlk.entity.basicmodule.DevicesClassifyDetail">
+        insert into dhlk_basic_devices_classify_detail
+        (attr_set_id,attr_sub_name,attr_detail_id,devices_classify_id)
+        values
+        <foreach collection="classifyDetails" item="devicesClassifyDetail" index="i" separator=",">
+            (
+            #{devicesClassifyDetail.attrSetId},
+            #{devicesClassifyDetail.attrSubName},
+            #{devicesClassifyDetail.attrDetailId},
+            #{devicesClassifyDetail.devicesClassifyId}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.DevicesClassifyDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_devices_classify_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="attrSetId != null  and attrSetId != ''">attr_set_id,</if>
+            <if test="attrSubName != null  and attrSubName != ''">attr_sub_name,</if>
+            <if test="attrDetailId != null ">attr_detail_id,</if>
+            <if test="devicesClassifyId != null ">devices_classify_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="attrSetId != null  and attrSetId != ''">#{attrSetId},</if>
+            <if test="attrSubName != null  and attrSubName != ''">#{attrSubName},</if>
+            <if test="attrDetailId != null ">#{attrDetailId},</if>
+            <if test="devicesClassifyId != null ">#{devicesClassifyId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.DevicesClassifyDetail">
+        update dhlk_basic_devices_classify_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="attrSetId != null  and attrSetId != ''">attr_set_id = #{attrSetId},</if>
+            <if test="attrSubName != null  and attrSubName != ''">attr_sub_name = #{attrSubName},</if>
+            <if test="attrDetailId != null ">attr_detail_id = #{attrDetailId},</if>
+            <if test="devicesClassifyId != null ">devices_classify_id = #{devicesClassifyId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        delete from dhlk_basic_devices_classify_detail where id = #{id}
+    </delete>
+
+    <delete id="deleteByDevicesClassifyId" parameterType="java.lang.String">
+        delete from dhlk_basic_devices_classify_detail
+        where devices_classify_id = #{devicesClassifyId}
+    </delete>
+
+</mapper>

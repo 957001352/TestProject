@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.MetaTableDao">
+    <insert id="insert" parameterType="com.dhlk.entity.hive.MetaTable">
+        insert into dhlk_basic_meta_table (id,table_enname,table_cnname)
+             values (#{id},#{tableEnname},#{tableCnname})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.hive.MetaTable">
+        update dhlk_basic_meta_table set table_enname=#{tableEnname},table_cnname=#{tableCnname} where id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        update dhlk_basic_meta_table set status=2 where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findList" resultType="com.dhlk.entity.hive.MetaTable">
+        select * from dhlk_basic_meta_table  where status=0
+    </select>
+
+    <select id="findAllList" resultMap="metaTableResultMap">
+        select * from dhlk_basic_meta_table  where status=0
+    </select>
+    <resultMap type="com.dhlk.entity.hive.MetaTable" id="metaTableResultMap">
+        <id column="id" property="id"/>
+        <collection property="columnList" javaType="ArrayList"
+                    column="id" ofType="com.dhlk.entity.hive.MetaTableColumn"
+                    select="findColumnList"
+        ></collection>
+    </resultMap>
+
+    <insert id="insertColumn" parameterType="com.dhlk.entity.hive.MetaTableColumn">
+        insert into dhlk_basic_meta_table_column (id,column_enname,column_cnname,data_type,length,table_id)
+             values (#{id},#{columnEnname},#{columnCnname},#{dataType},#{length},#{tableId})
+    </insert>
+
+    <update id="updateColumn" parameterType="com.dhlk.entity.hive.MetaTableColumn">
+        update dhlk_basic_meta_table_column set column_enname=#{columnEnname},
+              column_cnname=#{columnCnname},data_type=#{dataType},length=#{length},table_id=#{tableId}   where id=#{id}
+    </update>
+
+    <delete id="deleteColumn" parameterType="java.util.List">
+        update dhlk_basic_meta_table_column set status=2 where id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findColumnList" resultType="com.dhlk.entity.hive.MetaTableColumn">
+        select * from dhlk_basic_meta_table_column  where status=0 and table_id=#{tableId}
+    </select>
+
+
+    <update id="executeSql" parameterType="java.lang.String">
+           ${sql}
+    </update>
+    <select id="findTableList" resultType="String">
+        select table_name from information_schema.tables
+        where TABLE_SCHEMA='dhlk_platdb' and TABLE_NAME like 'hive_meta_%'
+    </select>
+    <select id="findTableColumnList" resultType="String">
+        select column_name from information_schema.columns
+        where TABLE_SCHEMA='dhlk_platdb' and TABLE_NAME=concat('hive_meta_',#{tableName})
+    </select>
+</mapper>

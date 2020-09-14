@@ -1,0 +1,68 @@
+#debug配置是否调试模式，如果打包发布的话，需要设置为false。
+#默认情况下，spring boot从控制台打印出来的日志级别有error，warn，info，如果你要打印debug级别的日志，可设置debug=true
+debug: true
+#server.port配置的是 Spring Boot 服务的端口
+server:
+  port: 8988
+spring:
+  application:
+    name: system-service
+  servlet:
+    multipart:
+      max-file-size: -1 #  设置单个文件最大内存 -1为不限制
+      max-request-size: -1 # 设置所有文件最大内存 -1为不限制
+
+
+  #redis配置
+  redis:
+    database: 0 # Redis数据库索引（默认为0）
+    host: 127.0.0.1 # Redis服务器地址
+    port: 6379 # Redis服务器连接端口
+    password: # Redis服务器连接密码（默认为空）
+    jedis:
+      pool:
+        max-active: 8 # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1ms  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 8   # 连接池中的最大空闲连接
+        min-idle: 0   # 连接池中的最小空闲连接
+      timeout: 5000 # 连接超时时间（毫秒）
+
+linux:
+  user: root
+  host: 127.0.0.1
+  port: 22
+  pwd: 1111
+  webLog:
+    dhlk_light_factory: 1>/home/software/java/logs/dhlk_local.log 2>&1 &
+    dhlk_server_manage: 1>/home/software/java/logs/dhlk_server_manage.log 2>&1 &
+mysql:
+  driver: com.mysql.cj.jdbc.Driver
+  userName: root
+  password: Dhlk~!@#123
+  url: jdbc:mysql://127.0.0.1:3306/dhlk_light_factory_161?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true&allowMultiQueries=true
+
+upoload:
+  path:
+    windows: ./upload
+    linux: /home/dhlk/server
+    sqlPath: /home/testsoftware
+swagger:
+  ebable: true
+#附件路径
+attachment:
+  path: C:\attachment\
+  dockerPath: tcp://127.0.0.1:2375
+  localUrl: 127.0.0.1
+  clientCloudUrl: http://192.168.2.114:8082/proxy/requestTempPort
+logging:
+  config: classpath:logback-spring.xml
+logging.level.org.springframework.boot.autoconfigure: ERROR
+mqtt:
+  username: dhlk #MQTT-用户名
+  password: dhlktech #MQTT-密码
+  host: tcp://192.168.2.161:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+#控制sql文件筛选关键字
+sqlKeyword:
+  list:
+
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.AttachmentDao">
+    <insert id="insert" parameterType="com.dhlk.domain.BaseFile" keyProperty="id">
+        INSERT INTO dhlk_basic_attachment (name, save_name, path, suffix, create_time, data_id)
+        VALUES(#{name},#{saveName},#{path},#{suffix},now(),#{dataId})
+    </insert>
+
+    <select id="findById" resultType="com.dhlk.domain.BaseFile">
+        select id,name,save_name saveName,path,suffix,create_time createTime,
+                data_id dataId,replace(path,#{rootPath},'/attach/') webPath
+        from dhlk_basic_attachment
+        where id = #{id} order by create_time
+    </select>
+
+    <select id="findByDataId" resultType="com.dhlk.domain.BaseFile">
+        select id,name,save_name saveName,path,suffix,create_time createTime,
+                data_id dataId,replace(path,#{rootPath},'\\attach\\') webPath
+        from dhlk_basic_attachment
+        where data_id = #{dataId} order by create_time
+    </select>
+    <select id="findWebPathByDataId" resultType="java.lang.String">
+        select replace(path,#{attachPath},'/attach/') from dhlk_basic_attachment
+        where data_id = #{id} order by create_time limit 1
+    </select>
+    <delete id="deleteById">
+        delete from dhlk_basic_attachment where id = #{id}
+    </delete>
+
+    <delete id="deleteByDataId">
+        delete from dhlk_basic_attachment where data_id = #{dataId}
+    </delete>
+</mapper>

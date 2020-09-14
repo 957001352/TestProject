@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.LedFaultDao">
+
+    <resultMap id="DhlkBasicLedFaultResult" type="com.dhlk.entity.light.LedFault">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="ledSn" jdbcType="VARCHAR" column="led_sn"/>
+        <result property="faultCode" jdbcType="VARCHAR" column="fault_code"/>
+        <result property="type" jdbcType="INTEGER" column="type"/>
+        <association property="faultObject" column="fault_code" select="com.dhlk.light.service.dao.FaultCodeDao.findByCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.LedFault" useGeneratedKeys="true" keyProperty="id">
+         insert into dhlk_light_led_fault
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="ledSn != null and ledSn != '' ">led_sn,</if>
+                <if test="faultCode != null  and faultCode != ''">fault_code,</if>
+                <if test="type != null  and type != ''">type,</if>
+            </trim>
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="ledSn != null and ledSn != ''" >#{ledSn},</if>
+                <if test="faultCode != null  and faultCode != ''">#{faultCode},</if>
+                <if test="type != null  and type != ''">#{type}</if>
+            </trim>
+    </insert>
+
+    <select id="findList" parameterType="com.dhlk.entity.light.LedFault" resultMap="DhlkBasicLedFaultResult">
+        select
+        id,led_sn,fault_code,type
+        from
+        dhlk_light_led_fault
+        where 1=1
+        <if test="ledSn !=null and ledSn !='' ">and led_sn = #{ledSn}</if>
+        order by led_sn
+    </select>
+
+    <select id="findExportList" resultType="java.util.LinkedHashMap">
+        select
+        led_sn,fault_code
+        from
+        dhlk_light_led_fault
+        where 1=1
+        <if test="ledSn !=null and ledSn !='' ">and led_sn = #{ledSn}</if>
+        order by led_sn
+    </select>
+</mapper>

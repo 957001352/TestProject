@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.factory.dao.TenantDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.Tenant" id="DhlkBasicTenantResult">
+        <result property="id" jdbcType="INTEGER"   column="id"/>
+        <result property="code"  jdbcType="VARCHAR"  column="code"/>
+        <result property="name" jdbcType="VARCHAR"   column="name"/>
+        <result property="telephone" jdbcType="VARCHAR"   column="telephone"/>
+        <result property="adress" jdbcType="VARCHAR"   column="adress"/>
+        <result property="companyEmail" jdbcType="VARCHAR"   column="company_email"/>
+        <result property="linkman" jdbcType="VARCHAR"   column="linkman"/>
+        <result property="phone" jdbcType="VARCHAR"   column="phone"/>
+        <result property="email" jdbcType="VARCHAR"   column="email"/>
+        <result property="startTime" jdbcType="TIMESTAMP"   column="start_time"/>
+        <result property="endTime" jdbcType="TIMESTAMP"   column="end_time"/>
+        <result property="createTime" jdbcType="TIMESTAMP"   column="create_time"/>
+        <result property="devices" jdbcType="INTEGER"   column="devices"/>
+        <result property="status" jdbcType="INTEGER"   column="status"/>
+        <result property="isSystem" jdbcType="INTEGER"   column="is_system"/>
+        <result property="tbLoginname" jdbcType="VARCHAR"  column="tb_loginname"/>
+        <result property="tbPassword" jdbcType="VARCHAR"  column="tb_password"/>
+        <result property="orgId" jdbcType="INTEGER"   column="orgId"/>
+        <result property="roleId" jdbcType="INTEGER"   column="roleId"/>
+        <result property="fileId" jdbcType="VARCHAR"   column="file_id"/>
+        <result property="tbId" jdbcType="VARCHAR"   column="tb_id"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+         id,code, telephone, adress, company_email, linkman, phone,email,start_time,end_time,create_time,devices,status,is_system,tb_loginname,tb_password,file_id,tb_id
+    </sql>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.Tenant" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_tenant
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">code,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="telephone != null  and telephone != ''">telephone,</if>
+            <if test="adress != null  and adress != ''">adress,</if>
+            <if test="companyEmail != null  and companyEmail != ''">company_email,</if>
+            <if test="linkman != null  and linkman != ''">linkman,</if>
+            <if test="phone != null  and phone != ''">phone,</if>
+            <if test="email != null  and email != ''">email,</if>
+            <if test="startTime != null">start_Time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="devices != null  and devices != ''">devices,</if>
+            <if test="status != null and status !=''">status,</if>
+            <if test="isSystem != null and isSystem !=''">is_system,</if>
+            <if test="tbLoginname != null and tbLoginname !=''">tb_loginname,</if>
+            <if test="tbPassword != null and tbPassword !=''">tb_password,</if>
+            <if test="tbId != null and tbId !=''">tb_id,</if>
+            <if test="fileId != null and fileId !=''">file_id</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null  and code != ''">#{code},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="telephone != null  and telephone != ''">#{telephone},</if>
+            <if test="adress != null  and adress != ''">#{adress},</if>
+            <if test="companyEmail != null  and companyEmail != ''">#{companyEmail},</if>
+            <if test="linkman != null  and linkman != ''">#{linkman},</if>
+            <if test="phone != null  and phone != ''">#{phone},</if>
+            <if test="email != null  and email != ''">#{email},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="devices != null  and devices != ''">#{devices},</if>
+            <if test="status != null and status !=''">#{status},</if>
+            <if test="isSystem != null and isSystem !=''">#{isSystem},</if>
+            <if test="tbLoginname != null and tbLoginname !=''">#{tbLoginname},</if>
+            <if test="tbPassword != null and tbPassword !=''">#{tbPassword},</if>
+            <if test="tbId != null and tbId !=''">#{tbId},</if>
+            <if test="fileId != null and fileId !=''">#{fileId}</if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            insert into dhlk_basic_tenant (
+            id,
+            code,
+            name,
+            telephone,
+            adress,
+            company_email,
+            linkman,
+            phone,
+            email,
+            start_time,
+            end_time,
+            create_time,
+            devices,
+            status,
+            tb_loginname,
+            tb_password,
+            tb_id,
+            is_system,
+            file_id
+            ) VALUES
+            (
+            #{item.id},
+            #{item.code},
+            #{item.name},
+            #{item.telephone},
+            #{item.adress},
+            #{item.companyEmail},
+            #{item.linkman},
+            #{item.phone},
+            #{item.email},
+            #{item.startTime},
+            #{item.endTime},
+            #{item.createTime},
+            #{item.devices},
+            #{item.status},
+            #{item.tbLoginname},
+            #{item.tbPassword},
+            #{item.tbId},
+            #{item.isSystem},
+            #{item.fileId}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="String">
+        delete from dhlk_basic_tenant
+    </delete>
+
+    <select id="findTenantByCode" parameterType="String" resultType="com.dhlk.entity.basicmodule.Tenant">
+        select <include refid="baseColumn"/>
+        from dhlk_basic_tenant
+        <if test="code != null  and code != ''">
+            where code = CONCAT('dhlk_tenant_',#{code})
+        </if>
+    </select>
+
+    <select id="findAll" resultMap="DhlkBasicTenantResult">
+        SELECT  <include refid="baseColumn"/>  FROM dhlk_basic_tenant
+    </select>
+    <select id="findTenantIsExitsById" resultType="java.lang.Integer" >
+        SELECT count(id) FROM dhlk_basic_tenant where id=#{id}
+    </select>
+    <select id="findTenantId" resultType="java.lang.Integer" >
+        SELECT id FROM dhlk_basic_tenant  limit 1
+    </select>
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.DevicesClassifyDao">
+
+    <resultMap type="com.dhlk.entity.basicmodule.DevicesClassify" id="DhlkBasicDevicesClassifyResult">
+        <result property="id" jdbcType="VARCHAR"    column="id"    />
+        <result property="classifyName" jdbcType="VARCHAR"   column="classify_name"    />
+        <result property="describe"  jdbcType="VARCHAR"  column="describe"    />
+        <result property="classifyId" jdbcType="VARCHAR"   column="classify_id"    />
+        <result property="tenantId"  jdbcType="INTEGER"  column="tenant_id"    />
+        <collection property="classifyDetails" column="id" select="com.dhlk.basicmodule.service.dao.DevicesClassifyDetailDao.findDevicesClassifyDetailByDevicesClassifyId" />
+        <collection property="attrSet" column="id" select="findAttrSetByClassifyById" />
+        <collection property="dmClassifyType" column="id" select="findClassifyType"/>
+        <collection property="imagePath" javaType="String"
+                    column="{id=id,attachPath=attachPath}" ofType="String"
+                    select="com.dhlk.basicmodule.service.dao.AttachmentDao.findWebPathByDataId"
+        ></collection>
+    </resultMap>
+    <select id="findAttrSetByClassifyById"  resultType="java.util.LinkedHashMap">
+        SELECT s.id setId,s.name,GROUP_CONCAT(d.attr order by d.attr) attr,GROUP_CONCAT(d.id) detailIds FROM dhlk_basic_devices_classify_detail c
+          LEFT JOIN dhlk_basic_devices_attr_set s ON s.id=c.attr_set_id
+          LEFT JOIN dhlk_basic_devices_attr_detail  d ON d.id=c.attr_detail_id
+         WHERE c.devices_classify_id=#{devicesClassifyId}
+         GROUP BY s.`id`,s.name
+    </select>
+
+    <select id="findClassifyType"  resultType="com.dhlk.entity.dm.DmClassifyType">
+        select * from dhlk_dm_classify_type where id in (
+        select type_id from dhlk_basic_devices_classify where id = #{id})
+        and status = 0
+    </select>
+
+
+
+    <select id="findAttrByClassifyById"  resultType="java.util.LinkedHashMap">
+        SELECT d.attr,d.code FROM dhlk_basic_devices_classify_detail c
+        LEFT JOIN dhlk_basic_devices_attr_set s ON s.id=c.attr_set_id
+        LEFT JOIN dhlk_basic_devices_attr_detail  d ON d.id=c.attr_detail_id
+        WHERE c.devices_classify_id=#{devicesClassifyId}
+    </select>
+    <sql id="selectDhlkBasicDevicesClassifyVo">
+        select id, classify_name, `describe`, classify_id, tenant_id from dhlk_basic_devices_classify
+    </sql>
+
+    <select id="isRepeatName" parameterType="String" resultType="Integer">
+        select count(*)from dhlk_basic_devices_classify
+        where classify_name = #{classifyName}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            and tenant_id=#{tenantId}
+        </if>
+    </select>
+    <select id="findDevicesClassifyById"  resultType="com.dhlk.entity.basicmodule.DevicesClassify">
+        <include refid="selectDhlkBasicDevicesClassifyVo"/>
+        <if test="id != null and id != ''">
+            where id=#{id}
+        </if>
+    </select>
+    <select id="findList" parameterType="String" resultMap="DhlkBasicDevicesClassifyResult">
+        select id, classify_name, `describe`, classify_id, tenant_id,#{attachPath} attachPath from dhlk_basic_devices_classify
+        <where>
+            <if test="classifyName != null and classifyName != ''">
+                and classify_name like concat('%',#{classifyName},'%')
+        </if>
+            <if test="tenantId != null and tenantId != ''">
+                and tenant_id=#{tenantId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.dhlk.entity.basicmodule.DevicesClassify" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_basic_devices_classify
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">id,</if>
+            <if test="classifyName != null  and classifyName != ''">classify_name,</if>
+            <if test="describe != null  and describe != ''">`describe`,</if>
+            <if test="classifyId != null ">classify_id,</if>
+            <if test="tenantId != null ">tenant_id,</if>
+            <if test="dmClassifyType != null">type_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null  and id != ''">#{id},</if>
+            <if test="classifyName != null  and classifyName != ''">#{classifyName},</if>
+            <if test="describe != null  and describe != ''">#{describe},</if>
+            <if test="classifyId != null ">#{classifyId},</if>
+            <if test="tenantId != null ">#{tenantId},</if>
+            <if test="dmClassifyType != null">#{dmClassifyType.id},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.basicmodule.DevicesClassify">
+        update dhlk_basic_devices_classify
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="classifyName != null  and classifyName != ''">classify_name = #{classifyName},</if>
+            <if test="describe != null  and describe != ''">`describe` = #{describe},</if>
+            <if test="classifyId != null ">classify_id = #{classifyId},</if>
+            <if test="dmClassifyType != null ">type_id = #{dmClassifyType.id},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        delete from dhlk_basic_devices_classify where id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    active: @profileActive@ #使用开发环境
+    include:
+    # 这里写你的include

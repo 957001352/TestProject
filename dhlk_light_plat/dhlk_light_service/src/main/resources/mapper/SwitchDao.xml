@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.light.service.dao.SwitchDao">
+    <resultMap type="com.dhlk.entity.light.Switch" id="DhlkBasicSwitchResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="sn" jdbcType="VARCHAR" column="sn"/>
+        <result property="ip" jdbcType="VARCHAR" column="ip"/>
+        <result property="areaId" jdbcType="VARCHAR" column="area_id"/>
+        <result property="computerId" jdbcType="INTEGER" column="computer_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+        <association property="computer" column="computer_id" select="com.dhlk.light.service.dao.ComputerDao.findById"/>
+        <collection property="leds" column="id" select="com.dhlk.light.service.dao.LedDao.findLedsBySwitchId"/>
+        <!--<collection property="switchGroups" column="id" select="com.dhlk.light.service.dao.SwitchGroupDao.findSwitchGroupBySwitchId"/>-->
+    </resultMap>
+
+    <sql id="selectDhlkBasicSwitchVo">
+        select id, `name`, sn, ip,area_id,computer_id,create_time,tenant_id from dhlk_light_switch
+    </sql>
+
+    <insert id="insert" parameterType="com.dhlk.entity.light.Switch" useGeneratedKeys="true" keyProperty="id">
+        insert into dhlk_light_switch
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="sn != null and sn != ''">sn,</if>
+            <if test="ip != null and ip != ''">ip,</if>
+            <if test="areaId != null and areaId != ''">area_id,</if>
+            <if test="computerId != null and computerId != ''">computer_id,</if>
+            <if test="createTime != null and createTime != ''">create_time,</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="sn != null and sn != ''">#{sn},</if>
+            <if test="ip != null and ip != ''">#{ip},</if>
+            <if test="areaId != null and areaId != ''">#{areaId},</if>
+            <if test="computerId != null and computerId != ''">#{computerId},</if>
+            <if test="createTime != null and createTime != ''">#{createTime},</if>
+            <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.light.Switch">
+        update dhlk_light_switch
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="sn != null and sn != ''">sn = #{sn},</if>
+            <if test="ip != null and ip != ''">ip = #{ip},</if>
+            <if test="areaId != null and areaId != ''">area_id = #{areaId},</if>
+            <if test="computerId != null and computerId != ''">computer_id = #{computerId},</if>
+            <if test="createTime != null and createTime != ''">create_time = #{createTime},</if>
+            <if test="tenantId != null and tenantId != ''">tenant_id = #{tenantId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        delete from dhlk_light_switch where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findList" resultMap="DhlkBasicSwitchResult">
+        <include refid="selectDhlkBasicSwitchVo"/>
+        where 1 = 1
+        <if test="name != null  and name != ''">
+            and name like concat('%', #{name}, '%')
+        </if>
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+        ORDER BY create_time desc
+    </select>
+    <resultMap type="com.dhlk.entity.light.SwitchGroup" id="LightSwitchGroupResult">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="switchId" jdbcType="INTEGER" column="switch_id"/>
+        <result property="groupId" jdbcType="INTEGER" column="group_id"/>
+        <collection property="leds" column="id" select="findLedsByGroupId"/>
+    </resultMap>
+
+    <select id="findLedsByGroupId" resultType="com.dhlk.entity.light.Led">
+        select * from dhlk_light_led l,dhlk_light_led_switch s where l.id=s.led_id and s.group_id=#{id}
+    </select>
+    <select id="findGroupList"  resultMap="LightSwitchGroupResult">
+       select * from dhlk_light_switch_group
+        <if test="switchId != null  and switchId != ''">
+            where switch_id = #{switchId}
+        </if>
+        ORDER BY id
+    </select>
+
+
+    <select id="isRepeatSn" resultType="Integer">
+        select count(*) from dhlk_light_switch
+        where sn = #{sn}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            AND tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="isRepeatIp" resultType="Integer">
+        select count(*) from dhlk_light_switch
+        where ip = #{ip}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            AND tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="isRepeatName" resultType="Integer">
+        select count(*) from dhlk_light_switch
+        where name = #{name}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            AND tenant_id = #{tenantId}
+        </if>
+        <if test="areaId != null and areaId != ''">
+            AND area_id = #{area_id}
+        </if>
+    </select>
+
+    <select id="isExist" resultType="Integer">
+        select count(*) from dhlk_light_switch
+        where id = #{id}
+    </select>
+
+    <select id="findListByTenantId" parameterType="INTEGER" resultMap="DhlkBasicSwitchResult">
+        select id, `name`, sn, ip,area_id,computer_id,create_time,tenant_id
+        from dhlk_light_switch where 1=1
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="findListByComputerId" resultType="java.lang.Integer">
+        select count(id)
+        from dhlk_light_switch where computer_id in
+        <foreach collection="computerIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="findListByAreaId" resultMap="DhlkBasicSwitchResult">
+        <include refid="selectDhlkBasicSwitchVo"/>
+        where 1 = 1
+        <if test="areaId != null  and areaId != ''">
+            and area_id = #{areaId}
+        </if>
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id = #{tenantId}
+        </if>
+        ORDER BY create_time desc
+    </select>
+
+</mapper>

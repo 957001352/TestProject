@@ -1,0 +1,6 @@
+#debug配置是否调试模式，如果打包发布的话，需要设置为false。
+#默认情况下，spring boot从控制台打印出来的日志级别有error，warn，info，如果你要打印debug级别的日志，可设置debug=true
+debug: true
+#server.port配置的是 Spring Boot 服务的端口
+server:
+  port: 8084

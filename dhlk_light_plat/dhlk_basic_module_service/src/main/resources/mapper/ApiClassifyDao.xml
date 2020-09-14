@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dhlk.basicmodule.service.dao.ApiClassifyDao">
+    <insert id="insert" parameterType="com.dhlk.entity.api.ApiClassify">
+        insert into dhlk_api_classify (id,class_name,parent_id)
+        values (#{id},#{className},#{parentId})
+    </insert>
+
+    <update id="update" parameterType="com.dhlk.entity.api.ApiClassify">
+        update dhlk_api_classify set class_name=#{className},parent_id=#{parentId} where id=#{id}
+    </update>
+
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from  dhlk_api_classify where id  in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+
+
+    <select id="findList" resultType="com.dhlk.entity.api.ApiClassify">
+        select * from dhlk_api_classify  where 1=1
+        <if test="parentId != null and parentId != ''">
+            and parent_id=#{parentId}
+        </if>
+    </select>
+    <select id="isRepeatName" resultType="Integer">
+        SELECT count(*) FROM dhlk_api_classify  WHERE class_name=#{className}
+        <if test="id!= null and id != ''">
+            AND id!=#{id}
+        </if>
+    </select>
+</mapper>
