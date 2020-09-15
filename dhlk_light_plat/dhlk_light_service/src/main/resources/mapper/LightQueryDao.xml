@@ -82,17 +82,15 @@
 	    LEFT JOIN (
 	        <!-- 企业上个月灯消耗的能耗 -->
 	        SELECT
-                b.tenant_id,
+                c.tenant_id,
                 SUM(IFNULL( c.energy,0) )energySum
 	        FROM
-		        dhlk_basic_tenant a
-                JOIN dhlk_light_led b ON a.id = b.tenant_id
-                JOIN dhlk_light_led_power c ON b.sn = c.led_sn
+                dhlk_light_led_power c
 	           WHERE
                 <!-- 筛选当前时间减去创建时间等于1的  表示上个月的（例如：202006-202005 = 1）-->
                    PERIOD_DIFF( date_format( NOW( ), '%Y%m' ), date_format( c.create_time, '%Y%m' ) ) = 1
 	        GROUP BY
-            b.tenant_id) t2
+            c.tenant_id) t2
         ON t1.tenant_id = t2.tenant_id
         ORDER BY energy DESC LIMIT ${limit}
     </select>
@@ -129,7 +127,8 @@
                 FROM
                 dhlk_light_original_power
                 where 1 =1
-                <if test="tenantIds != null and tenantIds.size > 0">and tenant_id in
+                <if test="tenantIds != null and tenantIds.size > 0">
+                and tenant_id in
                     <foreach
                             collection="tenantIds" index="index" item="item" open="(" separator="," close=")">
                                 #{item}
@@ -147,17 +146,11 @@
          FROM
             dhlk_light_led_power lp
         <if test="tenantIds != null and tenantIds.size > 0">
-            join (
-                select
-                    sn
-                from
-                    dhlk_light_led
                 where tenant_id in
                     <foreach collection="tenantIds" index="index" item="item" open="(" separator="," close=")">
                         #{item}
                     </foreach>
-                ) led
-            on lp.led_sn = led.sn
+                )
         </if>
     </select>
 </mapper>

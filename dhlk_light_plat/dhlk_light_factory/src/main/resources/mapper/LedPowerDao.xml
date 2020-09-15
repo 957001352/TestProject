@@ -10,6 +10,8 @@
         <result property="energy" jdbcType="NUMERIC" column="energy"/>
         <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
         <result property="ledBrightness" jdbcType="INTEGER" column="brightness"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
+
     </resultMap>
     
     <resultMap id="DhlkPeopleFeelStatisticsDataModel" type="com.dhlk.entity.light.CloudPeopleFeelStatistics">
@@ -21,6 +23,7 @@
         <result property="id" jdbcType="INTEGER" column="id"/>
         <result property="ledSn" jdbcType="VARCHAR" column="led_sn"/>
         <result property="onlineTime" jdbcType="INTEGER" column="online_time"/>
+        <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
     </resultMap>
     <insert id="insert">
         insert into dhlk_light_led_power
@@ -96,12 +99,12 @@
     <insert id="insertBySumEnergy">
         insert into dhlk_light_led_power_summarizing
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            led_sn,energy,isSend
+            led_sn,energy,isSend,tenant_id
         </trim>
         values
         <foreach collection="list" item="item" index="index" separator="," >
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                #{item.ledSn},#{item.energy},0
+                #{item.ledSn},#{item.energy},0,#{tenantId}
             </trim>
         </foreach>
     </insert>
@@ -126,12 +129,12 @@
     <insert id="insertOnlineList">
         insert into dhlk_light_led_online
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            led_sn,online_time,create_time,isSend
+            led_sn,online_time,create_time,isSend,tenant_id
         </trim>
         values
         <foreach collection="list" item="item" index="index" separator="," >
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                #{item.ledSn},#{item.onlineTime},NOW(),0
+                #{item.ledSn},#{item.onlineTime},NOW(),0,#{tenantId}
             </trim>
         </foreach>
     </insert>
@@ -157,7 +160,8 @@
             id,
 	        led_sn,
 	        energy,
-	        create_time
+	        create_time,
+	        tenant_id
         FROM
 	        dhlk_light_led_power_summarizing
         WHERE
@@ -185,7 +189,8 @@
         SELECT
             id,
 	        led_sn,
-	        online_time
+	        online_time,
+	        tenant_id
         FROM
 	        dhlk_light_led_online
         WHERE

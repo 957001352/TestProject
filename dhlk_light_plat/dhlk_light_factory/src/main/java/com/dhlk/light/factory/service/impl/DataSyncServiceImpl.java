@@ -239,7 +239,7 @@ public class DataSyncServiceImpl implements DataSyncService {
                 flag = userDao.insertBatch(listUser);
             }
             if (!CollectionUtils.isEmpty(listLed)) {
-                ledDao.delete();
+                ledDao.deletes();
                 flag = ledDao.insertBatch(listLed);
             }
             if (!CollectionUtils.isEmpty(listTenant)) {

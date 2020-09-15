@@ -20,7 +20,7 @@ public class LedConst {
     public final static String REDIS_PEOPLEONOFF = "REDIS_PEOPLEONOFF_"; //灯人感开关状态
     public final static String REDIS_LIGHTFELL = "REDIS_LIGHTFELL_"; //灯光感
 
-
+    public final static String REDIS_WEBSOCKET = "REDIS_WEBSOCKET"; //是否给websoket推送
 
 
     public final static String REDIS_LIGHTFELL_RETURN = "REDIS_LIGHTFELL_RETURN_"; //灯光感设置返回
@@ -99,5 +99,7 @@ public class LedConst {
     public final static String REDIS_RECORD_REFRESH_SETLIGHTFEEL_TIME_ = "REDIS_RECORD_REFRESH_SETLIGHTFEEL_TIME_";//记录点击设置光感的时间缓存到redis
     public final static String REDIS_RECORD_REFRESH_SETPEOPLEFEEL_TIME_ = "REDIS_RECORD_REFRESH_SETPEOPLEFEEL_TIME_";//记录点击设置人感的时间缓存到redis
     public final static String REDIS_RECORD_REFRESH_SETWIFI_TIME_ = "REDIS_RECORD_REFRESH_SETWIFI_TIME_";//记录点击设置wifi的时间缓存到redis
+    public final static String REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_ = "REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_";//记录点击数据重载的时间缓存到redis
 
+    public static final long REFRESHPARAM_TIME = 60;
 }

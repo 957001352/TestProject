@@ -3,8 +3,6 @@ package com.dhlk.web.light.controller;
 import com.alibaba.fastjson.JSON;
 import com.dhlk.domain.Result;
 import com.dhlk.entity.light.Computer;
-import com.dhlk.enums.SystemEnums;
-import com.dhlk.utils.ResultUtils;
 import com.dhlk.web.light.service.ComputerService;
 import com.dhlk.web.proxy.service.ProxyService;
 import io.swagger.annotations.Api;
@@ -89,8 +87,14 @@ public class ComputerController {
                                     @RequestParam("mac") String mac){
         Result add = proxyService.add(deviceId);
         if(add.getCode() == 0){
-            return computerService.addReseller(JSON.toJSONString(add.getData()),mac);
+            Result result = computerService.addReseller(JSON.toJSONString(add.getData()), mac);
+            if(result.getCode()==0){
+                return proxyService.requestIndexUrl(deviceId);
+            }
+            return result;
         }
-        return proxyService.requestIndexUrl(deviceId);
+        add.setCode(1000);
+        add.setMsg(add.getData()+"");
+        return add;
     }
 }

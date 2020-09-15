@@ -117,4 +117,9 @@
     <select id="findLed" resultType="com.dhlk.entity.light.Led">
         select * from dhlk_light_led where  sn =#{sn} and status =1 and  tenant_id =#{tenantId}
     </select>
+
+    <delete id="deletes" parameterType="INTEGER">
+        delete from dhlk_light_led
+    </delete>
+
 </mapper>

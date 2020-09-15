@@ -5,8 +5,8 @@ import com.dhlk.entity.light.InfoBox;
 import com.dhlk.entity.light.LedParamInfo;
 import com.dhlk.light.service.dao.LedParamInfoDao;
 import com.dhlk.light.service.service.LedParamInfoService;
+import com.dhlk.light.service.util.HeaderUtil;
 import com.dhlk.light.service.util.LedConst;
-import com.dhlk.light.service.util.LedResult;
 import com.dhlk.light.service.util.LightDeviceUtil;
 import com.dhlk.service.RedisService;
 import com.dhlk.utils.CheckUtils;
@@ -15,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class LedParamInfoServiceImpl implements LedParamInfoService {
@@ -26,6 +22,10 @@ public class LedParamInfoServiceImpl implements LedParamInfoService {
     private LedParamInfoDao ledParamInfoDao;
     @Autowired
     private LightDeviceUtil lightDeviceUtil;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private HeaderUtil headerUtil;
     @Override
     public Result save(LedParamInfo ledParamInfo) {
         if(ledParamInfo == null){
@@ -71,6 +71,10 @@ public class LedParamInfoServiceImpl implements LedParamInfoService {
         if(CheckUtils.isNull(infoBox.getSns()) || CheckUtils.isNull(infoBox.getTenantId())){
             return ResultUtils.failure();
         }
+        if(redisService.hasKey(LedConst.REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_+headerUtil.cloudToken())){
+            return ResultUtils.error("操作间隔不得小于1分钟");
+        }
+        redisService.set(LedConst.REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_+headerUtil.cloudToken(),infoBox,LedConst.REFRESHPARAM_TIME);
         lightDeviceUtil.refreshParam(infoBox.getSns(),infoBox.getTenantId());
         return ResultUtils.success();
     }

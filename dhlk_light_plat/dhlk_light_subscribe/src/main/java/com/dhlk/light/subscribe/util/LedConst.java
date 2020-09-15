@@ -20,7 +20,7 @@ public class LedConst {
 
     public final static String REDIS_LED_PARAM_INFO = "REDIS_LED_PARAM_INFO"; //灯的参数列表
 
-
+    public final static String REDIS_WEBSOCKET = "REDIS_WEBSOCKET"; //是否给websoket推送
 
     public final static String REDIS_LIGHTFELL_RETURN = "REDIS_LIGHTFELL_RETURN_"; //灯光感设置返回
     public final static String REDIS_PEOPLEFELL_RETURN = "REDIS_PEOPLEFELL_RETURN_"; //人感设置返回

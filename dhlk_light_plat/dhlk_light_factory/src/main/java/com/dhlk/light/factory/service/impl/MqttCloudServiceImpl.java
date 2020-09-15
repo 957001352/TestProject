@@ -367,8 +367,12 @@ public class MqttCloudServiceImpl implements MqttCloudService {
      */
     @Transactional
     public void deleteLed(String id) {
-        if (!CheckUtils.isNull(id)) {
-            ledDao.deteleById(Integer.parseInt(id));
+        try {
+            if (!CheckUtils.isNull(id)) {
+                ledDao.deteleById(Integer.parseInt(id));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -23,4 +23,8 @@ public class LedOnline {
 
     @ApiModelProperty(value = "在线时长(分钟)")
     private Integer onlineTime;
+
+    @ApiModelProperty(value = "租户ID")
+    private Integer tenantId;
+
 }

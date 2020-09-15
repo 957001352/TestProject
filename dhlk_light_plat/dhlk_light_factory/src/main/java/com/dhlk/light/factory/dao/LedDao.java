@@ -71,4 +71,11 @@ public interface LedDao {
 
     Led findLed(Led led);
 
+    /**
+     * 物理删除
+     *
+     * @return
+     */
+    Integer deletes();
+
 }

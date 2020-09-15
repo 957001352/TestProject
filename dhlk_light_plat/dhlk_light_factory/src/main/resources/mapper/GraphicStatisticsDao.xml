@@ -10,6 +10,7 @@
             FROM
                 dhlk_light_led_power_summarizing led
             WHERE
+                led.tenant_id != -1 and
                 DATE_FORMAT( led.create_time, '%Y-%m-%d' ) = date( NOW( ) )
     </select>
 
@@ -20,6 +21,7 @@
             FROM
                 dhlk_light_led_power_summarizing led
             WHERE
+                led.tenant_id != -1 and
                 DATE_FORMAT( led.create_time, '%Y-%m-%d' ) = date_sub(curdate(),interval 1 day)
     </select>
 
@@ -29,6 +31,7 @@
                 IFNULL( SUM( energy ), 0 ) AS energyTotal
             FROM
                 dhlk_light_led_power_summarizing led
+            where led.tenant_id != -1
     </select>
 
     <!--获取所有灯数-->
@@ -55,6 +58,7 @@
         FROM
             dhlk_light_led_power_summarizing led
         WHERE
+             led.tenant_id != -1 and
             DATE_FORMAT( led.create_time, '%Y-%m-%d' ) = CURDATE( )
         GROUP BY
             hours
@@ -69,6 +73,7 @@
             FROM
                 dhlk_light_led_power_summarizing led
             WHERE
+                led.tenant_id != -1 and
                 DATE_FORMAT( led.create_time, '%Y-%m-%d' ) = date_sub( curdate( ), INTERVAL 1 DAY )
             GROUP BY
                 hours
@@ -82,6 +87,7 @@
         FROM
             dhlk_light_led_power_summarizing led
         WHERE
+            led.tenant_id != -1 and
             DATE_FORMAT( led.create_time, '%Y-%m' ) = #{date}
         GROUP BY
         day
@@ -107,16 +113,7 @@
         FROM
             dhlk_light_led_online
         WHERE
-            led_sn = #{ledSn}
-    </select>
-
-    <!--查询灯消耗的总能耗-->
-    <select id="searchTotalEnergyBySn" parameterType="java.lang.String" resultType="java.lang.Float">
-         SELECT
-            IFNULL(SUM( energy ),0) AS totalEnergy
-        FROM
-            dhlk_light_led_power_summarizing
-        WHERE
+            tenant_id != -1 and
             led_sn = #{ledSn}
     </select>
 
@@ -125,10 +122,8 @@
          SELECT
 	        IFNULL(sum(led_power.energy),0) totalEnergy
          FROM
-	        dhlk_light_led led
-	    JOIN
 	        dhlk_light_led_power_summarizing led_power
-	    ON  led.sn = led_power.led_sn
+	    where led_power.tenant_id != -1
     </select>
 
     <!--查询所有灯的在线时长-->
@@ -136,8 +131,8 @@
 	    SELECT
 	        IFNULL(sum(led_online.online_time)/60,0) totalOnlineTime
         FROM
-	        dhlk_light_led led
-	    JOIN dhlk_light_led_online led_online ON led.sn = led_online.led_sn
+	       dhlk_light_led_online led_online
+	    where led_online.tenant_id != -1
     </select>
 
 </mapper>

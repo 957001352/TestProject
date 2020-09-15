@@ -10,10 +10,6 @@ import java.math.BigDecimal;
  */
 public interface GraphicStatisticsService {
 
-
-
-    public Result getLightEnergyAndlightCount();
-
     /**
      * 今日与昨日能耗对比接口
      * @return

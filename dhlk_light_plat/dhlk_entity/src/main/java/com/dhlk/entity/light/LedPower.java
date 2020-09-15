@@ -58,6 +58,9 @@ public class LedPower {
 
     private Integer linghtStatus;//光感状态
 
+    @ApiModelProperty(value = "租户ID",hidden = true)
+    private Integer tenantId;
+
 
     public LedPower(JSONObject result) {
         JSONObject data = JSONObject.parseObject(result.get("data")+"");

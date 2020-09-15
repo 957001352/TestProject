@@ -85,6 +85,7 @@ create table dhlk_light_led_online
    led_sn               varchar(100)                   DEFAULT NULL COMMENT '灯sn',
    online_hour          timestamp                      DEFAULT NOW() COMMENT '在线时间(年月日时)',
    online_time          integer                        DEFAULT NULL COMMENT '在线时长(分钟)',
+   tenant_id            integer                        DEFAULT NULL COMMENT '租户对象',
    primary key  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='灯在线统计，按小时统计灯在线多少分钟';
 /*==============================================================*/
@@ -101,6 +102,7 @@ create table dhlk_light_led_power
    create_time          timestamp                      DEFAULT NOW() COMMENT '统计时间',
    energy               decimal(12,4)                   DEFAULT NULL COMMENT '电能',
    brightness           integer                        DEFAULT NULL COMMENT '灯亮度',
+   tenant_id            integer                        DEFAULT NULL COMMENT '租户对象',
    primary key  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='灯功率统计，10分钟统计一次';
 
@@ -273,19 +275,6 @@ create table dhlk_light_people_feel
    tenant_id            integer                      DEFAULT NULL COMMENT '租户Id',
    primary key  (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='人感';
-
-/*==============================================================*/
-/* Table: 本地人感数据  */
-/*==============================================================*/
-drop table if exists dhlk_light_local_people_feel_statistics;
-create table dhlk_light_local_people_feel_statistics
-(
-   id                   integer                      NOT NULL AUTO_INCREMENT,
-   led_sn 		        varchar(50)                  DEFAULT NULL COMMENT '照明设备',
-   status               integer                      DEFAULT NULL COMMENT '0无人 1有人',
-   create_time          timestamp                    NULL COMMENT '统计时间',
-   primary key  (id)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='本地人感数据统计';
 
 /*==============================================================*/
 /* Table: 云人感数据  */

@@ -28,10 +28,6 @@ spring:
       timeout: 5000 # 连接超时时间（毫秒）
 
 linux:
-  user: root
-  host: 127.0.0.1
-  port: 22
-  pwd: 1111
   webLog:
     dhlk_light_factory: 1>/home/software/java/logs/dhlk_local.log 2>&1 &
     dhlk_server_manage: 1>/home/software/java/logs/dhlk_server_manage.log 2>&1 &
@@ -39,7 +35,7 @@ mysql:
   driver: com.mysql.cj.jdbc.Driver
   userName: root
   password: Dhlk~!@#123
-  url: jdbc:mysql://127.0.0.1:3306/dhlk_light_factory_161?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true&allowMultiQueries=true
+  url: jdbc:mysql://127.0.0.1:3306/dhlk_light_factory?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true&allowMultiQueries=true
 
 upoload:
   path:
@@ -48,21 +44,18 @@ upoload:
     sqlPath: /home/testsoftware
 swagger:
   ebable: true
-#附件路径
-attachment:
-  path: C:\attachment\
-  dockerPath: tcp://127.0.0.1:2375
-  localUrl: 127.0.0.1
-  clientCloudUrl: http://192.168.2.114:8082/proxy/requestTempPort
 logging:
   config: classpath:logback-spring.xml
 logging.level.org.springframework.boot.autoconfigure: ERROR
 mqtt:
   username: dhlk #MQTT-用户名
   password: dhlktech #MQTT-密码
-  host: tcp://192.168.2.161:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+  host: tcp://192.168.2.162:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
 #控制sql文件筛选关键字
 sqlKeyword:
   list:
+#项目jar名称
+jarname: dhlk_server_manage
+
 
 

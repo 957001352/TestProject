@@ -34,7 +34,7 @@ linux:
 mysql:
   driver: com.mysql.cj.jdbc.Driver
   userName: root
-  password: Dhlk~!@#123
+  password: dhlktech
   url: jdbc:mysql://127.0.0.1:3306/dhlk_light_factory?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true&allowMultiQueries=true
 
 upoload:
@@ -50,7 +50,7 @@ logging.level.org.springframework.boot.autoconfigure: ERROR
 mqtt:
   username: dhlk #MQTT-用户名
   password: dhlktech #MQTT-密码
-  host: tcp://192.168.2.162:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+  host: tcp://68.79.30.98:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
 #控制sql文件筛选关键字
 sqlKeyword:
   list:

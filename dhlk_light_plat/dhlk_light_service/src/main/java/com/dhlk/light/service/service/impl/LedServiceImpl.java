@@ -83,8 +83,7 @@ public class LedServiceImpl implements LedService {
         }
         if (CheckUtils.isNull(led.getId())) {
             //设置租户id
-            //led.setTenantId(authUserUtil.tenantId());
-            led.setTenantId(2);
+            led.setTenantId(authUserUtil.tenantId());
             //查询该租户下是否存在相同sn被删除的灯，如果存在则修改，如果不存在则新增
             Led entity=  ledDao.findLed(led);
             if (entity == null) {
@@ -117,6 +116,7 @@ public class LedServiceImpl implements LedService {
         if (ledDao.findSnRepart(led.getSn(),led.getId()) > 0) {
             return ResultUtils.error("灯SN重复！");
         }
+        led.setTenantId(authUserUtil.tenantId());
         //查询该租户下是否存在相同sn被删除的灯，如果存在则原来的灯物理删除，然后进行修改，如果不存在则直接修改
         Led entity=  ledDao.findLed(led);
         if (entity == null) {
@@ -151,7 +151,7 @@ public class LedServiceImpl implements LedService {
         if (CheckUtils.isNumeric(id)) {
             if (ledDao.delete(Integer.parseInt(id)) > 0) {
                 //逻辑删除成功,给本地MQTT发送消息,修改status = 1
-                mqttSendServer.sendMQTTMessage(LedConst.LOCAL_TOPIC_LED_DELETE,JSON.toJSONString(id));
+                mqttSendServer.sendMQTTMessage(LedConst.LOCAL_TOPIC_LED_DELETE,id);
              /* String jsonStrLed = JSON.toJSONString(id);
                 SyncDataResult syncData = new SyncDataResult(Const.LED_TABLE_NAME, jsonStrLed, Const.SYNC_DATA_OPERATE_DELETE, headerUtil.tenantId());
                 dataSyncService.syncDataToLocal(syncData);*/

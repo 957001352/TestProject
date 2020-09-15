@@ -61,11 +61,6 @@ public interface GraphicStatisticsDao {
      */
     public Float selectLightOnline(@Param("ledSn") String ledSn);
 
-    /**
-     * 现在灯消耗的总能耗
-     */
-
-    public Float searchTotalEnergyBySn(@Param("ledSn") String ledSn);
 
     public Float searchTotalEnergy();
 

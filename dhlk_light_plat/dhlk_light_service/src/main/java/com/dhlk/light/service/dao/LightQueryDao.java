@@ -30,7 +30,7 @@ public interface LightQueryDao {
      * @param runDays  灯运行的天数
      * @return
      */
-    BigDecimal thriftCarbonEmission(@Param("runDays") Integer runDays,List<String> tenantIds);
+    //BigDecimal thriftCarbonEmission(@Param("runDays") Integer runDays,List<String> tenantIds);
 
     /**
      * 企业原始消耗能耗

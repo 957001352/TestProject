@@ -216,6 +216,7 @@ public class LightDeviceUtil {
         if(!CheckUtils.isNull(sns)){
             String userName=this.userName();
             Integer tenantId=headerUtil.tenantId();
+            //控制开关灯后3s websocket不给页面推送数据
             ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
             Future future = executorService.scheduleAtFixedRate(new Runnable() {
                 private int count = 0;
@@ -230,10 +231,12 @@ public class LightDeviceUtil {
                     //比对给没有mqtt未返回的灯重新发送
                     List<String> list = ledOnOffToMqttIsSuccess(sns,ts,Integer.parseInt(status),"onOff");
                     if (count > LedConst.RETRYCOUNT || list.size() == 0) {
+                        redisService.set(LedConst.REDIS_WEBSOCKET, 0, 3);  //增加30秒
                         //发送两次或者灯已经全部开启/关闭则停止定时任务
                         executorService.shutdown();
                         //更新返回结果
                         updateLedReord(userName,sns.split(","),ts,LedEnum.ONOFF,list,new LedResult(sns,LedEnum.ONOFF, new LedOnOff(Integer.parseInt(status)),ts,tenantId));
+
                     }
                 }
             }, 0, LedConst.RETRYTIME, TimeUnit.SECONDS);//延时5秒，每20秒发送一次，发送2次结束该任务。
@@ -722,9 +725,17 @@ public class LightDeviceUtil {
                     }
                     sendMessToMqtt(ledResult);
                 }
-                List<String> list = compareToMqttIsSuccess(sns,ts,cmdType);
+                List<String> list =null;
+                if(data.getClass().equals(IntensityInfo.class)){
+                    IntensityInfo light= (IntensityInfo) data;
+                    list = ledOnOffToMqttIsSuccess(sns,ts,light.getOn_off(),"light");
+                }else   if(data.getClass().equals(PeopleFeelInfo.class)){
+                    PeopleFeelInfo people= (PeopleFeelInfo) data;
+                    list = ledOnOffToMqttIsSuccess(sns,ts,people.getOn_off(),"people");
+                }else   if(data.getClass().equals(LedWifiInfo.class)){
+                    list = compareToMqttIsSuccess(sns,ts,cmdType);
+                }
                 if (count > LedConst.RETRYCOUNT || list.size() == 0) {
-
                     executorService.shutdown();
                     if(LedEnum.SETLIGHTFELL==cmdType){
                         acquireIntensity(sns, new IntensityInfo(),tenantId,1);

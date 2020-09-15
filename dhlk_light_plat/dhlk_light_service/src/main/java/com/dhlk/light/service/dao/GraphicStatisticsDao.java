@@ -65,14 +65,6 @@ public interface GraphicStatisticsDao {
      */
     public Float selectPower(@Param( value= "tenantId")  Integer tenantId);
 
-
-    /**
-     * 灯在线时长（单位，小时）
-     * @param ledSn
-     * @return
-     */
-    public Float selectLightOnline(@Param("ledSn") String ledSn);
-
     /**
      * 现在灯消耗的总能耗
      */

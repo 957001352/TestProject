@@ -8,12 +8,10 @@
           SELECT
 	        IFNULL(SUM( lp.energy ),0) AS totalEnergy
           FROM
-              dhlk_basic_tenant tenant
-              JOIN dhlk_light_led led ON tenant.id = led.tenant_id
-              JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+              dhlk_light_led_power lp
           WHERE
 	          DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = date( NOW( ) )
-	          AND tenant.id = #{tenantId}
+	          AND lp.tenant_id= #{tenantId}
     </select>
 
     <!--获取昨日能耗-->
@@ -21,12 +19,10 @@
           SELECT
             IFNULL(SUM( lp.energy ),0) AS yesterdayEnergy
           FROM
-              dhlk_basic_tenant tenant
-              JOIN dhlk_light_led led ON tenant.id = led.tenant_id
-              JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+             dhlk_light_led_power lp
           WHERE
               DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = date_sub(curdate(),interval 1 day)
-              AND tenant.id = #{tenantId}
+              AND lp.tenant_id= #{tenantId}
     </select>
 
     <!--获取累计能耗 所有灯累计能耗-->
@@ -35,11 +31,9 @@
           SELECT
             IFNULL( SUM( lp.energy ), 0 ) AS energyTotal
           FROM
-               dhlk_basic_tenant tenant
-               JOIN dhlk_light_led led ON tenant.id = led.tenant_id
-               JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+             dhlk_light_led_power lp
           WHERE
-              tenant.id = #{tenantId}
+              lp.tenant_id= #{tenantId}
     </select>
 
     <!--获取所有灯数-->
@@ -71,12 +65,10 @@
                 IFNULL(SUM( lp.energy ),0) AS totalEnergy,
                 DATE_FORMAT(lp.create_time,'%H') hours
          FROM
-                dhlk_basic_tenant tenant
-         JOIN dhlk_light_led led ON tenant.id = led.tenant_id
-         JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+                 dhlk_light_led_power lp
          WHERE
                 DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = CURDATE( )
-                and  tenant.id = #{tenantId}
+                and lp.tenant_id= #{tenantId}
         GROUP BY
             hours
     </select>
@@ -88,12 +80,10 @@
                 IFNULL(SUM( lp.energy ),0) AS totalEnergy,
                 DATE_FORMAT(lp.create_time,'%H') hours
         FROM
-                dhlk_basic_tenant tenant
-         JOIN dhlk_light_led led ON tenant.id = led.tenant_id
-         JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+             dhlk_light_led_power lp
         WHERE
                 DATE_FORMAT( lp.create_time, '%Y-%m-%d' ) = date_sub( curdate( ), INTERVAL 1 DAY )
-                and tenant.id = #{tenantId}
+                and lp.tenant_id= #{tenantId}
         GROUP BY
 			hours
 	</select>
@@ -104,12 +94,10 @@
             IFNULL(SUM( lp.energy ),0) AS totalEnergy,
             DATE_FORMAT(lp.create_time,'%d') day
         FROM
-            dhlk_basic_tenant tenant
-            JOIN dhlk_light_led led ON tenant.id = led.tenant_id
-            JOIN dhlk_light_led_power lp ON led.sn = lp.led_sn
+            dhlk_light_led_power lp
         WHERE
             DATE_FORMAT( lp.create_time, '%Y-%m' ) = #{date}
-			and tenant.id = ${tenantId}
+			and lp.tenant_id= #{tenantId}
         GROUP BY
         day
 
@@ -125,16 +113,6 @@
 	    where tenant_id = #{tenantId}
         ORDER BY id DESC
 	    LIMIT 1
-    </select>
-
-    <!--查询灯在线时长-->
-    <select id="selectLightOnline" resultType="java.lang.Float" parameterType="java.lang.String">
-        SELECT
-            IFNULL(SUM( online_time ),0)/60 AS OnLineTimeTotal
-        FROM
-            dhlk_light_led_online
-        WHERE
-            led_sn = #{ledSn}
     </select>
 
     <!--查询灯消耗的总能耗-->
@@ -160,10 +138,8 @@
          SELECT
 	        IFNULL(sum(led_power.energy),0) totalEnergy
          FROM
-	        dhlk_light_led led
-	    JOIN
-	        dhlk_light_led_power led_power ON  led.sn = led_power.led_sn
-	    where led.tenant_id = #{tenantId}
+	        dhlk_light_led_power led_power
+	    where led_power.tenant_id = #{tenantId}
     </select>
 
     <!--获取租户下所有灯在线时长-->
@@ -171,9 +147,8 @@
 	    SELECT
 	        IFNULL(sum(led_online.online_time)/60,0) totalOnlineTime
         FROM
-	        dhlk_light_led led
-	    JOIN dhlk_light_led_online led_online ON led.sn = led_online.led_sn
-	    where led.tenant_id = #{tenantId}
+	         dhlk_light_led_online led_online
+	    where led_online.tenant_id = #{tenantId}
     </select>
 
 </mapper>

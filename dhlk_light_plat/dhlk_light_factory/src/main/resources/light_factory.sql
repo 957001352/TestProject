@@ -223,6 +223,7 @@ create table dhlk_light_led_power_summarizing
    led_sn               varchar(100)                   DEFAULT NULL COMMENT '灯sn',
    create_time          timestamp                      DEFAULT NOW() COMMENT '统计时间',
    energy               decimal(12,4)                  DEFAULT NULL COMMENT '电能',
+   tenant_id            integer                        DEFAULT NULL COMMENT '租户对象',
    isSend               char(2)                        DEFAULT '0' COMMENT '是否往云端发送成功，0失败 1成功',
    primary key  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='灯能耗，一小时汇总一次';
@@ -296,6 +297,7 @@ create table dhlk_light_led_online
    led_sn               varchar(100)                   DEFAULT NULL COMMENT '灯sn',
    create_time          timestamp                      DEFAULT NOW() COMMENT '创建时间',
    online_time          integer                        DEFAULT NULL COMMENT '在线时长(分钟)',
+   tenant_id            integer                        DEFAULT NULL COMMENT '租户对象',
    isSend               char(2)                        DEFAULT '0' COMMENT '是否往云端发送成功，0失败 1成功',
    primary key  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='灯在线统计，按小时统计灯在线多少分钟';

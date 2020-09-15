@@ -16,7 +16,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.2.162:3306/dhlk_light_factory?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
     username: root
-    password: 1111
+    password: dhlktech
     hikari:
       minimum-idle: 5 # 连接池中维护的最小空闲连接数
       maximum-pool-size: 150  # 配置最大池大小
@@ -65,7 +65,7 @@ reverseProxy:
 mqttcloud:
   username: dhlk #MQTT-用户名
   password: dhlktech #MQTT-密码
-  host: tcp://192.168.2.162:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+  host: tcp://68.79.30.98:1883 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
   saveHdfs: false
 #云端MQTT配置信息
 mqttlocal:

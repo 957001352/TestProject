@@ -4,9 +4,11 @@ import com.dhlk.entity.light.CloudPeopleFeelStatistics;
 import com.dhlk.entity.light.LedOnline;
 import com.dhlk.entity.light.LedPower;
 import com.dhlk.entity.light.LocalPeopleFeelStatistics;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -73,9 +75,14 @@ public interface LedPowerDao {
     /**
      * 本地每小时汇总灯能耗数据存入能耗汇总表
      */
-    public Integer insertBySumEnergy(List<LedPower> list);
+    public Integer insertBySumEnergy(@Param(value = "list") List<LedPower> list,@Param(value = "tenantId") Integer tenantId);
 
-    public Integer insertOnlineList(List<LedOnline> list);
+    /**
+     * 在线时长
+     * @param list
+     * @return
+     */
+    public Integer insertOnlineList(@Param(value = "list") List<LedOnline> list,@Param(value = "tenantId") Integer tenantId);
 
 
     /**

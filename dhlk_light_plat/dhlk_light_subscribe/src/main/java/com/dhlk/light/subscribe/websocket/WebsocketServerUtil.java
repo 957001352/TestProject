@@ -174,6 +174,10 @@ public class WebsocketServerUtil {
             if (StringUtils.isEmpty(sns)) {
                 return null;
             }
+            //开关灯后3s websocket不给页面推送数据
+            if(redisService.hasKey(LedConst.REDIS_WEBSOCKET)){
+                return null;
+            }
             Map<String, LedPower> map = new HashMap<>();
             long s=System.currentTimeMillis();
             for (String sn : sns.split(",")) {

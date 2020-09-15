@@ -42,44 +42,6 @@ public class GraphicStatisticsServiceImpl implements GraphicStatisticsService {
     @Autowired
     private OriginalPowerDao originalPowerDao;
 
-    /**
-     * 获取今日能耗、昨日能耗、总能耗、灯在线数、离线数
-     *
-     * @return
-     */
-    @Override
-    public Result getLightEnergyAndlightCount() {
-
-        int lightOnLineCount = 0;
-        GraphicStatistics graphicStatistics = new GraphicStatistics();
-        //获取今日消耗能耗
-        graphicStatistics.setTodayEnergy(graphicStatisticsDao.getTodayEnergy());
-        //获取昨日消耗能耗
-        graphicStatistics.setYesterdayEnergy(graphicStatisticsDao.getYesterdayEnergy());
-        //获取总消耗能耗
-        graphicStatistics.setLightEnergyTotal(graphicStatisticsDao.getEnergyTotal());
-        //获取灯总数
-        graphicStatistics.setLightTotal(graphicStatisticsDao.getLightTotal());
-
-        List<String> snList = graphicStatisticsDao.getAllLightSn();
-        //从redis中获取灯在线数
-        if (snList != null && snList.size() > 0) {
-            for (String sn : snList) {
-                if (redisService.hasKey(LedConst.REDIS_POWER + sn)) {
-                    LedPower ledPower = JSON.parseObject(redisService.get(LedConst.REDIS_POWER + sn).toString(), LedPower.class);
-                    //1在线 0离线
-                    if ("1".equals(ledPower.getStatus())) {
-                        lightOnLineCount++;
-                    }
-                }
-            }
-        }
-        graphicStatistics.setLightOnlineCount(lightOnLineCount);
-
-
-        return ResultUtils.success(graphicStatistics);
-    }
-
 
     /**
      * 今日与昨日能耗对比接口

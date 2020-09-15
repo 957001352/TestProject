@@ -101,12 +101,12 @@
     <insert id="insertPower">
          insert into dhlk_light_led_power
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                    led_sn,electric,voltage,power,energy,brightness,create_time
+                    led_sn,electric,voltage,power,energy,brightness,create_time,tenant_id
             </trim>
             values
                 <foreach collection="list" item="item" index="index" separator="," >
                     <trim prefix="(" suffix=")" suffixOverrides=",">
-                        #{item.ledSn},#{item.electric},#{item.voltage},#{item.power},#{item.energy},#{item.ledBrightness},#{item.createTime}
+                        #{item.ledSn},#{item.electric},#{item.voltage},#{item.power},#{item.energy},#{item.ledBrightness},#{item.createTime},#{item.tenantId}
                     </trim>
                 </foreach>
     </insert>
@@ -128,12 +128,12 @@
     <insert id="insertOnlineList">
          insert into dhlk_light_led_online
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                led_sn,online_time
+                led_sn,online_time,tenant_id,online_hour
             </trim>
         values
             <foreach collection="list" item="item" index="index" separator="," >
                 <trim prefix="(" suffix=")" suffixOverrides=",">
-                    #{item.ledSn},#{item.onlineTime}
+                    #{item.ledSn},#{item.onlineTime},#{item.tenantId},now()
                 </trim>
             </foreach>
     </insert>

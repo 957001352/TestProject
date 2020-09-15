@@ -21,12 +21,6 @@ public class GraphicStatisticsController {
     @Autowired
     GraphicStatisticsService graphicStatisticsService;
 
-   /* @ApiOperation("获取今日能耗、昨日能耗、总能耗、灯在线数、离线数")
-    @GetMapping("/getLightEnergyAndlightCount")
-    public Result getLightEnergyAndlightCount() {
-        return graphicStatisticsService.getLightEnergyAndlightCount();
-    }*/
-
     @ApiOperation("今日与昨日能耗对比接口")
     @GetMapping("/getTodayEnergyPKYesterdayEnergy")
     public Result getTodayEnergyPKYesterdayEnergy() {

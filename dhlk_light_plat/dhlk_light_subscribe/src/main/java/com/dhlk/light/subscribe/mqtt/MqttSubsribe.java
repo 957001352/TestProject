@@ -105,23 +105,22 @@ public class MqttSubsribe {
     public void reConcatMqtt(MqttClient client) {
         while (true) {
             try {
+                if (startSubsribe(client)) {
+                    log.info("云端订阅重连成功....." + System.currentTimeMillis());
+                    break;
+                }
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (startSubsribe(client)) {
-                log.info("云端订阅重连成功....." + System.currentTimeMillis());
-                break;
-            }
+
         }
     }
 
     @Bean
     public void start() {
         MqttClient client = connect();
-        if (!startSubsribe(client)) {
-            reConcatMqtt(client);
-        }
+        startSubsribe(client);
     }
 
 }
