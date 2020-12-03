@@ -51,6 +51,19 @@
         </trim>
         where id = #{id}
     </update>
+    <update id="updateLocation" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update dhlk_light_led
+            <trim prefix="SET" suffixOverrides=",">
+               <if test="item.xaxis != null  and item.xaxis != ''">xaxis=#{item.xaxis},</if>
+               <if test="item.yaxis != null  and item.yaxis != ''">yaxis=#{item.yaxis},</if>
+            </trim>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+
+
     <update id="delete" parameterType="integer">
         update dhlk_light_led set status = 1 where id =#{id}
     </update>
@@ -114,12 +127,12 @@
     <insert id="insertPeopleFell">
          insert into dhlk_light_cloud_people_feel_statistics
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                led_sn,number,create_time
+                led_sn,number,create_time,tenant_id
             </trim>
         values
         <foreach collection="list" item="item" index="index" separator="," >
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                #{item.ledSn},#{item.number},now()
+                #{item.ledSn},#{item.number},now(),#{item.tenantId}
             </trim>
         </foreach>
     </insert>
@@ -203,5 +216,12 @@
 
     <select id="findLed" resultType="com.dhlk.entity.light.Led">
         select * from dhlk_light_led where  sn =#{sn} and status =1 and  tenant_id =#{tenantId}
+    </select>
+
+    <select id="findSnByTenantId" resultType="java.lang.String">
+        select sn from dhlk_light_led where status = 0
+        <if test="tenantId != null  and tenantId != ''">
+            and tenant_id =#{tenantId}
+        </if>
     </select>
 </mapper>

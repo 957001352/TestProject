@@ -159,7 +159,6 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public Result getTenantCode() {
-        System.out.println("----------->"+System.currentTimeMillis());
         Tenant tenant = tenantDao.findTenantByCode(null);
         if(tenant == null){
             return ResultUtils.success("");

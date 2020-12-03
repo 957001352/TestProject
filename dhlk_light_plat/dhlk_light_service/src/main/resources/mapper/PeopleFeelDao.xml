@@ -25,31 +25,31 @@
     <insert id="insert" parameterType="com.dhlk.entity.light.PeopleFeel" useGeneratedKeys="true" keyProperty="id">
         insert into dhlk_light_people_feel
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="on_off != null and  on_off != ''">on_off,</if>
-            <if test="trig_delay_tm != null  and trig_delay_tm != ''">trig_delay_tm,</if>
-            <if test="n_ramp_tm != null  and n_ramp_tm != ''">n_ramp_tm,</if>
-            <if test="minvalue != null  and minvalue != ''">minvalue,</if>
-            <if test="maxvalue != null  and maxvalue != ''">maxval,</if>
-            <if test="tenantId != null and tenantId != ''">tenant_id</if>
+            <if test="on_off != null">on_off,</if>
+            <if test="trig_delay_tm != null">trig_delay_tm,</if>
+            <if test="n_ramp_tm != null">n_ramp_tm,</if>
+            <if test="minvalue != null">minvalue,</if>
+            <if test="maxvalue != null">maxval,</if>
+            <if test="tenantId != null">tenant_id</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="on_off != null and  on_off != ''">#{on_off},</if>
-            <if test="trig_delay_tm != null  and trig_delay_tm != ''">#{trig_delay_tm},</if>
-            <if test="n_ramp_tm != null  and n_ramp_tm != ''">#{n_ramp_tm},</if>
-            <if test="minvalue != null  and minvalue != ''">#{minvalue},</if>
-            <if test="maxvalue != null  and maxvalue != ''">#{maxvalue},</if>
-            <if test="tenantId != null and tenantId != ''">#{tenantId}</if>
+            <if test="on_off != null">#{on_off},</if>
+            <if test="trig_delay_tm != null">#{trig_delay_tm},</if>
+            <if test="n_ramp_tm != null">#{n_ramp_tm},</if>
+            <if test="minvalue != null">#{minvalue},</if>
+            <if test="maxvalue != null ">#{maxvalue},</if>
+            <if test="tenantId != null">#{tenantId}</if>
         </trim>
     </insert>
 
     <update id="update" parameterType="com.dhlk.entity.light.PeopleFeel">
         update dhlk_light_people_feel
         <trim prefix="SET" suffixOverrides=",">
-            <if test="on_off != null and  on_off != ''">on_off = #{on_off},</if>
-            <if test="trig_delay_tm != null  and trig_delay_tm != ''">trig_delay_tm = #{trig_delay_tm},</if>
-            <if test="n_ramp_tm != null  and n_ramp_tm != ''">n_ramp_tm = #{n_ramp_tm},</if>
-            <if test="minvalue != null  and minvalue != ''">minvalue = #{minvalue},</if>
-            <if test="maxvalue != null  and maxvalue != ''">maxval = #{maxvalue}</if>
+            <if test="on_off != null">on_off = #{on_off},</if>
+            <if test="trig_delay_tm != null">trig_delay_tm = #{trig_delay_tm},</if>
+            <if test="n_ramp_tm != null">n_ramp_tm = #{n_ramp_tm},</if>
+            <if test="minvalue != null">minvalue = #{minvalue},</if>
+            <if test="maxvalue != null">maxval = #{maxvalue}</if>
         </trim>
         where id = #{id}
     </update>

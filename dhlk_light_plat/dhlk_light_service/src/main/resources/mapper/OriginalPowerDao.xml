@@ -10,10 +10,11 @@
         <result property="tenantId" jdbcType="INTEGER" column="tenant_id"/>
         <result property="preBrightness" jdbcType="INTEGER" column="pre_brightness"/>
         <result property="systemRunTime" jdbcType="VARCHAR" column="sys_runtime"/>
+        <result property="iconSize" jdbcType="VARCHAR" column="icon_size"/>
     </resultMap>
 
     <sql id="baseColumn">
-         id,led_count, led_power, led_opentime, tenant_id,pre_brightness,sys_runtime
+         id,led_count, led_power, led_opentime, tenant_id,pre_brightness,sys_runtime,icon_size
     </sql>
 
     <select id="selectTenantById" parameterType="INTEGER" resultType="com.dhlk.entity.light.OriginalPower">
@@ -30,7 +31,8 @@
             <if test="ledOpentime != null  and ledOpentime != ''">led_opentime,</if>
             <if test="tenantId != null and tenantId != ''">tenant_id,</if>
             <if test="preBrightness != null and preBrightness != ''">pre_brightness,</if>
-            <if test="systemRunTime != null and systemRunTime != ''">sys_runtime</if>
+            <if test="systemRunTime != null and systemRunTime != ''">sys_runtime,</if>
+            <if test="iconSize != null and iconSize != ''">icon_size</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="ledCount != null and  ledCount != ''">#{ledCount},</if>
@@ -38,7 +40,8 @@
             <if test="ledOpentime != null  and ledOpentime != ''">#{ledOpentime},</if>
             <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
             <if test="preBrightness != null and preBrightness != ''">#{preBrightness},</if>
-            <if test="systemRunTime != null and systemRunTime != ''">#{systemRunTime}</if>
+            <if test="systemRunTime != null and systemRunTime != ''">#{systemRunTime},</if>
+            <if test="iconSize != null and iconSize != ''">#{iconSize}</if>
         </trim>
     </insert>
 
@@ -47,7 +50,8 @@
         <trim prefix="SET" suffixOverrides=",">
             <if test="ledCount != null and  ledCount != ''">led_count = #{ledCount},</if>
             <if test="ledPower != null  and ledPower != ''">led_power = #{ledPower},</if>
-            <if test="ledOpentime != null  and ledOpentime != ''">led_opentime = #{ledOpentime}</if>
+            <if test="ledOpentime != null  and ledOpentime != ''">led_opentime = #{ledOpentime},</if>
+            <if test="iconSize != null  and iconSize != ''">icon_size = #{iconSize}</if>
         </trim>
         where id = #{id}
     </update>

@@ -60,11 +60,11 @@ public class AppLoginServiceImpl implements AppLoginService {
         if (!userBean.getPassword().equals(password)) {
             return ResultUtils.error(ResultEnum.USERNAME_PASSWORDEROR.getStateInfo());
         }
-        if(userBean.getTenantId() != null && userBean.getTenantId() != tenantByCode.getId()){
+        if(userBean.getTenantId() != null && !userBean.getTenantId().equals(tenantByCode.getId())){
             return ResultUtils.error(ResultEnum.USERNAME_PASSWORDEROR.getStateInfo());
         }
 
-        if (userBean.getStatus() == Const.STATUS_BAN){ //检查用户状态是否为禁用状态
+        if (userBean.getStatus().equals(Const.STATUS_BAN)){ //检查用户状态是否为禁用状态
             return ResultUtils.error(ResultEnum.BAN_USR.getStateInfo());
         }
         if(userBean.getTenantId() != null){

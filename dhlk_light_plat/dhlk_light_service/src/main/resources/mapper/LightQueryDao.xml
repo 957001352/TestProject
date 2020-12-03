@@ -17,7 +17,7 @@
         union all
         select count(0) count from  dhlk_light_led l
           left join dhlk_basic_tenant t on t.id=l.tenant_id
-        where t.status=0
+        where t.status=0 and l.status=0
         <if test="province != null  and province != ''">
             and substring_index(adress,',',1)=#{province}
         </if>
@@ -32,7 +32,7 @@
                 substring_index(adress,',',1) province,
             </otherwise>
         </choose>
-        sum((select count(0) from dhlk_light_led l where l.tenant_id=t.id)) count
+        sum((select count(0) from dhlk_light_led l where l.tenant_id=t.id and l.status=0)) count
         from dhlk_basic_tenant t  where t.status=0
         <if test="province != null  and province != ''">
             and substring_index(adress,',',1) =#{province}

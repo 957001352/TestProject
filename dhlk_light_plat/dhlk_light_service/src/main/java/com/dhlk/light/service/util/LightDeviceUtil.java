@@ -63,7 +63,7 @@ public class LightDeviceUtil {
                 @Override
                 public void run() {
                     count++;
-                    if (ledEnum.getState() == LedEnum.RESTART.getState()) {
+                    if (ledEnum.getState().equals(LedEnum.RESTART.getState())) {
                         backRes = redisService.get(sn + "_" + ledEnum.getState());
                         //有返回结果或者等待100毫秒，跳出
                         if (backRes != null || count > 9) {
@@ -85,7 +85,7 @@ public class LightDeviceUtil {
                         }
                     }
                 }
-            }, 0, 250, TimeUnit.MILLISECONDS);
+            }, 0, 100, TimeUnit.MILLISECONDS);
         }
         try {
             countDown.await();//阻塞在这里,等到所有线程返回结果
@@ -155,12 +155,17 @@ public class LightDeviceUtil {
         }else if(type.equals("light")){
             if(status==1){
                 redisService.set(LedConst.REDIS_LIGHTFELL + sn, status.toString(), LedConst.REDISTTIME);  //增加30秒
+                //开光感，关人感
+                redisService.del(LedConst.REDIS_PEOPLEFELL + sn);//人感触发上报值
+                redisService.del(LedConst.REDIS_PEOPLEONOFF+sn);  //人感开关状态值
             }else{
                 redisService.del(LedConst.REDIS_LIGHTFELL + sn);
             }
         }else if(type.equals("people")){
             if(status==1){
                 redisService.set(LedConst.REDIS_PEOPLEFELL + sn, status.toString(), LedConst.REDISTTIME);  //增加30秒
+                //开人感，关光感
+                redisService.del(LedConst.REDIS_LIGHTFELL + sn);
             }else{
                 redisService.del(LedConst.REDIS_PEOPLEFELL + sn);
             }
@@ -633,7 +638,7 @@ public class LightDeviceUtil {
                         countDown.countDown();
                     }
                 }
-            }, 0, 18, TimeUnit.SECONDS);
+            }, 0, 300, TimeUnit.MILLISECONDS);
         }
         try {
             countDown.await();//阻塞在这里,等到所有线程返回结果
@@ -644,23 +649,24 @@ public class LightDeviceUtil {
             return ledSns;
         }
         if(LedEnum.GETLIGHTFELL== cmdType){
-            updateLedParam(ledSns,LedConst.REDIS_LIGHTFELL_RETURN,ts);
+            updateControLedParam(ledSns,LedConst.REDIS_LIGHTFELL_RETURN,ts);
         }else if(LedEnum.GETPEOPLEFELL == cmdType){
-            updateLedParam(ledSns,LedConst.REDIS_PEOPLEFELL_RETURN,ts);
+            updateControLedParam(ledSns,LedConst.REDIS_PEOPLEFELL_RETURN,ts);
         }else if(LedEnum.GETWIFI== cmdType){
-            updateLedParam(ledSns,LedConst.REDIS_WIFI_RETURN,ts);
+            updateControLedParam(ledSns,LedConst.REDIS_WIFI_RETURN,ts);
         }else if(LedEnum.GETVERSION== cmdType){
-            updateLedParam(ledSns,LedConst.REDIS_VERSION_RETURN,ts);
+            updateControLedParam(ledSns,LedConst.REDIS_VERSION_RETURN,ts);
         }
         log.info("停止"+cmdType.getStateInfo()+"任务...");
         return ledSns;
     }
 
+
     /**
-     * 更新灯参数数据
+     * 设置参数时更新灯参数数据
      */
 
-    public void updateLedParam(List<String> sns,String key,long ts){
+    public void updateControLedParam(List<String> sns,String key,long ts){
         List<LedParamInfo> insertData = new ArrayList<>();
         List<LedParamInfo> updateData = new ArrayList<>();
         for (String sn:sns){
@@ -695,10 +701,6 @@ public class LightDeviceUtil {
 
         }
     }
-
-
-
-
 
 
     /**
@@ -766,12 +768,12 @@ public class LightDeviceUtil {
     /**
      * 获取返回参数，判断是否设置成功
      */
-    public void sendMessageToMqttControWifi(String sns,LedEnum cmdType,LedEnum devType,Object data,Integer tenantId){
-        String userName=this.userName();
+    public List<String> sendMessageToMqttControWifi(String sns, Integer tenantId){
         CountDownLatch countDown = new CountDownLatch(1);//设置线程阻塞等待
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
         Long ts=System.currentTimeMillis();
         String[] split = sns.split(",");
+        List<String> list = new ArrayList<>();
         Future future = executorService.scheduleAtFixedRate(new Runnable() {
             private int count = 0;
             @Override
@@ -779,19 +781,30 @@ public class LightDeviceUtil {
                 count++;
                 //给mqtt发送命令
                 for (String sn : split) {
-                    LedResult ledResult = new LedResult(sn,cmdType,devType,data,ts,tenantId);
-                    if(data == null){
-                        ledResult = new LedResult(sn,cmdType,devType,ts);
+                    sendMessToMqtt(new LedResult(sn,LedEnum.GETLIGHTFELL,LedEnum.DEVLIGHT,new IntensityInfo(),ts,tenantId));
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    sendMessToMqtt(ledResult);
+                    sendMessToMqtt(new LedResult(sn,LedEnum.GETPEOPLEFELL,LedEnum.DEVLIGHT,new PeopleFeelInfo(),ts,tenantId));
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    sendMessToMqtt(new LedResult(sn,LedEnum.GETWIFI,LedEnum.DEVLIGHT,new LedWifiInfo(),ts,tenantId));
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    sendMessToMqtt(new LedResult(sn,LedEnum.GETVERSION,LedEnum.DEVLIGHT,new Version<Integer>(0),ts,tenantId));
                 }
-                List<String> list = compareToMqttIsSuccess(sns,ts,cmdType);
-                if (count > LedConst.RETRYCOUNT|| list.size() == 0) {
-                    LedResult ledResult = new LedResult(sns,cmdType,devType,data,ts,tenantId);
-                    if(data == null){
-                        ledResult = new LedResult(sns,cmdType,devType,ts,tenantId);
-                    }
-                    updateLedReord(userName,sns.split(","),ts,cmdType,list,ledResult);
+                List<String> backSns = compareToMqttIsSuccessIPWV(sns,ts);
+                list.addAll(backSns);
+
+                if (count > LedConst.RETRYCOUNT || list.size() == 0) {
                     executorService.shutdown();
                     countDown.countDown();
                 }
@@ -803,22 +816,122 @@ public class LightDeviceUtil {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        updateAquireLedParam(split,LedConst.REDIS_LIGHTFELL_RETURN,ts);
+        return list;
+    }
 
-        if(LedEnum.GETLIGHTFELL== cmdType){
-            updateLedParam(Arrays.asList(split),LedConst.REDIS_LIGHTFELL_RETURN,ts);
-            sendMessageToMqttControWifi(sns,LedEnum.GETPEOPLEFELL,LedEnum.DEVLIGHT,new PeopleFeelInfo(),tenantId);
-        }else if(LedEnum.GETPEOPLEFELL == cmdType){
-            updateLedParam(Arrays.asList(split),LedConst.REDIS_PEOPLEFELL_RETURN,ts);
-            sendMessageToMqttControWifi(sns,LedEnum.GETWIFI,LedEnum.DEVLIGHT,new LedWifiInfo(),tenantId);
-        }else if(LedEnum.GETWIFI== cmdType){
-            updateLedParam(Arrays.asList(split),LedConst.REDIS_WIFI_RETURN,ts);
-            sendMessageToMqttControWifi(sns,LedEnum.GETVERSION,LedEnum.DEVLIGHT,new Version(0),tenantId);
-        }else if(LedEnum.GETVERSION== cmdType){
-            updateLedParam(Arrays.asList(split),LedConst.REDIS_VERSION_RETURN,ts);
+    /**
+     * 获取参数时更新灯参数数据
+     */
+
+    public void updateAquireLedParam(String[] sns,String key,long ts){
+        List<LedParamInfo> insertData = new ArrayList<>();
+        List<LedParamInfo> updateData = new ArrayList<>();
+        for (String sn:sns){
+            //更新灯参数数据库数据
+            String intensityInfo = redisService.get(LedConst.REDIS_LIGHTFELL_RETURN+sn + "_" + ts)+"";
+            String peopleFeelInfo = redisService.get(LedConst.REDIS_PEOPLEFELL_RETURN+sn + "_" + ts)+"";
+            String ledWifiInfo = redisService.get(LedConst.REDIS_WIFI_RETURN+sn + "_" + ts)+"";
+            String versionInfo = redisService.get(LedConst.REDIS_VERSION_RETURN+sn + "_" + ts)+"";
+
+            IntensityInfo intensity = null;
+            PeopleFeelInfo peopleFeel = null;
+            LedWifiInfo ledWifi = null;
+            Version version = null;
+
+            if(!"null".equals(intensityInfo) && !"".equals(intensityInfo)) {
+                intensity = JSON.parseObject(intensityInfo, IntensityInfo.class);
+            }
+            if(!"null".equals(peopleFeelInfo) && !"".equals(peopleFeelInfo)) {
+                peopleFeel = JSON.parseObject(peopleFeelInfo, PeopleFeelInfo.class);
+            }
+            if(!"null".equals(ledWifiInfo) && !"".equals(ledWifiInfo)) {
+                ledWifi = JSON.parseObject(ledWifiInfo, LedWifiInfo.class);
+            }
+            if(!"null".equals(versionInfo) && !"".equals(versionInfo)) {
+                version = JSON.parseObject(versionInfo, Version.class);
+            }
+            LedParamInfo ledParamInfo = new LedParamInfo(intensity,peopleFeel,ledWifi,version);
+            if(!"{}".equals(JSON.toJSONString(ledParamInfo))){
+                ledParamInfo.setSn(sn);
+                Integer ledParamInfoId = ledParamInfoService.isExistSn(ledParamInfo.getSn());
+                if ( ledParamInfoId != null ) {
+                    ledParamInfo.setId(ledParamInfoId);
+                    updateData.add(ledParamInfo);
+                } else {
+                    insertData.add(ledParamInfo);
+                }
+            }
+        }
+
+        if(insertData.size() > 0)
+            ledParamInfoService.insertList(insertData);
+
+        if(updateData.size() > 0){
+            ledParamInfoService.updateList(updateData);
         }
     }
 
-    public void refreshParam(String sns,Integer tenantId) {
-        sendMessageToMqttControWifi(sns,LedEnum.GETLIGHTFELL,LedEnum.DEVLIGHT,new IntensityInfo(),tenantId);
+
+    /**
+     * 将用户发送的光感、人感、WIFI与redis进行比较，如果redis存在，说明mqtt已经返回
+     * @param sns
+     * @return
+     */
+    private List<String> compareToMqttIsSuccessIPWV(String sns, Long ts) {
+        List<String> ledSns = new ArrayList<>();
+        CountDownLatch countDown = new CountDownLatch(sns.split(",").length);//设置线程阻塞等待
+        for (String sn : sns.split(",")) {
+            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+            Future future = executorService.scheduleAtFixedRate(new Runnable() {
+                boolean backRes = false;
+                boolean backRes1 = false;
+                boolean backRes2 = false;
+                boolean backRes3 = false;
+                boolean backRes4 = false;
+                private int count = 0;
+                @Override
+                public void run() {
+                    // rediskey+jsonObject.get("SN") + "_" + jsonObject.get("ts")
+                    count++;
+                    if(backRes1){
+                        backRes1 = redisService.hasKey(LedConst.REDIS_LIGHTFELL_RETURN + sn + "_" + ts);
+                    }
+                    if(backRes2){
+                        backRes2 = redisService.hasKey(LedConst.REDIS_PEOPLEFELL_RETURN + sn + "_" + ts);
+                    }
+                    if(backRes3){
+                        backRes3 = redisService.hasKey(LedConst.REDIS_WIFI_RETURN + sn + "_" + ts);
+                    }
+                    if(backRes4){
+                        backRes4 = redisService.hasKey(LedConst.REDIS_VERSION_RETURN + sn + "_" + ts);
+                    }
+                    if(backRes1&&backRes2&&backRes3&&backRes4){
+                        backRes = true;
+                    }
+                    if (backRes || count > 10) {
+                        if (!backRes) {
+                            ledSns.add(sn);
+                        }
+                        executorService.shutdown();
+                        countDown.countDown();
+                    }
+                }
+            }, 0, 100, TimeUnit.MILLISECONDS);
+        }
+        try {
+            countDown.await();//阻塞在这里,等到所有线程返回结果
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ledSns;
     }
+
+
+    public void refreshParam(String sns,Integer tenantId) {
+        sendMessageToMqttControWifi(sns,tenantId);
+    }
+
+
+
 }

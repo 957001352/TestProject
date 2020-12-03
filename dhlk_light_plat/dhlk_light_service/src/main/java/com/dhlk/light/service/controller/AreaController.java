@@ -81,4 +81,17 @@ public class AreaController {
     public Result findAreaRepeat(@RequestParam(value = "name") String name) {
         return areaService.findAreaRepeat(name);
     }
+
+
+    /**
+     * 修改
+     *
+     * @param area
+     * @return
+     */
+    @PostMapping("/update")
+    @RequiresPermissions("area:edit")
+    public Result update(@RequestBody Area area) {
+        return areaService.update(area);
+    }
 }

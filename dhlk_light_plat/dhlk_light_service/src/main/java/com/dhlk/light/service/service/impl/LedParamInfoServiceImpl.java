@@ -68,14 +68,14 @@ public class LedParamInfoServiceImpl implements LedParamInfoService {
 
     @Override
     public Result refreshParam(InfoBox<String> infoBox) {
-        if(CheckUtils.isNull(infoBox.getSns()) || CheckUtils.isNull(infoBox.getTenantId())){
-            return ResultUtils.failure();
-        }
-        if(redisService.hasKey(LedConst.REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_+headerUtil.cloudToken())){
-            return ResultUtils.error("操作间隔不得小于1分钟");
-        }
-        redisService.set(LedConst.REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_+headerUtil.cloudToken(),infoBox,LedConst.REFRESHPARAM_TIME);
-        lightDeviceUtil.refreshParam(infoBox.getSns(),infoBox.getTenantId());
-        return ResultUtils.success();
+//        if(CheckUtils.isNull(infoBox.getSns()) || CheckUtils.isNull(infoBox.getTenantId())){
+//            return ResultUtils.failure();
+//        }
+//        if(redisService.hasKey(LedConst.REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_+headerUtil.cloudToken())){
+//            return ResultUtils.error("操作间隔不得小于1分钟");
+//        }
+//        redisService.set(LedConst.REDIS_RECORD_REFRESH_REFRESHPARAM_TIME_+headerUtil.cloudToken(),infoBox,LedConst.REFRESHPARAM_TIME);
+        lightDeviceUtil.sendMessageToMqttControWifi(infoBox.getSns(), infoBox.getTenantId());
+        return ResultUtils.success(ledParamInfoDao.findParamBySn(infoBox.getSns().split(",")));
     }
 }

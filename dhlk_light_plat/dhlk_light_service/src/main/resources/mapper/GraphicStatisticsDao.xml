@@ -45,7 +45,7 @@
                dhlk_basic_tenant tenant
                JOIN dhlk_light_led led ON tenant.id = led.tenant_id
           WHERE
-              tenant.id = #{tenantId}
+              tenant.id = #{tenantId}  and led.status=0
     </select>
 
     <!--获取所有灯SN-->
@@ -56,7 +56,7 @@
 	            dhlk_basic_tenant tenant
                 JOIN dhlk_light_led led ON tenant.id = led.tenant_id
             where
-		       tenant.id = #{tenantId}
+		       tenant.id = #{tenantId}  and led.status=0
     </select>
 
     <!--获取今日能耗，按小时进行分组-->
@@ -130,7 +130,7 @@
         	SELECT
 		        sn
 	        from
-                dhlk_light_led
+                dhlk_light_led where status=0
     </select>
 
     <!--获取租户下所有灯消耗能耗-->

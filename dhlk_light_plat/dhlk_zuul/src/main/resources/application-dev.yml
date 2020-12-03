@@ -46,6 +46,10 @@ zuul:
       path: /light-service/**
       serviceId: light-service #灯联网服务
       sensitiveHeaders: "*"
+    light-service-ai:
+      path: /light-service-ai/**
+      serviceId: light-service-ai #AI服务
+      sensitiveHeaders: "*"
     proxy-service:
       path: /proxy-service/**
       serviceId: proxy-service

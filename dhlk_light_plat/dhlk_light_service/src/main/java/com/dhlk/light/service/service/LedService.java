@@ -1,11 +1,9 @@
 package com.dhlk.light.service.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dhlk.domain.Result;
 import com.dhlk.entity.api.ApiList;
-import com.dhlk.entity.light.Led;
-import com.dhlk.entity.light.LedOnline;
-import com.dhlk.entity.light.LedPower;
-import com.dhlk.entity.light.Switch;
+import com.dhlk.entity.light.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -54,6 +52,12 @@ public interface LedService {
      * 在线时长统计
      */
     Result saveOnline(LedOnline ledOnline);
+
+    /**
+     * 人感统计
+     */
+    Result savePeopleList(String json);
+
 
     /**
      * 批量插入在线时长
@@ -117,6 +121,15 @@ public interface LedService {
      * @return
      */
     Result update(Led led);
+    /**
+     * 修改位置
+     * @param leds
+     * @return
+     */
+    Result updateLocation(List<Led> leds);
+
+
+
 
 
     /**
@@ -146,4 +159,12 @@ public interface LedService {
      * @return
      */
     Result findLedsByArea(String areaId);
+
+    /**
+     * 显示图标大小
+     * @return
+     */
+    Result showIconSize();
+
+    Result syncLedBrightness(String brightness);
 }

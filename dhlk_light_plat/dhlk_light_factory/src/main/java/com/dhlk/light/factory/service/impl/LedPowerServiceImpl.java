@@ -26,10 +26,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -97,10 +94,35 @@ public class LedPowerServiceImpl implements LedPowerService {
      */
     @Scheduled(cron = "0 0 23 * * ?")
     @Override
-    public void peopleFeelStatistics() {
+    public void peopleFeelStatistics() throws Exception {
+
+        //请求头
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("dataType", "json");
+
         List<CloudPeopleFeelStatistics> list = ledPowerDao.peopleFeelStatistics();
         if (list != null && list.size() > 0) {
-            mqttCloudSender.sendMQTTMessage(LedConst.LOCAL_TOPIC_PEOPLE_FEEL_DATASYNC, JSONObject.toJSONString(list));
+            //调用获取验证码接口，判断云端服务运行是否正常
+            if (HttpClientUtils.doGet(baseUrl + "/kaptcha/").getCode() == 200) {
+                //list分组 100条为一组
+                Map<String, List> map = groupList(list);
+                for (List pfList : map.values()) {
+                    String ledPowerListJson = JSON.toJSONString(pfList);
+                    try {
+                        //将（灯能耗数据和灯在线时长数据）通过http传给云服务
+                        HttpClientResult httpClientResult = HttpClientUtils.doPostStringParams(baseUrl + "/led/savePeopleList/", headers, ledPowerListJson);
+                        Result result = JSON.parseObject(httpClientResult.getContent(), Result.class);
+                        if (result.getCode() == 0) {
+                            //发送成功，更新人感状态
+                            ledPowerDao.updatePeopleFellStatus(pfList);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
         }
     }
 
@@ -121,31 +143,40 @@ public class LedPowerServiceImpl implements LedPowerService {
             List<LedPower> ftList = lpList.stream().filter(k -> k.getEnergy().compareTo(BigDecimal.ZERO) == 1).collect(Collectors.toList());
             if (ftList != null && ftList.size() > 0) {
                 Integer tenantId = tenantDao.findTenantId();
-                if(tenantId == null || tenantId == 0){
+                if (tenantId == null || tenantId == 0) {
                     tenantId = -1;
                 }
                 //存入本地
                 Integer insertCount = ledPowerDao.insertBySumEnergy(ftList, tenantId);
-                if(insertCount > 0){
+                if (insertCount > 0) {
                     //调用获取验证码接口，判断云端服务运行是否正常
-                    if (HttpClientUtils.doGet(baseUrl+"/kaptcha/").getCode() == 200) {
+                    if (HttpClientUtils.doGet(baseUrl + "/kaptcha/").getCode() == 200) {
+
+                        //获取所有未发送成功的数据
                         List<LedPower> ledPowerList = ledPowerDao.findSendCloudErrorEnergyList();
-                        String ledPowerListJson = JSON.toJSONString(ledPowerList);
-                        //请求头
-                        Map<String, String> headers = new HashMap<String, String>();
-                        headers.put("Content-Type", "application/json;charset=utf-8");
-                        headers.put("dataType", "json");
-                        try {
-                            //将（灯能耗数据和灯在线时长数据）通过http传给云服务
-                            HttpClientResult httpClientResult = HttpClientUtils.doPostStringParams(baseUrl + "/led/savePower/", headers, ledPowerListJson);
-                            Result result = JSON.parseObject(httpClientResult.getContent(), Result.class);
-                            if (result.getCode() == 0) {
-                                //发送成功，更新能耗状态
-                                ledPowerDao.updateEnergyStatus(ledPowerList);
+                        if (ledPowerList != null && ledPowerList.size() > 0) {
+                            //list分组 100条为一组，循环发送给云端
+                            Map<String, List> map = groupList(ledPowerList);
+                            for (List pfList : map.values()) {
+                                String ledPowerListJson = JSON.toJSONString(pfList);
+                                //请求头
+                                Map<String, String> headers = new HashMap<String, String>();
+                                headers.put("Content-Type", "application/json;charset=utf-8");
+                                headers.put("dataType", "json");
+                                try {
+                                    //将（灯能耗数据和灯在线时长数据）通过http传给云服务
+                                    HttpClientResult httpClientResult = HttpClientUtils.doPostStringParams(baseUrl + "/led/savePower/", headers, ledPowerListJson);
+                                    Result result = JSON.parseObject(httpClientResult.getContent(), Result.class);
+                                    if (result.getCode() == 0) {
+                                        //发送成功，更新能耗状态
+                                        ledPowerDao.updateEnergyStatus(ledPowerList);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+
                     }
                 }
             }
@@ -162,32 +193,41 @@ public class LedPowerServiceImpl implements LedPowerService {
         List<LedOnline> ledOnlineList = ledPowerDao.ledOnLinTime(DateUtils.getSubtractTime(), DateUtils.getCurrentTime());
         if (ledOnlineList != null && ledOnlineList.size() > 0) {
             Integer tenantId = tenantDao.findTenantId();
-            if(tenantId == null || tenantId == 0){
+            if (tenantId == null || tenantId == 0) {
                 tenantId = -1;
             }
             //存入本地
             Integer insertCount = ledPowerDao.insertOnlineList(ledOnlineList, tenantId);
-            if(insertCount > 0 ){
+            if (insertCount > 0) {
                 //判断与云端是否连接正常
-                if (HttpClientUtils.doGet(baseUrl+"/kaptcha/").getCode() == 200) {
+                if (HttpClientUtils.doGet(baseUrl + "/kaptcha/").getCode() == 200) {
                     List<LedOnline> OnLineList = ledPowerDao.findSendCloudErrorOnLineList();
-                    //请求头
-                    Map<String, String> headers = new HashMap<String, String>();
-                    headers.put("Content-Type", "application/json;charset=utf-8");
-                    headers.put("dataType", "json");
 
-                    String ledOnlineJson = JSON.toJSONString(OnLineList);
-                    try {
-                        //将灯在线时长数据通过http传给云服务
-                        HttpClientResult httpClientResult = HttpClientUtils.doPostStringParams(baseUrl + "/led/saveOnlineList/", headers, ledOnlineJson);
-                        Result result = JSON.parseObject(httpClientResult.getContent(), Result.class);
-                        if (result.getCode() == 0) {
-                            //发送成功，更新能耗状态
-                            ledPowerDao.updateOnLineStatus(OnLineList);
+                    if(OnLineList != null && OnLineList.size() > 0){
+                        //list分组 100条为一组，循环发送给云端
+                        Map<String, List> map = groupList(OnLineList);
+                        for (List pfList : map.values()) {
+                            String ledOnlineJson = JSON.toJSONString(pfList);
+                            //请求头
+                            Map<String, String> headers = new HashMap<String, String>();
+                            headers.put("Content-Type", "application/json;charset=utf-8");
+                            headers.put("dataType", "json");
+
+                            try {
+                                //将灯在线时长数据通过http传给云服务
+                                HttpClientResult httpClientResult = HttpClientUtils.doPostStringParams(baseUrl + "/led/saveOnlineList/", headers, ledOnlineJson);
+                                Result result = JSON.parseObject(httpClientResult.getContent(), Result.class);
+                                if (result.getCode() == 0) {
+                                    //发送成功，更新能耗状态
+                                    ledPowerDao.updateOnLineStatus(OnLineList);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+
+
                 }
             }
         }
@@ -214,5 +254,30 @@ public class LedPowerServiceImpl implements LedPowerService {
         ledPowerDao.delete();
     }
 */
+
+
+    /**
+     * 根据list 每100条分一组装map中
+     *
+     * @param list
+     * @return
+     */
+    public static Map<String, List> groupList(List list) {
+
+        int listSize = list.size();
+        int toIndex = 100;
+        Map<String, List> map = new HashMap();     //用map存起来新的分组后数据
+        int keyToken = 0;
+        for (int i = 0; i < list.size(); i += 100) {
+            if (i + 100 > listSize) {        //作用为toIndex最后没有100条数据则剩余几条newList中就装几条
+                toIndex = listSize - i;
+            }
+            List newList = list.subList(i, i + toIndex);
+            map.put("group" + keyToken, newList);
+            keyToken++;
+        }
+
+        return map;
+    }
 
 }

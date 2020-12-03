@@ -32,6 +32,9 @@ public class LocalPeopleFeelStatistics {
     @ApiModelProperty(value = "人感状态 0无人 1有人",hidden = true)
     private Integer status;
 
+    @ApiModelProperty(value = "租户ID")
+    private Integer tenantId;
+
 
     public LocalPeopleFeelStatistics() {
         this.createTime= Convert.formatDateTime(DateUtils.getLongCurrentTimeStamp(),"yyyy-MM-dd HH:mm:ss");

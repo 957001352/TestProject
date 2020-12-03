@@ -69,7 +69,7 @@ public class GraphicStatisticsServiceImpl implements GraphicStatisticsService {
         if (CheckUtils.isNull(date)) {
             return ResultUtils.error(ResultEnum.PARAM_ERR);
         }
-        return ResultUtils.success(graphicStatisticsDao.getEveryDayEnergyByCurrentMonth(date,headerUtil.tenantId()));
+        return ResultUtils.success(graphicStatisticsDao.getEveryDayEnergyByCurrentMonth(date, headerUtil.tenantId()));
     }
 
     /**
@@ -81,8 +81,8 @@ public class GraphicStatisticsServiceImpl implements GraphicStatisticsService {
     public Result getSystemRunTime() {
 
         OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(headerUtil.tenantId());
-        if(originalPower != null && !StringUtils.isEmpty(originalPower.getSystemRunTime())){
-            return ResultUtils.success(DateUtils.getDistanceTime(Long.valueOf(originalPower.getSystemRunTime()),DateUtils.getLongCurrentTimeStamp()));
+        if (originalPower != null && !StringUtils.isEmpty(originalPower.getSystemRunTime())) {
+            return ResultUtils.success(DateUtils.getDistanceTime(Long.valueOf(originalPower.getSystemRunTime()), DateUtils.getLongCurrentTimeStamp()));
         }
         return ResultUtils.success("0分");
     }

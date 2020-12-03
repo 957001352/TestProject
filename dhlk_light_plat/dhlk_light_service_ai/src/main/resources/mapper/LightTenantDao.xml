@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.dao.LightTenantDao">
+
+    <resultMap type="com.dhlk.light.entity.LightTenant" id="DhlkBasicTenantResult">
+        <result property="id" jdbcType="INTEGER"   column="id"/>
+        <result property="code"  jdbcType="VARCHAR"  column="code"/>
+        <result property="name" jdbcType="VARCHAR"   column="name"/>
+        <result property="telephone" jdbcType="VARCHAR"   column="telephone"/>
+        <result property="adress" jdbcType="VARCHAR"   column="adress"/>
+        <result property="companyEmail" jdbcType="VARCHAR"   column="company_email"/>
+        <result property="linkman" jdbcType="VARCHAR"   column="linkman"/>
+        <result property="phone" jdbcType="VARCHAR"   column="phone"/>
+        <result property="email" jdbcType="VARCHAR"   column="email"/>
+        <result property="startTime" jdbcType="TIMESTAMP"   column="start_time"/>
+        <result property="endTime" jdbcType="TIMESTAMP"   column="end_time"/>
+        <result property="createTime" jdbcType="TIMESTAMP"   column="create_time"/>
+        <result property="devices" jdbcType="INTEGER"   column="devices"/>
+        <result property="status" jdbcType="INTEGER"   column="status"/>
+        <result property="isSystem" jdbcType="INTEGER"   column="is_system"/>
+        <result property="tbLoginname" jdbcType="VARCHAR"  column="tb_loginname"/>
+        <result property="tbPassword" jdbcType="VARCHAR"  column="tb_password"/>
+        <result property="orgId" jdbcType="INTEGER"   column="orgId"/>
+        <result property="roleId" jdbcType="INTEGER"   column="roleId"/>
+        <result property="fileId" jdbcType="VARCHAR"   column="file_id"/>
+        <result property="tbId" jdbcType="VARCHAR"   column="tb_id"/>
+    </resultMap>
+
+    <select id="findAll" resultType="com.dhlk.light.entity.LightTenant">
+
+        select * from dhlk_basic_tenant
+
+    </select>
+</mapper>

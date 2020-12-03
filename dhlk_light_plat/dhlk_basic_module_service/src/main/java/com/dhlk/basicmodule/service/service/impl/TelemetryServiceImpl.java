@@ -42,7 +42,6 @@ public class TelemetryServiceImpl implements TelemetryService {
         params.put("limit",limit.toString());
         params.put("agg",agg);
         HttpClientResult httpClientResult = HttpClientUtils.doGet(api, restTemplateUtil.getHeaders(true), params);
-        System.out.println("2222"+httpClientResult.getContent());
         if(httpClientResult.getCode()==200){
             return ResultUtils.success(JSONObject.parseObject(httpClientResult.getContent()));
         }

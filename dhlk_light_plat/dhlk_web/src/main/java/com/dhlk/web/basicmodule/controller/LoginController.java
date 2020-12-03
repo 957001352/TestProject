@@ -64,4 +64,11 @@ public class LoginController {
         return loginService.getToken();
     }
 
+
+    @ApiOperation(value = "校验token是否正确")
+    @PostMapping("/checkToken")
+    public Result checkToken() {
+        return loginService.checkToken();
+    }
+
 }

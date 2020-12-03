@@ -24,7 +24,6 @@ public class LogRecording {
     @Autowired
     private MonitoringLogDao monitoringLogDao;
     @Scheduled(cron = "0 0/3 * * * ? ")
-    @Transactional
     public void logCreate(){
         Map<Object, Object> hmget = redisService.hmget(LedConst.REDIS_RECORDING_LOG);
         if(!hmget.isEmpty()){
@@ -57,14 +56,11 @@ public class LogRecording {
                 log.info("{}盏灯上线",upLines.size());
             }
             int count = 0;
-             new ArrayList<>();
             while (true){
                 count += 1;
                 log.info("第{}次进行校验,{}盏灯离线",count,downLines.size());
-                for (MonitoringLog dLog: downLines){
-                    if(redisService.hasKey(LedConst.REDIS_POWER+dLog.getSn())){
-                        downLines.remove(dLog);
-                    }
+                if(downLines!=null&&downLines.size()>0){
+                    downLines.removeIf(dLog -> redisService.hasKey(LedConst.REDIS_POWER + dLog.getSn()));
                 }
                 if(downLines.size() == 0 || count > 10){
                     for (MonitoringLog moni:downLines) {

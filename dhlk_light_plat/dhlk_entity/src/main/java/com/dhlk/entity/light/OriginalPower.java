@@ -58,6 +58,12 @@ public class OriginalPower implements Serializable {
     @ApiModelProperty(value = "系统初始化时间", hidden = true)
     private String systemRunTime;
 
+    /**
+     * 图标大小
+     */
+    @ApiModelProperty(value = "图标大小")
+    private String iconSize;
+
     public String getSystemRunTime() {
         return systemRunTime;
     }
@@ -112,5 +118,13 @@ public class OriginalPower implements Serializable {
 
     public void setPreBrightness(Integer preBrightness) {
         this.preBrightness = preBrightness;
+    }
+
+    public String getIconSize() {
+        return iconSize;
+    }
+
+    public void setIconSize(String iconSize) {
+        this.iconSize = iconSize;
     }
 }

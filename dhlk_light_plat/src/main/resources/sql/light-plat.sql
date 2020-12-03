@@ -257,6 +257,7 @@ create table dhlk_light_original_power
    tenant_id            integer                      DEFAULT NULL COMMENT '租户Id',
    pre_brightness       integer                      DEFAULT NULL COMMENT '预设亮度',
    sys_runtime          varchar(50)                  DEFAULT NULL COMMENT '系统初始化时间戳',
+   icon_size           varchar(50)                  DEFAULT NULL COMMENT '图标大小',
    primary key  (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='企业原照明功率维护';
 
@@ -286,6 +287,7 @@ create table dhlk_light_cloud_people_feel_statistics
    led_sn 		        varchar(50)                  DEFAULT NULL COMMENT '照明设备',
    number               integer                      DEFAULT NULL COMMENT '次数',
    create_time          timestamp                    NULL COMMENT '统计时间',
+   tenant_id            integer                      DEFAULT NULL COMMENT '租户Id',
    primary key  (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='云人感数据统计';
 
@@ -492,8 +494,8 @@ INSERT INTO `dhlk_basic_menu` VALUES (125, 'peopleFeel/findList', '人感统计'
 
 INSERT INTO `dhlk_basic_menu` VALUES (126, 'graphic/statistics', '指标总览', 'graphic/statistics', 0, 78, 'dhlk:view', 0);
 INSERT INTO `dhlk_basic_menu` VALUES (127, 'led/log', '日志', 'led/log', 0, 78, 'dhlk:view', 0);
-
-
+INSERT INTO `dhlk_basic_menu` VALUES (128, 'area/edit', '修改施工区域', 'area/edit', 0, 79, 'area:edit', 1);
+INSERT INTO `dhlk_basic_menu` VALUES (129, 'led/wifiBand', '射频范围', 'led/wifiBand', 0, 91, 'led:wifiBand', 1);
 
 
 
@@ -549,6 +551,8 @@ INSERT INTO `dhlk_basic_permissions`(`id`, `menu_id`, `role_id`) VALUES (99, 124
 INSERT INTO `dhlk_basic_permissions`(`id`, `menu_id`, `role_id`) VALUES (100, 125, 1);
 INSERT INTO `dhlk_basic_permissions`(`id`, `menu_id`, `role_id`) VALUES (101, 126, 1);
 INSERT INTO `dhlk_basic_permissions`(`id`, `menu_id`, `role_id`) VALUES (102, 127, 1);
+INSERT INTO `dhlk_basic_permissions`(`id`, `menu_id`, `role_id`) VALUES (103, 128, 1);
+INSERT INTO `dhlk_basic_permissions`(`id`, `menu_id`, `role_id`) VALUES (104, 129, 1);
 -- 故障代码
 insert into dhlk_light_fault_code(code,name,content) values('10001','LocalNetwork_Exception','本地网络异常');
 insert into dhlk_light_fault_code(code,name,content) values('10002','PublicNetwork_Exception','公网网络异常');

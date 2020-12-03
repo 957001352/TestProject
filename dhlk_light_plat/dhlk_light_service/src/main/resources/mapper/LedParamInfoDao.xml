@@ -21,10 +21,11 @@
         <result property="wf_dev" jdbcType="INTEGER" column="wf_dev"/>
         <result property="wf_mode" jdbcType="INTEGER" column="wf_mode"/>
         <result property="version" jdbcType="VARCHAR" column="version"/>
-
+        <!--
         <collection property="alias" column="sn" select="findAliasBySn"/>
-<!--        <collection property="group_id" column="sn" select="findGroupBySn"/>-->
+        <collection property="group_id" column="sn" select="findGroupBySn"/>
         <collection property="switchNames" column="sn" select="findSwitchNamesBySn"/>
+        -->
     </resultMap>
 
     <select id="findSwitchNamesBySn" parameterType="java.lang.String" resultType="java.lang.String">
@@ -32,7 +33,7 @@
         FROM dhlk_light_switch
         WHERE id IN
         (SELECT switch_id FROM dhlk_light_led_switch WHERE led_id IN
-        (SELECT id FROM dhlk_light_led WHERE sn = #{sn}))
+        (SELECT id FROM dhlk_light_led WHERE sn = #{sn} and status=0))
     </select>
 
     <select id="findGroupBySn" parameterType="java.lang.String" resultType="java.lang.Integer">
@@ -40,13 +41,11 @@
         FROM dhlk_light_switch_group
         WHERE switch_id IN
         (SELECT switch_id FROM dhlk_light_led_switch WHERE led_id IN
-        (SELECT id FROM dhlk_light_led WHERE sn = #{sn})) LIMIT 0,1
+        (SELECT id FROM dhlk_light_led WHERE sn = #{sn} and status=0)) LIMIT 0,1
     </select>
 
     <select id="findAliasBySn" parameterType="java.lang.String" resultType="java.lang.String">
-        select alias
-        from dhlk_light_led
-        where sn = #{sn}
+        select alias from dhlk_light_led  where sn = #{sn} and status=0
     </select>
 
 
@@ -119,11 +118,23 @@
         where sn = #{sn}
     </update>
 
-    <select id="findList" resultMap="DhlkLedParamInfoResult">
-        select *
-        from dhlk_light_led_param
+    <select id="findList" resultType="com.dhlk.entity.light.LedParamInfo">
+        select   l.alias,l.sn,
+                 (select GROUP_CONCAT(s.name)
+                    from dhlk_light_led_switch ls, dhlk_light_switch  s
+                   where ls.led_id=l.id
+                     and ls.switch_id=s.id
+                     and l.area_id=s.area_id
+                     group by led_id) switch_names
+        <!--
+        p.light_on_off,p.illumi_top,p.illumi_top_min,p.illumi_flr,p.illumi_flr_max,p.people_on_off,p.trig_delay_tm,p.n_ramp_tm,
+        p.minval,p.maxval,p.ssid,p.ip,p.password,p.wf_dev,p.wf_mode,p.version
+        -->
+        from dhlk_light_led l
+        <!--left join  dhlk_light_led_param p on p.sn=l.sn-->
+        where l.status=0
         <if test="sns != null and sns != ''">
-            where sn in
+            and l.sn in
             <foreach collection="sns" separator="," open="(" close=")" item="sn">
                 #{sn}
             </foreach>
@@ -133,6 +144,13 @@
     <select id="isExistSn" resultType="java.lang.Integer">
         select id
         from dhlk_light_led_param where sn = #{sn}
+    </select>
+
+    <select id="findParamBySn" resultMap="DhlkLedParamInfoResult">
+        select * from dhlk_light_led_param where sn in
+        <foreach collection="sns" open="(" separator="," close=")" item="sn">
+            #{sn}
+        </foreach>
     </select>
 
     <insert id="insertList" parameterType="java.util.List">

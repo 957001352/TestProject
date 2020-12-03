@@ -75,9 +75,8 @@ public class MqttSubsribeServiceImpl implements MqttSubsribeService {
     private void acquireVersionUpdateParam(String jsonStr) {
         if(jsonStr != null){
             InfoBox infoBox = JSON.parseObject(jsonStr, InfoBox.class);
-            lightDeviceUtil.acquireVersion(infoBox.getSns(),new Version(0),infoBox.getTenantId(),1);
+            lightDeviceUtil.acquireVersion(infoBox.getSns(),new Version<Integer>(0),infoBox.getTenantId(),1);
         }
-
     }
 
     private void deleteSyncData(String jsonStr) {
@@ -91,19 +90,22 @@ public class MqttSubsribeServiceImpl implements MqttSubsribeService {
      * @param jsonStr
      */
     public void updateOriginalPower(String jsonStr) {
+        System.out.println("修改亮度设置--->"+jsonStr);
         if (!CheckUtils.isNull(jsonStr)) {
             JSONObject json = JSONObject.parseObject(jsonStr);
             OriginalPower originalPower = JSONObject.toJavaObject(json, OriginalPower.class);
             if(originalPower.getTenantId() != null){
+                System.out.println("修改亮度设置--=======33333333333=======");
                 OriginalPower power = originalPowerDao.selectOriginalPowerByTenantId(originalPower.getTenantId());
+                System.out.println("修改亮度设置--=======11111111111======="+power);
                 if(power != null){
                     originalPowerDao.setValues(originalPower.getLedCount(),originalPower.getLedOpentime(),originalPower.getLedPower(),originalPower.getTenantId(),originalPower.getPreBrightness(),originalPower.getSystemRunTime());
                 }else {
                     originalPowerDao.insert(originalPower);
                 }
             }
-
         }
+
     }
 
     /**

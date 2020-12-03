@@ -26,6 +26,7 @@ public class LedController {
 
     /**
      * 保存
+     *
      * @param led
      * @return
      */
@@ -37,6 +38,7 @@ public class LedController {
 
     /**
      * 增加别名
+     *
      * @param led
      * @return
      */
@@ -46,8 +48,16 @@ public class LedController {
         return ledService.update(led);
     }
 
+
+    @PostMapping(value = "/updateLocation")
+    //@RequiresAuthentication
+    public Result updateLocation(@RequestBody List<Led> leds) {
+        return ledService.updateLocation(leds);
+    }
+
     /**
      * 灯闪一闪
+     *
      * @param infoBox
      * @return
      */
@@ -55,11 +65,12 @@ public class LedController {
     @RequiresAuthentication
     public Result flashingLed(@RequestBody InfoBox<String> infoBox) {
 //            @RequestParam("sns") String sns) {
-        return  ledService.flashingLed(infoBox.getSns());
+        return ledService.flashingLed(infoBox.getSns());
     }
 
     /**
      * 删除
+     *
      * @param id
      * @return result
      */
@@ -68,8 +79,10 @@ public class LedController {
     public Result delete(@RequestParam(value = "id") String id) {
         return ledService.delete(id);
     }
+
     /**
      * 列表查询
+     *
      * @param sn
      * @param areaId
      * @return
@@ -78,15 +91,14 @@ public class LedController {
     @RequiresAuthentication
     public Result findList(@RequestParam(value = "sn", required = false) String sn,
                            @RequestParam(value = "areaId", required = false) String areaId,
-                           @RequestParam(value = "switchId", required = false) String switchId){
-        return ledService.findList(sn, areaId,switchId);
+                           @RequestParam(value = "switchId", required = false) String switchId) {
+        return ledService.findList(sn, areaId, switchId);
     }
-
-
 
 
     /**
      * 新增灯能耗信息 (能耗统计)
+     *
      * @param list
      * @return
      */
@@ -96,15 +108,28 @@ public class LedController {
         return ledService.savePower(list);
     }
 
+
     /**
      * 新增灯在线时长
+     *
      * @param ledOnline
      * @return
      */
     @PostMapping(value = "/saveOnline")
-    @RequiresAuthentication
+    //@RequiresAuthentication
     public Result saveOnline(@RequestBody LedOnline ledOnline) {
         return ledService.saveOnline(ledOnline);
+    }
+
+    /**
+     * 保存人感统计
+     *
+     * @param json
+     * @return
+     */
+    @PostMapping(value = "/savePeopleList")
+    public Result savePeopleList(@RequestBody String json) {
+        return ledService.savePeopleList(json);
     }
 
     @PostMapping(value = "/saveOnlineList")
@@ -115,6 +140,7 @@ public class LedController {
 
     /**
      * 增加开关与灯绑定关系
+     *
      * @param swich
      * @return
      */
@@ -126,19 +152,19 @@ public class LedController {
 
     /**
      * 设置灯亮度
+     *
      * @param infoBox
      * @return
      */
     @PostMapping(value = "/setLedBrightness")
     @RequiresAuthentication
     public Result setLedBrightness(@RequestBody InfoBox<String> infoBox) {
-//            @RequestParam("sns") String sns,
-//                                   @RequestParam("brightness") String brightness) {
-        return ledService.setLedBrightness(infoBox.getSns(),infoBox.getT());
+        return ledService.setLedBrightness(infoBox.getSns(), infoBox.getT());
     }
 
     /**
      * 查询有灯的区域
+     *
      * @return
      */
     @GetMapping(value = "/findAreasByLed")
@@ -149,40 +175,41 @@ public class LedController {
 
     /**
      * 开关灯
+     *
      * @return
      */
     @PostMapping(value = "/openOrCloseLed")
     @RequiresAuthentication
     public Result openOrCloseLed(@RequestBody InfoBox<String> infoBox) {
-//            @RequestParam("sns") String sns,
-//                                 @RequestParam("status") String status) {
-        return ledService.openOrCloseLed(infoBox.getSns(),infoBox.getT());
+        return ledService.openOrCloseLed(infoBox.getSns(), infoBox.getT());
     }
 
 
     /**
      * 灯重启
+     *
      * @return
      */
     @PostMapping(value = "/ledRestart")
     @RequiresAuthentication
     public Result ledRestart(@RequestBody InfoBox<String> infoBox) {
-//            @RequestParam("sns") String sns) {
         return ledService.ledRestart(infoBox.getSns());
     }
+
     /**
      * 开关重启
+     *
      * @return
      */
     @PostMapping(value = "/switchRestart")
     @RequiresAuthentication
     public Result switchRestart(@RequestBody InfoBox<String> infoBox) {
-//            @RequestParam("sns") String sns) {
         return ledService.switchRestart(infoBox.getSns());
     }
 
     /**
      * 获取照明设备故障信息
+     *
      * @return
      */
     @GetMapping(value = "/findLedFault")
@@ -197,12 +224,13 @@ public class LedController {
     @GetMapping("/findExportList")
     @RequiresAuthentication
     public Result findExportList(@RequestParam("ledSn") String ledSn) {
-        return  ledService.findExportList(ledSn);
+        return ledService.findExportList(ledSn);
     }
 
 
     /**
      * 根据租户Id获取灯信息
+     *
      * @param tenantId
      * @return
      */
@@ -214,26 +242,26 @@ public class LedController {
 
     /**
      * 获取灯的配置参数
+     *
      * @param infoBox
      */
     @PostMapping("/findLedParamInfos")
     @RequiresAuthentication
     public Result findLedParamInfos(@RequestBody InfoBox<String> infoBox) {
-//            @RequestParam(value = "sns", required = false) String sns) {
         return ledService.findLedParamInfos(infoBox.getSns());
     }
 
     @GetMapping(value = "/findLedRecord")
     @RequiresAuthentication
-    public Result findLedRecord(@RequestParam(value ="sn", required = false) String sn,
-                                @RequestParam(value ="commond", required = false) String commond,
-                                @RequestParam(value ="sendResult", required = false) String sendResult,
-                                @RequestParam(value ="backResult", required = false) String backResult,
-                                @RequestParam(value ="startTime", required = false) String startTime,
-                                @RequestParam(value ="endTime", required = false) String endTime,
+    public Result findLedRecord(@RequestParam(value = "sn", required = false) String sn,
+                                @RequestParam(value = "commond", required = false) String commond,
+                                @RequestParam(value = "sendResult", required = false) String sendResult,
+                                @RequestParam(value = "backResult", required = false) String backResult,
+                                @RequestParam(value = "startTime", required = false) String startTime,
+                                @RequestParam(value = "endTime", required = false) String endTime,
                                 @RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
                                 @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
-        return ledService.findLedRecord(sn,commond,sendResult,backResult,startTime,endTime,pageNum,pageSize);
+        return ledService.findLedRecord(sn, commond, sendResult, backResult, startTime, endTime, pageNum, pageSize);
     }
 
     /**
@@ -258,7 +286,7 @@ public class LedController {
      * 查询区域里的所有灯
      */
     @GetMapping("/findLedsByArea")
-    public Result findLedsByArea(@RequestParam("areaId")String areaId) {
+    public Result findLedsByArea(@RequestParam("areaId") String areaId) {
         return ledService.findLedsByArea(areaId);
     }
 
@@ -277,5 +305,26 @@ public class LedController {
     @PostMapping("/refreshParam")
     public Result refreshParam(@RequestBody InfoBox<String> infoBox) {
         return ledParamInfoService.refreshParam(infoBox);
+    }
+
+    /**
+     * 显示图标大小
+     */
+    @GetMapping("/showIconSize")
+    public Result showIconSize() {
+        return ledService.showIconSize();
+    }
+
+
+    /**
+     * 同步本地亮度设置
+     *
+     * @param power
+     * @return
+     */
+    @PostMapping(value = "/syncLedBrightness")
+    @RequiresAuthentication
+    public Result syncLedBrightness(@RequestBody String power) {
+        return ledService.syncLedBrightness(power);
     }
 }

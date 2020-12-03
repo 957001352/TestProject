@@ -90,4 +90,17 @@ public class AreaController {
     public Result findAreaRepeat(@RequestParam(value = "name") String name) {
         return areaService.findAreaRepeat(name);
     }
+
+
+    /**
+     * 修改
+     *
+     * @param area
+     * @return
+     */
+    @ApiOperation("修改区域信息")
+    @PostMapping("/update")
+    public Result update(@RequestBody Area area) {
+        return areaService.update(area);
+    }
 }

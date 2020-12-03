@@ -124,7 +124,7 @@
             AND tenant_id = #{tenantId}
         </if>
         <if test="areaId != null and areaId != ''">
-            AND area_id = #{area_id}
+            AND area_id = #{areaId}
         </if>
     </select>
 

@@ -39,7 +39,7 @@
         SELECT
 		    COUNT(id) as lightCount
 	    from
-		    dhlk_light_led
+		    dhlk_light_led where status=0
     </select>
 
     <!--获取所有灯SN-->
@@ -47,7 +47,7 @@
         	SELECT
 		        sn
 	        from
-		        dhlk_light_led
+		        dhlk_light_led where status=0
     </select>
 
     <!--获取今日能耗，按小时进行分组-->

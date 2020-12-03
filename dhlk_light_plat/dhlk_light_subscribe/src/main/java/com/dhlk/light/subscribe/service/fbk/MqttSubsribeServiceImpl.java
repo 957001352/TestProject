@@ -13,6 +13,7 @@ import com.dhlk.light.subscribe.util.LedConst;
 import com.dhlk.utils.CheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,8 @@ import java.util.HashMap;
 public class MqttSubsribeServiceImpl implements MqttSubsribeService {
     @Autowired
     private RedisService redisService;
-
+    @Value("${lighting.lineTime}")
+    private Integer lineTime;
     @Override
     public void subsribe(String topic, String jsonStr) {
             JSONObject result = JSONObject.parseObject(jsonStr);
@@ -100,10 +102,6 @@ public class MqttSubsribeServiceImpl implements MqttSubsribeService {
             JSONObject jsonObject = JSONObject.parseObject(jsonStr);
             if (jsonObject.get("data") != null) {
                 redisService.set(rediskey+jsonObject.get("SN") + "_" + jsonObject.get("ts"), JSON.toJSONString(jsonObject.get("data")),LedConst.REDISTIME_RETURNDATA);
-                if(LedConst.REDIS_WIFI_RETURN.equals(rediskey)){
-                    log.info((System.currentTimeMillis()-Long.parseLong(jsonObject.get("ts")+""))+"=======>>>"+jsonObject.get("SN"));
-                }
-
             }
         }
     }
@@ -134,7 +132,7 @@ public class MqttSubsribeServiceImpl implements MqttSubsribeService {
             Integer tenantId = result.getInteger("tenantId");
             LedPower lightDataModel = new LedPower(result);
             String sn=result.getString("SN");
-            redisService.set(LedConst.REDIS_POWER + sn, JSONObject.toJSONString(lightDataModel), LedConst.REDISTTIME);
+            redisService.set(LedConst.REDIS_POWER + sn, JSONObject.toJSONString(lightDataModel),lineTime);
             //记录灯首次上线的sn
             if (!CheckUtils.isNull(tenantId)) {
                 if (!redisService.hasKeyAndItem(LedConst.REDIS_LED_PARAM_INFO, sn)) {

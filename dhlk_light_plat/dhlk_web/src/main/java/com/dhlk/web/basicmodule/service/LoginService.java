@@ -22,11 +22,14 @@ public interface LoginService {
     Result logout();
 
     @GetMapping("/kaptcha")
-    public Result kaptcha() ;
+    Result kaptcha() ;
 
     @GetMapping("/getTbToken")
-    public Result getTbToken() ;
+    Result getTbToken() ;
 
     @GetMapping("/getToken")
     Result getToken();
+
+    @PostMapping("/checkToken")
+    Result checkToken();
 }

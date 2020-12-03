@@ -76,7 +76,6 @@ public class MqttLocalSender {
                 MqttMessage message = new MqttMessage(msg.getBytes());
                 message.setQos(0);
                 client.publish(topic, message);
-                System.out.println(topic+"=====>>>>>>>>>>>"+msg);
             }
         } catch (MqttException e) {
             e.printStackTrace();

@@ -1,29 +1,29 @@
 package com.dhlk.light.factory.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dhlk.domain.Result;
 import com.dhlk.entity.light.*;
-import com.dhlk.light.factory.dao.AreaDao;
-import com.dhlk.light.factory.dao.LedDao;
-import com.dhlk.light.factory.dao.LedRecordDao;
-import com.dhlk.light.factory.dao.OriginalPowerDao;
+import com.dhlk.light.factory.dao.*;
 import com.dhlk.light.factory.mqtt.MqttCloudSender;
 import com.dhlk.light.factory.service.LedService;
 import com.dhlk.light.factory.util.HeaderUtil;
 import com.dhlk.light.factory.util.LedConst;
 import com.dhlk.light.factory.util.LightDeviceUtil;
 import com.dhlk.service.RedisService;
-import com.dhlk.utils.CheckUtils;
-import com.dhlk.utils.DateUtils;
-import com.dhlk.utils.ResultUtils;
+import com.dhlk.utils.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description
@@ -32,6 +32,7 @@ import java.util.List;
  */
 @Service
 public class LedServiceImpl implements LedService {
+    private Logger log = LoggerFactory.getLogger(LedServiceImpl.class);
     @Autowired
     private LightDeviceUtil lightDeviceUtil;
     @Autowired
@@ -44,6 +45,8 @@ public class LedServiceImpl implements LedService {
     @Value("${attachment.path}")
     private String attachmentPath;
 
+    @Value("${cloud.baseUrl}")
+    private String baseUrl;
 
     @Autowired
     private LedDao ledDao;
@@ -58,7 +61,8 @@ public class LedServiceImpl implements LedService {
     private OriginalPowerDao originalPowerDao;
     @Autowired
     private MqttCloudSender mqttCloudSender;
-
+    @Autowired
+    private TenantDao tenantDao;
     @Override
     public Result openOrCloseLed(String sns, Integer status) {
         if(CheckUtils.isNull(sns) || !CheckUtils.isNumeric(status)) return ResultUtils.error("参数错误");
@@ -69,35 +73,72 @@ public class LedServiceImpl implements LedService {
         redisService.set(LedConst.REDIS_RECORD_REFRESH_ONOFF_TIME_+headerUtil.cloudToken(), status, LedConst.BANTIME);
         return ResultUtils.success("命令已发送");
     }
+
     @Override
     public Result setLedBrightness(String sns, String brightness) {
         if(CheckUtils.isNull(sns) || !CheckUtils.isNumeric(brightness)) return ResultUtils.error("参数错误");
         lightDeviceUtil.ledBrightness(sns,Integer.parseInt(brightness),true);
         //增加本地设置亮度值给云端发数据
         Integer flag = 0;
-        Integer tenantId = headerUtil.tenantId();
+        Integer tenantId = tenantDao.findTenantId();
         Integer preBrightness = Integer.valueOf(brightness);
         OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(tenantId);
-        if(originalPower == null){
-            OriginalPower power = new OriginalPower();
-            power.setPreBrightness(preBrightness);
-            power.setTenantId(tenantId);
-            flag = originalPowerDao.insert(power);
-            //给云端发送保存的主题
-            if(flag > 0){
-                mqttCloudSender.sendMQTTMessage(LedConst.CLOUD_TOPIC_ORIPOWER_SAVE, JSONObject.toJSONString(power));
-                return ResultUtils.success(power.getPreBrightness());
+        try {
+            if(originalPower == null){
+                OriginalPower power = new OriginalPower();
+                power.setPreBrightness(preBrightness);
+                power.setTenantId(tenantId);
+                flag = originalPowerDao.insert(power);
+                //给云端发送保存的主题
+                if(flag > 0){
+                   // mqttCloudSender.sendMQTTMessage(LedConst.CLOUD_TOPIC_ORIPOWER_SAVE, JSONObject.toJSONString(power));
+                    Map<String, String> headers = new HashMap<String, String>();
+                    headers.put("Content-Type", "application/json;charset=utf-8");
+                    headers.put("dataType", "json");
+                    headers.put("Authorization",headerUtil.cloudToken());
+                    String powerStr = JSON.toJSONString(power);
+                    //将灯亮度设置数据通过http传给云服务
+                    HttpClientResult clientResult =HttpClientUtils.doPostStringParams(baseUrl + "/led/syncLedBrightness/", headers, powerStr);
+                    if (clientResult.getCode() == 200) {
+                        log.info("网络正常，灯亮度设置成功....");
+                    }else{
+                        log.info("网络异常，灯亮度设置失败....");
+                    }
+                    return ResultUtils.success(power.getPreBrightness());
+                }
+            }else{
+                flag = originalPowerDao.updateOriginalPower(preBrightness,tenantId,null);
+                //给云端发送修改的主题
+                if(flag > 0){
+                    originalPower.setPreBrightness(preBrightness);
+                    //mqttCloudSender.sendMQTTMessage(LedConst.CLOUD_TOPIC_ORIPOWER_UPDATE, JSONObject.toJSONString(originalPower));
+                    Map<String, String> headers = new HashMap<String, String>();
+                    headers.put("Content-Type", "application/json;charset=utf-8");
+                    headers.put("dataType", "json");
+                    headers.put("Authorization",headerUtil.cloudToken());
+                    String powerStr = JSON.toJSONString(originalPower);
+                    //将灯亮度设置数据通过http传给云服务
+                    HttpClientResult clientResult = HttpClientUtils.doPostStringParams(baseUrl + "/led/syncLedBrightness/", headers, powerStr);
+                    if (clientResult.getCode() == 200) {
+                        log.info("网络正常，灯亮度设置成功....");
+                    }else{
+                        log.info("网络异常，灯亮度设置失败....");
+                    }
+                    //发送成功
+                    return ResultUtils.success(preBrightness);
+                }
             }
-        }else{
-            flag = originalPowerDao.updateOriginalPower(preBrightness,tenantId,null);
-            //给云端发送修改的主题
-            if(flag > 0){
-                originalPower.setPreBrightness(preBrightness);
-                mqttCloudSender.sendMQTTMessage(LedConst.CLOUD_TOPIC_ORIPOWER_UPDATE, JSONObject.toJSONString(originalPower));
-                return ResultUtils.success(preBrightness);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return ResultUtils.success("命令已发送");
+    }
+
+    public Map<String, String> getHeadersn(String token) throws Exception {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", token);
+        return headers;
     }
 
     @Override
@@ -170,11 +211,15 @@ public class LedServiceImpl implements LedService {
 
     @Override
     public Result brightnessShow() {
-        OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(headerUtil.tenantId());
-        if(originalPower != null){
+        Integer tenantId = tenantDao.findTenantId();
+        if(CheckUtils.isNull(tenantId)){
+            return ResultUtils.success();
+        }
+        OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(tenantId);
+        if (originalPower != null) {
             return ResultUtils.success(originalPower.getPreBrightness());
         }
-        return ResultUtils.success(null);
+        return ResultUtils.success();
     }
 
     @Override
@@ -195,5 +240,15 @@ public class LedServiceImpl implements LedService {
             }
         }
         return ResultUtils.success(leds);
+    }
+
+    @Override
+    public Result showIconSize() {
+        Integer tenantId = headerUtil.tenantId();
+        OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(tenantId);
+        if (originalPower != null) {
+            return ResultUtils.success(originalPower.getIconSize());
+        }
+        return ResultUtils.success();
     }
 }

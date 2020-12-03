@@ -9,6 +9,7 @@ import com.dhlk.entity.basicmodule.User;
 import com.dhlk.entity.light.*;
 import com.dhlk.light.factory.dao.*;
 import com.dhlk.light.factory.service.DataSyncService;
+import com.dhlk.service.RedisService;
 import com.dhlk.systemconst.Const;
 import com.dhlk.utils.DateUtils;
 import com.dhlk.utils.HttpClientResult;
@@ -78,7 +79,8 @@ public class DataSyncServiceImpl implements DataSyncService {
 
     @Value("${attachment.path}")
     private String attachPath;
-
+    @Autowired
+    private RedisService redisService;
 
     public Result authToken(String token) {
         Map tokenInfo = new HashMap();
@@ -433,12 +435,21 @@ public class DataSyncServiceImpl implements DataSyncService {
                 OriginalPower originalPower = JSONObject.toJavaObject(jsonObject, OriginalPower.class);
                 OriginalPower power = originalPowerDao.selectOriginalPowerByTenantId(originalPower.getTenantId());
                 if (power == null) {
-                    originalPowerDao.insert(originalPower);
+                    return originalPowerDao.insert(originalPower);
                 } else {
                     suffixSql = " where tenant_id = " + originalPower.getTenantId();
                 }
             } else {
                 suffixSql = suffix + "";
+            }
+            //云端修改区域图片本地下载
+            if (syncDataResult.getTableName().equals("dhlk_light_area")) {
+                try {
+                    downAreaImg(jsonObject);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return count;
+                }
             }
         } else if (Const.SYNC_DATA_OPERATE_DELETE.equals(syncDataResult.getOperate())) {
             //delete from table_name where id = 1;
@@ -448,7 +459,12 @@ public class DataSyncServiceImpl implements DataSyncService {
                     prex.append("delete from " + syncDataResult.getTableName() + " where switch_id in (" + ids + ")");
                 } else if (syncDataResult.getTableName().equals("dhlk_light_task_scheduler_detail")) {
                     prex.append("delete from " + syncDataResult.getTableName() + " where schedule_id in (" + ids + ")");
-                } else {
+                } else if (syncDataResult.getTableName().equals("dhlk_basic_user")) {
+                    //删除用户
+                    prex.append("delete from " + syncDataResult.getTableName() + " where id in (" + ids + ")");
+                    //删除token
+                    delUserToken(ids);
+                }  else {
                     prex.append("delete from " + syncDataResult.getTableName() + " where id in (" + ids + ")");
                 }
                 prexSql = prex + "";
@@ -459,6 +475,23 @@ public class DataSyncServiceImpl implements DataSyncService {
             count = mqttSyncDao.executeSql(prexSql + suffixSql);
         }
         return count;
+    }
+    /**
+    * 删除用户同时删除token
+     * @param id
+    * @return
+    */
+    public void delUserToken(String id) {
+        Set<String> set = redisService.keys(Const.TOKEN_CACHE_ITEM_PREFIX + "*");
+        for (String key : set) {
+            Object userStr = redisService.get(key);
+            if (userStr != null) {
+                User user = JSONObject.parseObject(userStr.toString(), User.class);
+                if (user!=null&&user.getId().toString().equals(id)) {
+                    redisService.del(key);
+                }
+            }
+        }
     }
 
     private void downAreaImg(JSONObject jsonObject) throws Exception {

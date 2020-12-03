@@ -54,6 +54,11 @@ public class LedServiceFbk implements LedService {
     }
 
     @Override
+    public Result savePeopleList(String json) {
+        return ResultUtils.error(ResultEnum.NETWORK_ERR);
+    }
+
+    @Override
     public Result saveSwitchBoundLed(Switch swich) {
         return ResultUtils.error(ResultEnum.NETWORK_ERR);
     }
@@ -104,6 +109,11 @@ public class LedServiceFbk implements LedService {
     }
 
     @Override
+    public Result updateLocation(List<Led> leds) {
+        return ResultUtils.error(ResultEnum.NETWORK_ERR);
+    }
+
+    @Override
     public Result findLedParamInfos(InfoBox<String> infoBox) {
         return ResultUtils.error(ResultEnum.NETWORK_ERR);
     }
@@ -124,6 +134,11 @@ public class LedServiceFbk implements LedService {
     }
 
     @Override
+    public Result syncLedBrightness(String brightness) {
+        return ResultUtils.error(ResultEnum.NETWORK_ERR);
+    }
+
+    @Override
     public Result findLedsByArea(String areaId) {
         return ResultUtils.error(ResultEnum.NETWORK_ERR);
     }
@@ -131,5 +146,10 @@ public class LedServiceFbk implements LedService {
     @Override
     public Result refreshParam(InfoBox<String> infoBox) {
         return ResultUtils.success();
+    }
+
+    @Override
+    public Result showIconSize() {
+        return ResultUtils.error(ResultEnum.NETWORK_ERR);
     }
 }

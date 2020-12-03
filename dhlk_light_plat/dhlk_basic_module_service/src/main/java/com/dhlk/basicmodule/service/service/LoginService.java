@@ -48,4 +48,9 @@ public interface LoginService {
      * @return  Result
      */
     Result getToken();
+
+    /**
+     * 校验token是否正确
+     */
+    Result checkToken();
 }

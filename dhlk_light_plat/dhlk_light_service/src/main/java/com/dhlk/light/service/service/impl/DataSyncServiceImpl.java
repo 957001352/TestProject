@@ -125,6 +125,8 @@ public class DataSyncServiceImpl implements DataSyncService {
         if(!Const.SYNC_DATA_OPERATE_DELETE.equals(syncDataResult.getOperate())){
             JSONObject jsonObject = JSON.parseObject(syncDataResult.getData() + "");
             syncDataResult.setDataId(jsonObject.getString("id"));
+        }else{
+            syncDataResult.setDataId(syncDataResult.getData()+"");
         }
         syncDataDao.insert(syncDataResult);
         try {

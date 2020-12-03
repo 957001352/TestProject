@@ -32,7 +32,7 @@ public class LedController {
     /**
      * 设置灯亮度
      *
-     * @param sns brightness
+     * @param infoBox brightness
      * @return
      */
     @PostMapping(value = "/setLedBrightness")
@@ -169,5 +169,13 @@ public class LedController {
     @RequiresAuthentication
     public Result findLedsByArea(@RequestParam("areaId")String areaId) {
         return ledService.findLedsByArea(areaId);
+    }
+
+    /**
+     * 显示图标大小
+     */
+    @GetMapping("/showIconSize")
+    public Result showIconSize() {
+        return ledService.showIconSize();
     }
 }

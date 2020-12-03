@@ -46,7 +46,7 @@ public class LedPowerTask {
     @Autowired
     private LedPowerService ledPowerService;
 
-    @Scheduled(cron = "*/1 * * * * ? ")
+    @Scheduled(cron = "*/5 * * * * ? ")
     public void ledPowerToCloud() {
         if (redisService.hasKey(LedConst.REDIS_MQTT_LED_POWER)) {
             Set<Object> hkeys = redisService.hkeys(LedConst.REDIS_MQTT_LED_POWER);
@@ -72,11 +72,18 @@ public class LedPowerTask {
                 }
                 //给云端mqtt发送能耗数据
                 result.put("tenantId", redisService.get(LedConst.REDIS_TENANTID));
-                localMqttToCloudMqtt(JSONObject.toJSONString(result));
-                //给云端mqtt发送消息，存储hdfs
-                if (saveHdfs) {
-                    sentDataToHdfs(JSONObject.parseObject(result.get("data").toString()));
+                log.info("-------------->"+redisService.get(LedConst.REDIS_MQTTISRIGHT));
+                if(redisService.get(LedConst.REDIS_MQTTISRIGHT)!=null&&"0".equals(redisService.get(LedConst.REDIS_MQTTISRIGHT).toString())){
+                    log.info("============>");
+                    localMqttToCloudMqtt(JSONObject.toJSONString(result));
+                    //给云端mqtt发送消息，存储hdfs
+                    if (saveHdfs) {
+                        if (redisService.get(LedConst.REDIS_MQTTISRIGHT) != null && "0".equals(redisService.get(LedConst.REDIS_MQTTISRIGHT).toString())) {
+                            sentDataToHdfs(result);
+                        }
+                    }
                 }
+                log.info(">>>>>>>>>>>>>>");
             }
             //现时间减去原来时间等于1分钟
             //if (DateUtils.getTimeDifference(System.currentTimeMillis(), orTimestamp) >= 1) {
@@ -109,8 +116,8 @@ public class LedPowerTask {
      * @param
      * @return
      */
-    private void sentDataToHdfs(JSONObject data) {
-        if (data != null) {
+    private void sentDataToHdfs(JSONObject result) {
+        if (result != null) {
             Object tenantCode = null;
             //从redis获取租户code，如果获取不到，从数据库查询
             if (redisService.get(LedConst.REDIS_TENANTCOUD) == null) {
@@ -122,11 +129,15 @@ public class LedPowerTask {
             } else {
                 tenantCode = redisService.get(LedConst.REDIS_TENANTCOUD);
             }
-            data.put("create_time", DateUtils.getToday("yyyy-MM-dd HH:mm:ss"));
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("factoryCode", tenantCode);
-            jsonObject.put("after", data);
-            mqttCloudSender.sendMQTTMessage(LedConst.TOPIC_LOCALTOHDFS, JSONObject.toJSONString(jsonObject));
+            if(result.get("data")!=null){
+                JSONObject data=JSONObject.parseObject(result.get("data").toString());
+                data.put("SN",result.get("SN"));
+                data.put("create_time", DateUtils.getToday("yyyy-MM-dd HH:mm:ss"));
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("factoryCode", tenantCode);
+                jsonObject.put("after", data);
+                mqttCloudSender.sendMQTTMessage(LedConst.TOPIC_LOCALTOHDFS, JSONObject.toJSONString(jsonObject));
+            }
         }
     }
 }

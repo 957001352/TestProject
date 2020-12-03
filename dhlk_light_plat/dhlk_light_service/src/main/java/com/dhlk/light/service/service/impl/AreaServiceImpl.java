@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Arrays;
 import java.util.List;
@@ -127,6 +128,29 @@ public class AreaServiceImpl implements AreaService {
             return ResultUtils.error("区域名已经存在!");
         }
         return ResultUtils.success();
+    }
+
+    @Override
+    public Result update(Area area) {
+        Integer flag = 0;
+        Area item = areaDao.selectTenantById(area.getId());
+        if(item == null){
+            return ResultUtils.error("区域信息不存在,请刷新页面");
+        }
+        if(!area.getArea().equals(item.getArea())){
+            //校验是否有重复的区域名称
+            if (areaDao.findAreaRepeat(area.getArea(),headerUtil.tenantId()) > 0) {
+                return ResultUtils.error("区域名已经存在");
+            }
+        }
+        flag = areaDao.update(area);
+        if (flag > 0) {
+            //给本地发送数据,新增
+            String jsonStrArea = JSON.toJSONString(area);
+            SyncDataResult syncData = new SyncDataResult(Const.AREA_TABLE_NAME,jsonStrArea, Const.SYNC_DATA_OPERATE_UPDATE,headerUtil.tenantId());
+            dataSyncService.syncDataToLocal(syncData);
+        }
+        return flag > 0 ? ResultUtils.success() : ResultUtils.failure();
     }
 
 

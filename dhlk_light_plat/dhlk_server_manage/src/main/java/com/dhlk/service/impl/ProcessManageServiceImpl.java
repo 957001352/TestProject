@@ -46,6 +46,9 @@ public class ProcessManageServiceImpl implements ProcessManageService {
     @Value("${linux.webLog.dhlk_server_manage}")
     String dhlk_server_manage_logPath;
 
+    @Value("${linux.webLog.dhlk_server_guard}")
+    String dhlk_server_guard_logPath;
+
     /**
      * 获取所有进程信息
      *
@@ -209,7 +212,6 @@ public class ProcessManageServiceImpl implements ProcessManageService {
      * @param processName
      * @return
      */
-    // todo 需要加硬件服务启动命令
     public String getStartCommand(String processName) {
         //Const.WEB_START_PROCESS+redisService.get(processName).toString() = java -jar xxxxxxx.jar
         //nohup java -jar /home/software/java/dhlk_web-1.0-SNAPSHOT.jar 1>/home/software/java/logs/dhlk_web.log 2>&1 &
@@ -226,7 +228,7 @@ public class ProcessManageServiceImpl implements ProcessManageService {
                     String sub = org.apache.commons.lang3.StringUtils.substringBeforeLast(redisService.get(processName).toString(), "/");
                     System.out.println("sub======="+sub);
                     return "cd  "+sub+"; "
-                            + " 777 "+  processName  + ";"
+                            + "chmod 777 "+  processName  + ";"
                             +  sub+"/"+processName+ " &";
                 }else{
                     System.out.println("=========="+redisService.get(processName).toString()+"/"+processName+ " &");
@@ -243,6 +245,8 @@ public class ProcessManageServiceImpl implements ProcessManageService {
                 return Const.START_MOSQUITTO_PROCESS_COMMAND;
             } else if ("nginx".equals(processName)) {
                 return Const.START_NGINX_PROCESS_COMMAND;
+            }else if("dhlk_server_guard".equals(processName)){
+                return dhlk_server_guard_logPath;
             }
         }
         return "";

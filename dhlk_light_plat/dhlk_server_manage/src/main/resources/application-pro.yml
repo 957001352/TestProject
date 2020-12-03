@@ -31,10 +31,11 @@ linux:
   webLog:
     dhlk_light_factory: 1>/home/software/java/logs/dhlk_local.log 2>&1 &
     dhlk_server_manage: 1>/home/software/java/logs/dhlk_server_manage.log 2>&1 &
+    dhlk_server_guard: nohup java -jar /home/software/java/dhlk_server_guard-0.0.1-SNAPSHOT.jar 1>/home/software/java/logs/guard.log 2>&1 &
 mysql:
   driver: com.mysql.cj.jdbc.Driver
   userName: root
-  password: dhlktech
+  password: 1111
   url: jdbc:mysql://127.0.0.1:3306/dhlk_light_factory?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true&allowMultiQueries=true
 
 upoload:

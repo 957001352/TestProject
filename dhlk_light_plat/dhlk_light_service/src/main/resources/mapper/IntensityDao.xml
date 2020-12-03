@@ -26,20 +26,20 @@
     <insert id="insert" parameterType="com.dhlk.entity.light.Intensity" useGeneratedKeys="true" keyProperty="id">
         insert into dhlk_light_intensity
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="on_off != null and  on_off != ''">on_off,</if>
-            <if test="illumi_top != null and  illumi_top != ''">illumi_top,</if>
-            <if test="illumi_top_min != null and  illumi_top_min != ''">illumi_top_min,</if>
+            <if test="on_off != null">on_off,</if>
+            <if test="illumi_top != null ">illumi_top,</if>
+            <if test="illumi_top_min != null">illumi_top_min,</if>
             <if test="illumi_flr != null">illumi_flr,</if>
-            <if test="illumi_flr_max != null and  illumi_flr_max != ''">illumi_flr_max,</if>
+            <if test="illumi_flr_max != null">illumi_flr_max,</if>
             <if test="tenantId != null and tenantId != ''">tenant_id,</if>
             <if test="controlParam != null">control_param</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="on_off != null and  on_off != ''">#{on_off},</if>
-            <if test="illumi_top != null and  illumi_top != ''">#{illumi_top},</if>
-            <if test="illumi_top_min != null and  illumi_top_min != ''">#{illumi_top_min},</if>
+            <if test="on_off != null">#{on_off},</if>
+            <if test="illumi_top != null">#{illumi_top},</if>
+            <if test="illumi_top_min != null">#{illumi_top_min},</if>
             <if test="illumi_flr != null">#{illumi_flr},</if>
-            <if test="illumi_flr_max != null and  illumi_flr_max != ''">#{illumi_flr_max},</if>
+            <if test="illumi_flr_max != null">#{illumi_flr_max},</if>
             <if test="tenantId != null and tenantId != ''">#{tenantId},</if>
             <if test="controlParam != null">#{controlParam}</if>
         </trim>
@@ -48,11 +48,11 @@
     <update id="update" parameterType="com.dhlk.entity.light.Intensity">
         update dhlk_light_intensity
         <trim prefix="SET" suffixOverrides=",">
-            <if test="on_off != null and  on_off != ''">on_off = #{on_off},</if>
-            <if test="illumi_top != null and  illumi_top != ''">illumi_top = #{illumi_top},</if>
-            <if test="illumi_top_min != null and  illumi_top_min != ''">illumi_top_min = #{illumi_top_min},</if>
+            <if test="on_off != null">on_off = #{on_off},</if>
+            <if test="illumi_top != null">illumi_top = #{illumi_top},</if>
+            <if test="illumi_top_min != null">illumi_top_min = #{illumi_top_min},</if>
             <if test="illumi_flr != null">illumi_flr = #{illumi_flr},</if>
-            <if test="illumi_flr_max != null and  illumi_flr_max != ''">illumi_flr_max = #{illumi_flr_max},</if>
+            <if test="illumi_flr_max != null">illumi_flr_max = #{illumi_flr_max},</if>
             <if test="controlParam != null">control_param = #{controlParam}</if>
         </trim>
         where id = #{id}

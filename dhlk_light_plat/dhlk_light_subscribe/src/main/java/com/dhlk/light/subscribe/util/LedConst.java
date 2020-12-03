@@ -80,7 +80,7 @@ public class LedConst {
 
     public final static Integer REDISTTIME =45;//灯数据redis数据存储时间
 
-    public final static Integer REDISTIME_RETURNDATA =180;//光感数据redis数据存储时间
+    public final static Integer REDISTIME_RETURNDATA =60;//光感数据redis数据存储时间
 
     public final static Integer BRIGHT =30;//调光测试, 功率30
 

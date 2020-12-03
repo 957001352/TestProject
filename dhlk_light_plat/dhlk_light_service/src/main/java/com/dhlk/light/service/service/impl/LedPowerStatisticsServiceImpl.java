@@ -61,7 +61,6 @@ public class LedPowerStatisticsServiceImpl implements LedPowerStatisticsService 
      * @param ledPower
      */
 
-    //TODO 因需要硬件传递灯相关信息，暂时还未实现新增灯功率统计
     @Override
     public void save(LedPower ledPower){
         ledPowerStatisticsDao.insert(ledPower);
@@ -91,7 +90,7 @@ public class LedPowerStatisticsServiceImpl implements LedPowerStatisticsService 
         if(CheckUtils.isNull(areaId) || CheckUtils.isNull(date)){
             return ResultUtils.error(ResultEnum.PARAM_ERR);
         }
-        return ResultUtils.success(ledPowerStatisticsDao.findPeopleFeelNumber(areaId,date));
+        return ResultUtils.success(ledPowerStatisticsDao.findPeopleFeelNumber(areaId,date,headerUtil.tenantId()));
     }
 
     /**

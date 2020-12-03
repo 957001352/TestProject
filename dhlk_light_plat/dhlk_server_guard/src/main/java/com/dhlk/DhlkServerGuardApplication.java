@@ -54,6 +54,11 @@ public class DhlkServerGuardApplication {
                     //服务是否启动
                     if (!applicationStatus(String.valueOf(o))) {
                         startApp(guardProcess.findPropValus(String.valueOf(o)));
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }

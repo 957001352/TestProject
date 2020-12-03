@@ -29,6 +29,7 @@ public class LedController {
 
     /**
      * 保存
+     *
      * @param led
      * @return
      */
@@ -40,6 +41,7 @@ public class LedController {
 
     /**
      * 修改
+     *
      * @param led
      * @return
      */
@@ -49,19 +51,27 @@ public class LedController {
         return ledService.update(led);
     }
 
+
+    @PostMapping(value = "/updateLocation")
+    public Result updateLocation(@RequestBody List<Led> leds) {
+        return ledService.updateLocation(leds);
+    }
+
     /**
      * 灯闪一闪
+     *
      * @param infoBox
      * @return
      */
     @ApiOperation("闪一闪")
     @PostMapping(value = "/flashingLed")
     public Result flashingLed(@RequestBody InfoBox<String> infoBox) {
-        return  ledService.flashingLed(infoBox);
+        return ledService.flashingLed(infoBox);
     }
 
     /**
      * 删除
+     *
      * @param id
      * @return result
      */
@@ -70,8 +80,10 @@ public class LedController {
     public Result delete(@RequestParam(value = "id") String id) {
         return ledService.delete(id);
     }
+
     /**
      * 列表查询
+     *
      * @param sn
      * @param areaId
      * @return
@@ -81,12 +93,13 @@ public class LedController {
     public Result findList(@RequestParam(value = "sn", required = false) String sn,
                            @RequestParam(value = "areaId", required = false) String areaId,
                            @RequestParam(value = "switchId", required = false) String switchId) {
-        return ledService.findList(sn, areaId,switchId);
+        return ledService.findList(sn, areaId, switchId);
     }
 
 
     /**
      * 新增灯能耗信息
+     *
      * @param list
      * @return
      */
@@ -102,9 +115,21 @@ public class LedController {
         return ledService.saveOnlineList(list);
     }
 
+    /**
+     * 保存人感统计
+     *
+     * @param list
+     * @return
+     */
+    @PostMapping(value = "/savePeopleList")
+    public Result savePeopleList(@RequestBody String json) {
+        return ledService.savePeopleList(json);
+    }
+
 
     /**
      * 新增灯在线时长
+     *
      * @param ledOnline
      * @return
      */
@@ -116,6 +141,7 @@ public class LedController {
 
     /**
      * 增加开关与灯绑定关系
+     *
      * @param swich
      * @return
      */
@@ -127,6 +153,7 @@ public class LedController {
 
     /**
      * 设置灯亮度
+     *
      * @param infoBox
      * @return
      */
@@ -141,6 +168,7 @@ public class LedController {
 
     /**
      * 查询有灯的区域
+     *
      * @return
      */
     @ApiOperation("查询有灯的区域")
@@ -151,6 +179,7 @@ public class LedController {
 
     /**
      * 开关灯
+     *
      * @return
      */
     @PostMapping(value = "/openOrCloseLed")
@@ -159,8 +188,10 @@ public class LedController {
 //                                 @RequestParam("status") String status) {
         return ledService.openOrCloseLed(infoBox);
     }
+
     /**
      * 灯重启
+     *
      * @return
      */
     @PostMapping(value = "/ledRestart")
@@ -168,16 +199,20 @@ public class LedController {
     public Result ledRestart(@RequestBody InfoBox<String> infoBox) {
         return ledService.ledRestart(infoBox);
     }
+
     /**
      * 开关重启
+     *
      * @return
      */
     @PostMapping(value = "/switchRestart")
     public Result switchRestart(@RequestBody InfoBox<String> infoBox) {
         return ledService.switchRestart(infoBox);
     }
+
     /**
      * 获取照明设备故障信息
+     *
      * @return
      */
     @GetMapping(value = "/findLedFault")
@@ -188,11 +223,11 @@ public class LedController {
 
     @ApiOperation("文件导出")
     @GetMapping("/exportExcel")
-    public void exportExcel(HttpServletResponse response,@RequestParam("ledSn")String ledSn){
-        try{
-            List<LinkedHashMap<String,Object>> list= (List<LinkedHashMap<String, Object>>) ledService.findExportList(ledSn).getData();
-            ExcelUtil.exportExcel(response, Arrays.asList(new String[]{"SN","故障代码"}), list, "测试excel导出");
-        }catch (Exception e) {
+    public void exportExcel(HttpServletResponse response, @RequestParam("ledSn") String ledSn) {
+        try {
+            List<LinkedHashMap<String, Object>> list = (List<LinkedHashMap<String, Object>>) ledService.findExportList(ledSn).getData();
+            ExcelUtil.exportExcel(response, Arrays.asList(new String[]{"SN", "故障代码"}), list, "测试excel导出");
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -200,6 +235,7 @@ public class LedController {
 
     /**
      * 根据租户Id获取灯信息
+     *
      * @param tenantId
      * @return
      */
@@ -211,6 +247,7 @@ public class LedController {
 
     /**
      * 获取灯的配置参数
+     *
      * @param infoBox
      */
     @PostMapping("/findLedParamInfos")
@@ -220,15 +257,15 @@ public class LedController {
 
     @ApiOperation("操作日志查询")
     @GetMapping(value = "/findLedRecord")
-    public Result findLedRecord(@RequestParam(value ="sn", required = false) String sn,
-                                @RequestParam(value ="commond", required = false) String commond,
-                                @RequestParam(value ="sendResult", required = false) String sendResult,
-                                @RequestParam(value ="backResult", required = false) String backResult,
-                                @RequestParam(value ="startTime", required = false) String startTime,
-                                @RequestParam(value ="endTime", required = false) String endTime,
+    public Result findLedRecord(@RequestParam(value = "sn", required = false) String sn,
+                                @RequestParam(value = "commond", required = false) String commond,
+                                @RequestParam(value = "sendResult", required = false) String sendResult,
+                                @RequestParam(value = "backResult", required = false) String backResult,
+                                @RequestParam(value = "startTime", required = false) String startTime,
+                                @RequestParam(value = "endTime", required = false) String endTime,
                                 @RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
                                 @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
-        return ledService.findLedRecord(sn,commond,sendResult,backResult,startTime,endTime,pageNum,pageSize);
+        return ledService.findLedRecord(sn, commond, sendResult, backResult, startTime, endTime, pageNum, pageSize);
     }
 
     /**
@@ -252,7 +289,7 @@ public class LedController {
      * 查询区域里的所有灯
      */
     @GetMapping("/findLedsByArea")
-    public Result findLedsByArea(@RequestParam("areaId")String areaId) {
+    public Result findLedsByArea(@RequestParam("areaId") String areaId) {
         return ledService.findLedsByArea(areaId);
     }
 
@@ -262,5 +299,25 @@ public class LedController {
     @PostMapping("/refreshParam")
     public Result refreshParam(@RequestBody InfoBox<String> infoBox) {
         return ledService.refreshParam(infoBox);
+    }
+
+    /**
+     * 显示图标大小
+     */
+    @ApiOperation("显示图标大小")
+    @GetMapping("/showIconSize")
+    public Result showIconSize() {
+        return ledService.showIconSize();
+    }
+
+    /**
+     * 接收本地亮度设置
+     * @param power
+     * @return
+     */
+    @PostMapping(value = "/syncLedBrightness")
+    @ApiOperation("接收本地亮度设置")
+    public Result syncLedBrightness(@RequestBody String power) {
+        return ledService.syncLedBrightness(power);
     }
 }

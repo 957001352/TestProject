@@ -25,7 +25,7 @@ public interface LedPowerService {
 
     public Integer saveLocalPeopleFeel(LocalPeopleFeelStatistics localPeopleFeelStatistics);
 
-    public void peopleFeelStatistics();
+    public void peopleFeelStatistics() throws Exception;
 
 
 }

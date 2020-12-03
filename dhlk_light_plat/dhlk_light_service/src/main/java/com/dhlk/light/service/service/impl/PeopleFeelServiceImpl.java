@@ -103,7 +103,11 @@ public class PeopleFeelServiceImpl implements PeopleFeelService {
 
     @Override
     public Result memoryPeopleFeel() {
-        return ResultUtils.success(peopleFeelDao.selectByTenantId(headerUtil.tenantId()));
+        Integer tenantId = headerUtil.tenantId();
+        if(CheckUtils.isNull(tenantId)){
+            return ResultUtils.success();
+        }
+        return ResultUtils.success(peopleFeelDao.selectByTenantId(tenantId));
     }
 
 }

@@ -33,6 +33,7 @@
         where ls.group_id=g.id
           and ls.led_id=l.id
           and ls.switch_id=s.id
+          and l.status=0
           and ls.led_id in
         <foreach collection="leds" open="(" close=")" separator="," item="led">
             #{led.id}

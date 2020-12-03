@@ -41,9 +41,9 @@
                IFNULL(sum(p.energy),0) AS energy,
                IFNULL(a.area,'') AS area
         from dhlk_light_led_power p
-        left join dhlk_light_led   l on p.led_sn=l.sn
+        left join dhlk_light_led   l on p.led_sn=l.sn and p.tenant_id = l.tenant_id
         left join dhlk_light_area a on a.id=l.area_id
-        where l.tenant_id=#{tenantId}
+        where p.tenant_id=#{tenantId}
         group by time,a.area
         having 1 = 1
         <if test="startDate !=null and startDate !='' ">
@@ -59,21 +59,12 @@
     </select>
 
     <select id="findPeopleFeelNumber" parameterType="map" resultMap="DhlkPeopleFell">
-        SELECT
-	        sta.led_sn,
-	        sta.number
-        FROM
-	        dhlk_light_area area
-	    JOIN dhlk_light_led led ON area.id = led.area_id
-	    JOIN (
 		    SELECT
 			    led_sn, SUM( number) AS number
 		    FROM
 			    dhlk_light_cloud_people_feel_statistics
-			where DATE_FORMAT(create_time, '%Y-%m-%d' ) = #{date}
-		    GROUP BY led_sn ) sta
-	        ON led.sn = sta.led_sn
-	    where  area.id = #{areaId}
+			where DATE_FORMAT(create_time, '%Y-%m-%d' ) = #{date} and  tenant_id = #{tenantId}
+		    GROUP BY led_sn
     </select>
 
     <select id="exportEnergyStatistics" parameterType="map" resultType="java.util.LinkedHashMap">
@@ -88,10 +79,10 @@
         IFNULL(a.area,'') AS area,
         IFNULL(sum(p.energy),0) AS energy
         from dhlk_light_led_power p
-        left join dhlk_light_led   l on p.led_sn=l.sn
+        left join dhlk_light_led   l on p.led_sn=l.sn and p.tenant_id = l.tenant_id
         left join dhlk_light_area a on a.id=l.area_id,
         (SELECT (@rowNum := 0)) b
-        where l.tenant_id=#{tenantId}
+        where p.tenant_id=#{tenantId}
         group by time,a.area
         having 1 = 1
         <if test="startDate !=null and startDate !='' ">

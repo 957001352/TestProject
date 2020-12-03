@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.dao.KMeansLightDao">
+
+    <resultMap id="kmlightResultMap" type="com.dhlk.light.entity.KMeansLight">
+        <result property="clusterOne" column="cluster_one" jdbcType="LONGVARCHAR"/>
+        <result property="clusterTwo" column="cluster_two" jdbcType="LONGVARCHAR"/>
+        <result property="clusterThree" column="cluster_three" jdbcType="LONGVARCHAR"/>
+    </resultMap>
+
+    <select id="findList" resultMap="kmlightResultMap">
+        select * from dhlk_light_cluster where 1=1 and factoryCode = #{factoryCode} order by id limit 1
+    </select>
+
+    <select id="selectFactoryCode" resultType="java.lang.String">
+
+        select distinct(factoryCode) from dhlk_light_cluster
+
+    </select>
+
+    <select id="selectAreaBySn" resultType="com.dhlk.light.entity.LightLocation">
+
+        SELECT
+	        l.id,l.sn,l.tenant_id,l.xaxis,l.yaxis,a.area,l.area_id
+        FROM
+	        dhlk_light_led l
+        LEFT JOIN dhlk_light_area a ON l.area_id = a.id
+        WHERE
+	        1 = 1
+        AND
+	        sn=#{sn}
+    </select>
+</mapper>

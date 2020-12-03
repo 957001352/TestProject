@@ -108,4 +108,9 @@ public interface LedPowerDao {
      */
     public Integer updateOnLineStatus(List<LedOnline> list);
 
+    /**
+     * 更新灯人感发送云状态
+     */
+    public Integer updatePeopleFellStatus(List<CloudPeopleFeelStatistics> list);
+
 }

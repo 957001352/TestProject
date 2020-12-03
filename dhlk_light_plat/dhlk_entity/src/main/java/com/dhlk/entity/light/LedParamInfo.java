@@ -88,4 +88,31 @@ public class LedParamInfo {
         this.wf_mode = ledWifiInfo.getWf_mode();
     }
 
+    public LedParamInfo(IntensityInfo intensityInfo,PeopleFeelInfo peopleFeelInfo,LedWifiInfo ledWifiInfo,Version<String> version) {
+
+        if(intensityInfo != null){
+            this.light_on_off = intensityInfo.getOn_off();
+            this.illumi_top = intensityInfo.getIllumi_top();
+            this.illumi_top_min = intensityInfo.getIllumi_top_min();
+            this.illumi_flr = intensityInfo.getIllumi_flr();
+            this.illumi_flr_max = intensityInfo.getIllumi_flr_max();
+        }
+        if(peopleFeelInfo != null){
+            this.people_on_off = peopleFeelInfo.getOn_off();
+            this.trig_delay_tm = peopleFeelInfo.getTrig_delay_tm();
+            this.n_ramp_tm = peopleFeelInfo.getN_ramp_tm();
+            this.minval = peopleFeelInfo.getMinvalue();
+            this.maxval = peopleFeelInfo.getMaxvalue();
+        }
+        if(ledWifiInfo != null){
+            this.ssid = ledWifiInfo.getSsid();
+            this.ip = ledWifiInfo.getIp();
+            this.password = ledWifiInfo.getPassword();
+            this.wf_dev = ledWifiInfo.getWf_dev();
+            this.wf_mode = ledWifiInfo.getWf_mode();
+        }
+        if(version != null){
+            this.version = version.getVersion();
+        }
+    }
 }

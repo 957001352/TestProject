@@ -44,7 +44,7 @@
     <select id="findList"  resultMap="DhlkLightInspectionReportDaoResult">
         SELECT t1.sn,t2.area,t1.off,t1.dimming,t1.timed_control,t1.ons
         FROM dhlk_light_inspection_report t1
-        LEFT JOIN dhlk_light_led t3 ON t3.sn = t1.sn and t3.tenant_id = #{tenantId}
+        LEFT JOIN dhlk_light_led t3 ON t3.sn = t1.sn and t3.tenant_id = #{tenantId} and t3.status=0
         LEFT JOIN dhlk_light_area t2 ON t2.id = t3.area_id and t2.tenant_id = #{tenantId}
         WHERE 1=1
         <if test="tenantId != null  and tenantId != ''">
@@ -88,7 +88,7 @@
         FROM
         (SELECT  t1.sn,t2.area,t1.ons,t1.dimming,t1.off
         FROM dhlk_light_inspection_report t1
-        LEFT JOIN dhlk_light_led t3 ON t3.sn = t1.sn and t3.tenant_id = #{tenantId}
+        LEFT JOIN dhlk_light_led t3 ON t3.sn = t1.sn and t3.tenant_id = #{tenantId} and t3.status=0
         LEFT JOIN dhlk_light_area t2 ON t2.id = t3.area_id and t2.tenant_id = #{tenantId},(SELECT (@rowNum := 0)) b
         WHERE 1=1
         <if test="tenantId != null  and tenantId != ''">

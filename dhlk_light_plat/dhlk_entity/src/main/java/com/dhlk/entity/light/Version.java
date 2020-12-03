@@ -7,13 +7,13 @@ import lombok.Data;
 * @CreateDate:     2020/7/20 15:14
 */
 @Data
-public class Version {
-    private Integer version;
+public class Version<T> {
+    private T version;
 
     public Version() {
     }
 
-    public Version(Integer version) {
+    public Version(T version) {
         this.version = version;
     }
 }

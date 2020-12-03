@@ -309,6 +309,9 @@ public class ParseStringUtils {
             } else if (Arrays.asList(afterArgs).stream().filter(k -> k.contains("dhlk_server_manage")).collect(Collectors.toList()).size() > 0) {
                 processInfoEntity.setProcessName("dhlk_server_manage");
                 processInfoEntity.setType("3");
+            } else if (Arrays.asList(afterArgs).stream().filter(k -> k.contains("dhlk_server_guard")).collect(Collectors.toList()).size() > 0) {
+                processInfoEntity.setProcessName("dhlk_server_guard");
+                processInfoEntity.setType("6");
             } else if (Arrays.asList(afterArgs).stream().filter(k -> k.contains("quitto")).collect(Collectors.toList()).size() > 0) {
                 processInfoEntity.setProcessName("mosquitto");
                 processInfoEntity.setType("3");

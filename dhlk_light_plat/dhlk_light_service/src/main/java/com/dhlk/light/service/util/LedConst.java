@@ -48,6 +48,7 @@ public class LedConst {
     public final static String LOCAL_TOPIC_LED_SAVE = "LOCAL_TOPIC_LED_SAVE";//云端灯保存给本地发消息
     public final static String LOCAL_TOPIC_LED_UPDATE = "LOCAL_TOPIC_LED_UPDATE";//云端灯保存给本地发消息
     public final static String LOCAL_TOPIC_LED_DELETE = "LOCAL_TOPIC_LED_DELETE";//云端灯删除给本地发消息
+    public final static String LOCAL_TOPIC_LED_LOCATION = "LOCAL_TOPIC_LED_LOCATION";//云端灯位置修改给本地发消息
 
     public final static String LOCAL_TOPIC_AREA_SAVE = "LOCAL_TOPIC_AREA_SAVE";//云端区域保存给本地发消息
     public final static String LOCAL_TOPIC_AREA_UPDATE = "LOCAL_TOPIC_AREA_UPDATE";//云端区域保存给本地发消息
@@ -77,7 +78,7 @@ public class LedConst {
 
     public final static Integer RETRYCOUNT =0;//重发次数
 
-    public final static Integer SETRETRYCOUNT =3;//wifi设置重发次数
+    public final static Integer SETRETRYCOUNT = 0;//wifi设置重发次数
     public final static Integer SETRETRYTIME =20;//wifi设置重发时间  单位秒
 
 

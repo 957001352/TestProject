@@ -59,4 +59,12 @@ public interface AreaService {
      */
     @GetMapping("/findAreaRepeat")
     Result findAreaRepeat(@RequestParam(value = "name") String name);
+
+    /**
+     * 修改图纸
+     * @param area
+     * @return
+     */
+    @PostMapping("/update")
+    Result update(@RequestBody Area area);
 }

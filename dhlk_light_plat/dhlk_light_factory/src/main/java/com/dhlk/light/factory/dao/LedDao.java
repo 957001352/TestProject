@@ -44,6 +44,9 @@ public interface LedDao {
      */
     Integer update(Led led);
 
+
+
+    Integer updateLocation(@Param("list") List<Led> list);
     /**
      * 删除
      * @param id

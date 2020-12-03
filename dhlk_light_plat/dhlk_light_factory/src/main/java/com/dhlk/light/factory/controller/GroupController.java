@@ -19,7 +19,7 @@ public class GroupController {
      * @date        2020/6/4 15:50
      */
     @GetMapping("/findList")
-    @RequiresAuthentication
+    //@RequiresAuthentication
     public Result findList(){
         return groupService.findList();
     }
@@ -31,7 +31,7 @@ public class GroupController {
      * @date        2020/6/4 15:50
      */
     @PostMapping("/ledStatusIsChange")
-    @RequiresAuthentication
+    //@RequiresAuthentication
     public Result ledStatusIsChange(@RequestBody InfoBox<String> infoBox){
 //            @RequestParam("sns")String sns,@RequestParam("status")String status){
         return groupService.ledStatusIsChange(infoBox.getSns(),infoBox.getT());
@@ -44,7 +44,7 @@ public class GroupController {
      * @date        2020/6/4 15:50
      */
     @GetMapping("/findGroupList")
-    @RequiresAuthentication
+    //@RequiresAuthentication
     public Result findGroupList(@RequestParam("areaId") String areaId){
         return groupService.findGroupList(areaId);
     }

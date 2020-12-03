@@ -107,4 +107,9 @@ public interface LedService {
     */
    Result findLedsByArea(String areaId);
 
+   /**
+    * 显示图标大小
+    * @return
+    */
+    Result showIconSize();
 }

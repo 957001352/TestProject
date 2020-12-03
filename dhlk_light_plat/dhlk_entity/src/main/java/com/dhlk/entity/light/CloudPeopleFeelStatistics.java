@@ -29,6 +29,9 @@ public class CloudPeopleFeelStatistics {
     @ApiModelProperty(value = "次数",hidden = true)
     private Integer number;
 
+    @ApiModelProperty(value = "租户ID")
+    private Integer tenantId;
+
 
     public CloudPeopleFeelStatistics() {
         this.createTime= Convert.formatDateTime(DateUtils.getLongCurrentTimeStamp(),"yyyy-MM-dd hh:mm:ss");

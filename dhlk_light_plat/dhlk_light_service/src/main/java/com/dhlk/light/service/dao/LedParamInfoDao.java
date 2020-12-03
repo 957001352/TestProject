@@ -47,4 +47,7 @@ public interface LedParamInfoDao {
      * @param list
      */
     Integer updateList(@Param("list") List<LedParamInfo> list);
+
+
+    List<LedParamInfo> findParamBySn(@Param("sns") String[] sns);
 }

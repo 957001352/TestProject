@@ -50,6 +50,8 @@ public class MqttCloudServiceImpl implements MqttCloudService {
     @Autowired
     private AreaDao areaDao;
     @Autowired
+    private UserDao userDao;
+    @Autowired
     private SwitchDao switchDao;
     @Autowired
     private LedSwitchDao ledSwitchDao;
@@ -104,6 +106,8 @@ public class MqttCloudServiceImpl implements MqttCloudService {
             updateLed(jsonStr);
         } else if (LedConst.LOCAL_TOPIC_LED_DELETE.equals(topic)) {//订阅灯数据删除
             deleteLed(jsonStr);
+        } else if (LedConst.LOCAL_TOPIC_LED_LOCATION.equals(topic)) {//订阅灯位置更新数据
+            updateLedLocaltion(jsonStr);
         } else if (LedConst.LOCAL_TOPIC_AREA_SAVE.equals(topic)) {
             saveArea(jsonStr);
         } else if (LedConst.LOCAL_TOPIC_AREA_DELETE.equals(topic)) {
@@ -127,6 +131,11 @@ public class MqttCloudServiceImpl implements MqttCloudService {
         boolean flag = false;
         if (!CheckUtils.isNull(jsonStr)) {
             SyncDataResult syncDataResult = JSON.parseObject(jsonStr, SyncDataResult.class);
+
+            if(syncDataResult.getTenantId() == null && userDao.checkUserExist() > 0){
+                return syncDataResult;
+            }
+
             Integer tenantId;
             if (!redisService.hasKey(LedConst.REDIS_TENANTID)) {
                 tenantId = tenantDao.findTenantId();
@@ -141,7 +150,7 @@ public class MqttCloudServiceImpl implements MqttCloudService {
             if (tenantId != null && tenantId.equals(syncDataResult.getTenantId())) {
                 flag = true;
             }
-            if (flag || syncDataResult.getTenantId() == null) {
+            if (flag) {
                 return syncDataResult;
             }
         }
@@ -234,12 +243,12 @@ public class MqttCloudServiceImpl implements MqttCloudService {
             } else {
                 redisService.set(LedConst.REDIS_TENANTID, tenantId);
             }
-            if (tenantId == id) {
+            if (tenantId.equals(id) ) {
                 return true;
             }
         } else {
             Integer tenantId = (Integer) redisService.get(LedConst.REDIS_TENANTID);
-            if (tenantId == id) {
+            if (tenantId.equals(id)) {
                 return true;
             }
         }
@@ -399,6 +408,20 @@ public class MqttCloudServiceImpl implements MqttCloudService {
                     }
                 }
             }
+        }
+    }
+
+    /**
+    * 灯位置更新
+     * @param jsonStr
+    * @return
+    */
+    public void updateLedLocaltion(String jsonStr) {
+        if (!CheckUtils.isNull(jsonStr)) {
+           List<Led> leds=JSONObject.parseArray(jsonStr,Led.class);
+           if(leds!=null&&leds.size()>0){
+               ledDao.updateLocation(leds);
+           }
         }
     }
 

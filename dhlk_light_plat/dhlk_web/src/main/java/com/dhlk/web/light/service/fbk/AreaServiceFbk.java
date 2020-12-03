@@ -40,4 +40,9 @@ public class AreaServiceFbk implements AreaService {
     public Result findAreaRepeat(String name) {
         return ResultUtils.error(ResultEnum.NETWORK_ERR);
     }
+
+    @Override
+    public Result update(Area area) {
+        return ResultUtils.error(ResultEnum.NETWORK_ERR);
+    }
 }

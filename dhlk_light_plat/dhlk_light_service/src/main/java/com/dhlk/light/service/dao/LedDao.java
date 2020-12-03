@@ -21,6 +21,9 @@ public interface LedDao {
 
     Integer update(Led led);
 
+
+    Integer updateLocation(@Param("list") List<Led> list);
+
     Integer delete(Integer id);
 
     Integer deleteLed(Integer id);
@@ -69,4 +72,6 @@ public interface LedDao {
     List<String> findSnAll();
 
     Led findLed(Led led);
+
+    List<String> findSnByTenantId(@Param("tenantId") Integer tenantId);
 }

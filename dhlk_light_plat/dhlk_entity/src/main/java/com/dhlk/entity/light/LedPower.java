@@ -96,7 +96,9 @@ public class LedPower {
             this.switchStatus=data.get("on_off").toString();
             this.status=data.get("on_off").toString();
         }
-
+       if(!CheckUtils.isNull(result.getInteger("tenantId"))){
+           this.tenantId=result.getInteger("tenantId");
+       }
     }
 
     public LedPower() {

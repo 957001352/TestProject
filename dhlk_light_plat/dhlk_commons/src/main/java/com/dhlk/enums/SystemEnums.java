@@ -38,6 +38,7 @@ public enum SystemEnums {
     USERNAME_PASSWORD_ERR(7003,"用户名密码错误"),
     SELECT_VERIFICATION_CODE_ERROR(7004,"获取验证码异常"),
     URL_DECODER_ERROR(7005, "URL解码错误"),
+    GET_CAPTCHA_ERROR(7006, "获取验证码失败"),
 
 
     DESENCRYPT_ERR(2002, "DES转化异常"),

@@ -50,8 +50,15 @@
         <module>dhlk_light_factory</module>
         <!--一体机运维系统-->
         <module>dhlk_server_manage</module>
-        <!--等联网云端订阅服务-->
+        <!--灯联网云端订阅服务-->
         <module>dhlk_light_subscribe</module>
+
+        <!--能源数据订阅服务-->
+        <module>dhlk_energy_subscribe</module>
+
+        <!--AI-->
+        <module>dhlk_light_service_ai</module>
+
 
     </modules>
     <properties>

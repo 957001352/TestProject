@@ -39,7 +39,7 @@ public class MqttLocalSubsribe {
 
     private int[] Qos = {2};
 
-
+    String aa;
     private MqttConnect mqttConnect = new MqttConnect();
 
     private MqttConnectOptions options;
@@ -67,14 +67,13 @@ public class MqttLocalSubsribe {
         if(client!=null){
             //如果是订阅者则添加回调类，发布不需要
             client.setCallback(new MqttCallback() {
-
                 public void connectionLost(Throwable cause) {
                     cause.printStackTrace();
                     log.info("本地订阅连接断开....." + System.currentTimeMillis());
                     try {
                         client.close();
-                        MqttClient client = connect();
-                        reConcatMqtt(client);
+                        MqttClient clients = connect();
+                        reConcatMqtt(clients);
                     } catch (MqttException e) {
                         log.info("本地订阅连接异常....." + System.currentTimeMillis());
                     }
@@ -97,22 +96,38 @@ public class MqttLocalSubsribe {
             }
         } catch (MqttException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
      }
 
      public void reConcatMqtt(MqttClient client){
-             while (true){
+//             while (true){
+//                 try {
+//                     if(startSubsribe(client)){
+//                         log.info("本地订阅新开连接重连成功....."+System.currentTimeMillis());
+//                         break;
+//                     }
+//                     Thread.sleep(5000);
+//                 } catch (InterruptedException e) {
+//                     e.printStackTrace();
+//                 }
+//             }
+         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+         Future future = executorService.scheduleAtFixedRate(new Runnable() {
+             @Override
+             public void run() {
                  try {
+                     log.info(System.currentTimeMillis() + "本地订阅连接断开，正在尝试重新连接...");
                      if(startSubsribe(client)){
                          log.info("本地订阅新开连接重连成功....."+System.currentTimeMillis());
-                         break;
+                         executorService.shutdown();
                      }
-                     Thread.sleep(5000);
-                 } catch (InterruptedException e) {
+                 } catch (Exception e) {
                      e.printStackTrace();
                  }
              }
+         }, 0, 1, TimeUnit.MINUTES);
      }
      @Bean
     public void startLocal() {

@@ -2,6 +2,7 @@ package com.dhlk.basicmodule.service.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.dhlk.basicmodule.service.dao.LoginLogDao;
+import com.dhlk.basicmodule.service.dao.UserDao;
 import com.dhlk.basicmodule.service.service.CaptchaService;
 import com.dhlk.basicmodule.service.service.LoginService;
 import com.dhlk.basicmodule.service.service.UserService;
@@ -44,6 +45,10 @@ public class LoginServiceImpl implements LoginService {
     private AuthUserUtil authUserUtil;
     @Autowired
     private CaptchaService captchaService;
+    @Autowired
+    private HttpServletRequest request;
+    @Autowired
+    private UserDao userDao;
 
     @Override
     public Result login(String loginName, String password,String redisKey,String x,String y) {
@@ -163,5 +168,30 @@ public class LoginServiceImpl implements LoginService {
     public Result getToken() {
         String header = HttpContextUtil.getRequest().getHeader(Const.TOKEN_HEADER);
         return ResultUtils.success(header);
+    }
+
+
+    @Override
+    public Result checkToken() {
+        String token = request.getHeader(Const.TOKEN_HEADER);
+        if(CheckUtils.isNull(token)){
+            return ResultUtils.error("token错误");
+        }
+        String username = JWTUtil.getUsername(token);
+        if(CheckUtils.isNull(username)){
+            return ResultUtils.error("token错误");
+        }
+        User user = userDao.findUserByLoginName(username);
+        if(!CheckUtils.isNull(user)){
+            if(redisService.hasKey(Const.TOKEN_CACHE_ITEM_PREFIX+token)){
+                return ResultUtils.success();
+            }
+            if(JWTUtil.verify(token, username, user.getPassword())){
+                String userInfo = JSON.toJSONString(user);
+                redisService.set(Const.TOKEN_CACHE_ITEM_PREFIX + token, userInfo, Const.TOKEN_LOSE_TIME);
+                return ResultUtils.success();
+            }
+        }
+        return ResultUtils.failure();
     }
 }

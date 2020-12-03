@@ -41,7 +41,9 @@ public interface LedPowerStatisticsDao {
      * @return
      */
      List<CloudPeopleFeelStatistics> findPeopleFeelNumber(@Param("areaId") String areaId,
-                                                          @Param("date") String date);
+                                                          @Param("date") String date,
+                                                          @Param("tenantId") Integer tenantId
+     );
 
 
     /**

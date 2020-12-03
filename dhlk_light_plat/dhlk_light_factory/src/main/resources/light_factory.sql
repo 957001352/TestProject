@@ -267,6 +267,8 @@ create table dhlk_light_local_people_feel_statistics
    led_sn 		        varchar(50)                  DEFAULT NULL COMMENT '照明设备',
    status               integer                      DEFAULT NULL COMMENT '0无人 1有人',
    create_time          timestamp                    NULL COMMENT '统计时间',
+   tenant_id            integer                      DEFAULT NULL COMMENT '租户对象',
+   isSend               char(2)                      DEFAULT '0' COMMENT '是否往云端发送成功，0失败 1成功',
    primary key  (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='本地人感数据统计';
 
@@ -284,6 +286,7 @@ create table dhlk_light_original_power
    tenant_id            integer                      DEFAULT NULL COMMENT '租户Id',
    pre_brightness       integer                      DEFAULT NULL COMMENT '预设亮度',
    sys_runtime          varchar(50)                  DEFAULT NULL COMMENT '系统初始化时间戳',
+   icon_size           varchar(50)                  DEFAULT NULL COMMENT '图标大小',
    primary key  (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='企业原照明功率维护';
 

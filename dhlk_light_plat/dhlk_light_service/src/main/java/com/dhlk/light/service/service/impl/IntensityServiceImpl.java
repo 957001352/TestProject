@@ -104,6 +104,10 @@ public class IntensityServiceImpl implements IntensityService {
 
     @Override
     public Result memoryIntensity() {
-        return ResultUtils.success(intensityDao.selectByTenantId(headerUtil.tenantId()));
+        Integer tenantId = headerUtil.tenantId();
+        if(CheckUtils.isNull(tenantId)){
+            return ResultUtils.success();
+        }
+        return ResultUtils.success(intensityDao.selectByTenantId(tenantId));
     }
 }

@@ -56,27 +56,51 @@
     <insert id="savePeopleFeelStatistics" parameterType="com.dhlk.entity.light.LocalPeopleFeelStatistics">
         insert into dhlk_light_local_people_feel_statistics
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            led_sn,status,create_time
+            led_sn,status,create_time,tenant_id,isSend
         </trim>
         values
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                #{ledSn},#{status},#{createTime}
+                #{ledSn},#{status},#{createTime},#{tenantId},0
             </trim>
     </insert>
 
 
 
     <!--根据时间查询人感数据(定时每天晚上11点汇总)-->
+
+<!--    <select id="peopleFeelStatistics" resultMap="DhlkPeopleFeelStatisticsDataModel">
+        SELECT
+            led_sn,
+            COUNT( id ) AS number,
+            tenantId
+        FROM
+            (
+            SELECT
+                id,
+                led_sn,
+                tenant_id AS tenantId
+            FROM
+                dhlk_light_local_people_feel_statistics
+            WHERE
+                DATE_FORMAT( create_time, '%Y-%m-%d' ) = CURDATE( )
+                AND isSend = 0
+            ORDER BY id ASC LIMIT 200
+            ) A
+        GROUP BY
+            led_sn,
+            tenantId
+    </select>-->
     <select id="peopleFeelStatistics" resultMap="DhlkPeopleFeelStatisticsDataModel">
            SELECT
 	            led_sn,
-	            COUNT(id) as number
+	            COUNT(id) as number,
+	            tenant_id as tenantId
             FROM
 	            dhlk_light_local_people_feel_statistics
             WHERE
-	            DATE_FORMAT( create_time, '%Y-%m-%d' ) = CURDATE()
+	            DATE_FORMAT( create_time, '%Y-%m-%d' ) = CURDATE() and isSend = 0
             GROUP BY
-                led_sn
+                led_sn,tenant_id
     </select>
     
     <!--灯能耗统计 （10分钟统计一次,并且是该10分钟内的净能耗（最大能耗减去最小能耗））-->
@@ -167,7 +191,6 @@
         WHERE
 	        isSend = 0
         ORDER BY id
-        LIMIT 100
     </select>
 
     <!--更新能耗统计表状态-->
@@ -183,6 +206,18 @@
             </trim>
     </update>
 
+    <update id="updatePeopleFellStatus">
+        update
+        dhlk_light_local_people_feel_statistics
+        set isSend = 1
+        where led_sn in
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <foreach collection="list" item="item" index="index" separator="," >
+                #{item.ledSn}
+            </foreach>
+        </trim>
+    </update>
+
 
     <!-- 查询往云端发送失败的灯在线数据 前100条 -->
     <select id="findSendCloudErrorOnLineList" resultMap="DhlkOnlineDataModel" >
@@ -196,7 +231,6 @@
         WHERE
 	        isSend = 0
         ORDER BY id
-        LIMIT 100
     </select>
 
     <!--更新灯在线计表状态-->

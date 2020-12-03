@@ -95,7 +95,5 @@ swagger: ##给swagger设置开关
 captcha:
   slide-verification-code:
     path:
-      origin-image: "F:/attchment/verifyImages/originImage"
-      template-image: "F:/attchment/verifyImages/templates"
-#      origin-image: "/home/software/attachment/verifyImages/originImage"
-#      template-image: "/home/software/attachment/verifyImages/templates"
+      origin-image: "C:/attachment/verifyImages/originImage"
+      template-image: "C:/attachment/verifyImages/templates"

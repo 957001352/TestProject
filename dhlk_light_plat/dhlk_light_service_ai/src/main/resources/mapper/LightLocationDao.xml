@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhlk.light.dao.LightLocationDao">
+
+    <resultMap id="led_area" type="com.dhlk.light.entity.LightLocation"/>
+
+
+    <select id="findAll" resultMap="led_area">
+
+        SELECT
+	        l.id,
+            l.sn,
+            l.tenant_id,
+            l.xaxis,
+            l.yaxis,
+            a.area,
+            l.area_id
+        FROM
+	        dhlk_light_led l
+        LEFT JOIN
+            dhlk_light_area a ON l.area_id = a.id
+        WHERE 1 = 1
+        AND
+	        a.tenant_id = #{tenantId}
+
+        <if test="areaId != null and areaId != ''">
+            and `area_id` = #{areaId}
+        </if>
+
+    </select>
+
+    <select id="selectBySn" resultType="com.dhlk.light.entity.LightLocation">
+
+        select * from dhlk_light_led where sn = #{sn}
+
+    </select>
+
+    <select id="selectLightByTenant" resultType="com.dhlk.light.entity.LightLocation">
+        select * from dhlk_light_led where tenant_id=#{tenantId}
+
+    </select>
+</mapper>

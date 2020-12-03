@@ -49,4 +49,11 @@ public interface AreaService {
      * @return
      */
     Result findAreaRepeat(String name);
+
+    /**
+     * 修改上传图纸
+     * @param area
+     * @return
+     */
+    Result update(@RequestBody Area area);
 }

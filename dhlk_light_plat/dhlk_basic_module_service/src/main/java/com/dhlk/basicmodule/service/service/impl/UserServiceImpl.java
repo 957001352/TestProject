@@ -1,6 +1,7 @@
 package com.dhlk.basicmodule.service.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dhlk.basicmodule.service.dao.OrgDao;
 import com.dhlk.basicmodule.service.dao.UserDao;
 import com.dhlk.basicmodule.service.dao.UserRoleDao;
@@ -91,11 +92,34 @@ public class UserServiceImpl implements UserService {
         String[] split = ids.split(",");
         if (userDao.delete(split) > 0) {
             userRoleDao.deleteByUserIds(split);
+            //删除用户登录token
+            if(split!=null&&split.length>0){
+                for (String id:split) {
+                    delUserToken(id);
+                }
+            }
+
             return ResultUtils.success();
         }
         return ResultUtils.failure();
     }
-
+    /**
+     * 删除用户同时删除token
+     * @param id
+     * @return
+     */
+    public void delUserToken(String id) {
+        Set<String> set = redisService.keys(Const.TOKEN_CACHE_ITEM_PREFIX + "*");
+        for (String key : set) {
+            Object userStr = redisService.get(key);
+            if (userStr != null) {
+                User user = JSONObject.parseObject(userStr.toString(), User.class);
+                if (user!=null&&user.getId().toString().equals(id)) {
+                    redisService.del(key);
+                }
+            }
+        }
+    }
     @Override
     public Result findList(String name) {
         List<User> users = userDao.findList(name, authUserUtil.tenantId());

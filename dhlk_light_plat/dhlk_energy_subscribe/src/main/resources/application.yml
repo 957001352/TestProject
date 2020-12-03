@@ -1,0 +1,11 @@
+server:
+ port: 10055
+#mqtt 配置信息
+mqtt:
+ host: tcp://mq.dahanglink.com:1883
+ topic: dhlk_Energy
+ username: dhlk
+ password: dhlktech
+#重庆能源平台数据接收接口地址
+dhlk_energy:
+  url: http://192.168.64.13:8060/mqtt/messages

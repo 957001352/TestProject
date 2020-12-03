@@ -128,13 +128,21 @@ public class LedServiceImpl implements LedService {
         if (flag > 0) {
             //修改成功给本地MQTT发送消息
             mqttSendServer.sendMQTTMessage(LedConst.LOCAL_TOPIC_LED_UPDATE,JSON.toJSONString(led));
-
-           /* String jsonStrLed = JSON.toJSONString(led);
-            SyncDataResult syncData = new SyncDataResult(Const.LED_TABLE_NAME, jsonStrLed, Const.SYNC_DATA_OPERATE_UPDATE, led.getTenantId());
-            dataSyncService.syncDataToLocal(syncData);*/
         }
         return flag > 0 ? ResultUtils.success() : ResultUtils.failure();
     }
+
+
+    @Override
+    public Result updateLocation(List<Led> leds) {
+        Integer flag  = ledDao.updateLocation(leds);
+        if (flag > 0) {
+            //修改成功给本地MQTT发送消息
+            mqttSendServer.sendMQTTMessage(LedConst.LOCAL_TOPIC_LED_LOCATION,JSON.toJSONString(leds));
+        }
+        return flag > 0 ? ResultUtils.success() : ResultUtils.failure();
+    }
+
     @Override
     public Result flashingLed(String sns) {
         if (CheckUtils.isNull(sns)) return ResultUtils.error(ResultEnum.PARAM_ERR);
@@ -185,6 +193,16 @@ public class LedServiceImpl implements LedService {
     @Override
     public Result saveOnline(LedOnline ledOnline) {
         if (ledDao.insertOnline(ledOnline) > 0) {
+            return ResultUtils.success();
+        }
+        return ResultUtils.failure();
+    }
+
+    @Override
+    public Result savePeopleList(String json) {
+        List<CloudPeopleFeelStatistics> list = JSONObject.parseArray(json, CloudPeopleFeelStatistics.class);
+        if (list != null && list.size() > 0) {
+            ledDao.insertPeopleFell(list);
             return ResultUtils.success();
         }
         return ResultUtils.failure();
@@ -362,12 +380,13 @@ public class LedServiceImpl implements LedService {
             JSONObject json = JSONObject.parseObject(str);
             LedPower ledPower = JSONObject.toJavaObject(json, LedPower.class);
             //把有sn的数据才放到list集合中
-            if (!StringUtils.isEmpty(ledPower.getLedSn())) {
+            if (!StringUtils.isEmpty(ledPower.getLedSn())&&ledPower.getTenantId().equals(headerUtil.tenantId())) {
                 lists.add(ledPower.getLedSn());
             }
         }
-        //获取所有灯的sn号
-        List<String> leds = ledDao.findSnAll();
+        //获取当前租户所有灯的sn号
+        //List<String> leds = ledDao.findSnAll();
+        List<String> leds = ledDao.findSnByTenantId(headerUtil.tenantId());
         if (CollectionUtils.isEmpty(leds)) {
             return ResultUtils.success(lists);
         }
@@ -380,11 +399,15 @@ public class LedServiceImpl implements LedService {
 
     @Override
     public Result brightnessShow() {
-        OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(headerUtil.tenantId());
+        Integer tenantId = headerUtil.tenantId();
+        if(CheckUtils.isNull(tenantId)){
+            return ResultUtils.success();
+        }
+        OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(tenantId);
         if (originalPower != null) {
             return ResultUtils.success(originalPower.getPreBrightness());
         }
-        return ResultUtils.success(null);
+        return ResultUtils.success();
     }
 
     @Override
@@ -408,4 +431,36 @@ public class LedServiceImpl implements LedService {
     }
 
 
+    @Override
+    public Result showIconSize() {
+        Integer tenantId = headerUtil.tenantId();
+        if(CheckUtils.isNull(tenantId)){
+            return ResultUtils.success();
+        }
+        OriginalPower originalPower = originalPowerDao.selectOriginalPowerByTenantId(tenantId);
+        if (originalPower != null) {
+            return ResultUtils.success(originalPower.getIconSize());
+        }
+        return ResultUtils.success();
+    }
+
+
+
+
+    @Override
+    public Result syncLedBrightness(String brightness) {
+        if (!CheckUtils.isNull(brightness)) {
+            OriginalPower originalPower = JSONObject.parseObject(brightness, OriginalPower.class);
+            //本地发送过来OriginalPower数据,根据租户ID先去查询云端有没有这条数据
+            if (originalPower.getTenantId() != null) {
+                OriginalPower power = originalPowerDao.selectOriginalPowerByTenantId(originalPower.getTenantId());
+                if (power != null) {
+                    originalPowerDao.setValues(originalPower.getLedCount(), originalPower.getLedOpentime(), originalPower.getLedPower(), originalPower.getTenantId(), originalPower.getPreBrightness(), originalPower.getSystemRunTime());
+                } else {
+                    originalPowerDao.insert(originalPower);
+                }
+            }
+        }
+        return ResultUtils.success();
+    }
 }

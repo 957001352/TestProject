@@ -64,9 +64,9 @@
 
     <select id="findAreasByLed" resultMap="DhlkBasicConstructionResult">
         select id,area, tenant_id,replace(image_path,#{attachPath},'/attach/') as image_path from dhlk_light_area where id in(
-        select area_id from dhlk_light_led
+        select area_id from dhlk_light_led where status=0
         <if test="tenantId != null  and tenantId != ''">
-            where tenant_id =#{tenantId}
+            and  tenant_id =#{tenantId}
         </if>
         )
         <if test="tenantId != null  and tenantId != ''">

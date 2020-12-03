@@ -2,9 +2,7 @@ package com.dhlk.web.light.service;
 
 import com.dhlk.domain.Result;
 import com.dhlk.entity.light.*;
-import com.dhlk.web.light.service.fbk.ConstructionServiceFbk;
 import com.dhlk.web.light.service.fbk.LedServiceFbk;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,14 +25,16 @@ public interface LedService {
     Result save(@RequestBody Led led);
 
     /**
-    * 闪一闪
+     * 闪一闪
+     *
      * @param sns
-    */
+     */
     @PostMapping(value = "/flashingLed")
     Result flashingLed(@RequestBody InfoBox<String> infoBox);
 
     /**
      * 物理删除
+     *
      * @param id
      */
     @GetMapping(value = "/delete")
@@ -59,6 +59,7 @@ public interface LedService {
 
     /**
      * 新增灯在线时长
+     *
      * @param ledOnline
      * @return
      */
@@ -66,7 +67,17 @@ public interface LedService {
     Result saveOnline(@RequestBody LedOnline ledOnline);
 
     /**
+     * 保存人感统计
+     *
+     * @param json
+     * @return
+     */
+    @PostMapping(value = "/savePeopleList")
+    public Result savePeopleList(@RequestBody String json);
+
+    /**
      * 增加开关与灯绑定关系
+     *
      * @param swich
      * @return
      */
@@ -75,6 +86,7 @@ public interface LedService {
 
     /**
      * 设置灯亮度
+     *
      * @param infoBox
      * @return
      */
@@ -83,6 +95,7 @@ public interface LedService {
 
     /**
      * 查询有灯的区域
+     *
      * @return
      */
     @GetMapping(value = "/findAreasByLed")
@@ -90,6 +103,7 @@ public interface LedService {
 
     /**
      * 开关灯
+     *
      * @return
      */
     @PostMapping(value = "/openOrCloseLed")
@@ -97,6 +111,7 @@ public interface LedService {
 
     /**
      * 灯重启
+     *
      * @return
      */
     @PostMapping(value = "/ledRestart")
@@ -104,8 +119,10 @@ public interface LedService {
 
     @PostMapping(value = "/switchRestart")
     Result switchRestart(@RequestBody InfoBox<String> infoBox);
+
     /**
      * 获取照明设备故障信息
+     *
      * @return
      */
     @GetMapping(value = "/findLedFault")
@@ -119,6 +136,7 @@ public interface LedService {
 
     /**
      * 根据租户Id获取灯信息
+     *
      * @param tenantId
      * @return
      */
@@ -127,14 +145,20 @@ public interface LedService {
 
     /**
      * 修改
+     *
      * @param led
      * @return
      */
     @PostMapping("/update")
     Result update(@RequestBody Led led);
 
+
+    @PostMapping(value = "/updateLocation")
+    Result updateLocation(@RequestBody List<Led> leds);
+
     /**
      * 获取灯的配置参数
+     *
      * @param infoBox
      */
     @PostMapping("/findLedParamInfos")
@@ -153,6 +177,7 @@ public interface LedService {
 
     /**
      * 未添加灯具
+     *
      * @return
      */
     @GetMapping(value = "/notAddLed")
@@ -160,6 +185,7 @@ public interface LedService {
 
     /**
      * 预设亮度显示
+     *
      * @return
      */
     @GetMapping(value = "/brightnessShow")
@@ -169,11 +195,17 @@ public interface LedService {
      * 查询区域里的所有灯
      */
     @GetMapping("/findLedsByArea")
-    Result findLedsByArea(@RequestParam("areaId")String areaId);
+    Result findLedsByArea(@RequestParam("areaId") String areaId);
 
     /**
      * 设置灯的默认参数
      */
     @PostMapping("/refreshParam")
     Result refreshParam(@RequestBody InfoBox<String> infoBox);
+
+    @GetMapping("/showIconSize")
+    Result showIconSize();
+
+    @PostMapping(value = "/syncLedBrightness")
+    Result syncLedBrightness(@RequestBody String power);
 }

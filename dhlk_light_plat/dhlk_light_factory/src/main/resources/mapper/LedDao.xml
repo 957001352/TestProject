@@ -90,6 +90,18 @@
         where id = #{id}
     </update>
 
+    <update id="updateLocation" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update dhlk_light_led
+            <trim prefix="SET" suffixOverrides=",">
+                <if test="item.xaxis != null  and item.xaxis != ''">xaxis=#{item.xaxis},</if>
+                <if test="item.yaxis != null  and item.yaxis != ''">yaxis=#{item.yaxis},</if>
+            </trim>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+
     <update id="deteleById" parameterType="integer">
         update dhlk_light_led set status = 1 where id =#{id}
     </update>

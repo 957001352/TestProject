@@ -3,9 +3,12 @@ package com.dhlk.basicmodule.service.util;
 
 
 
+import com.dhlk.basicmodule.service.controller.CaptchaController;
 import com.dhlk.entity.basicmodule.ImageVerificationVo;
 import com.dhlk.enums.SystemEnums;
 import com.dhlk.exceptions.MyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -30,6 +33,11 @@ import java.util.Random;
  */
 
 public class ImageVerificationUtil {
+
+    /**
+     * 日志
+     */
+    private static final Logger log = LoggerFactory.getLogger(ImageVerificationUtil.class);
 
 
     /**
@@ -174,7 +182,9 @@ public class ImageVerificationUtil {
             throw new MyException(SystemEnums.IO_EXCEPTION);
         } finally {
             try {
-                byteArrayOutputStream.close();
+                if(byteArrayOutputStream!=null){
+                    byteArrayOutputStream.close();
+                }
             } catch (IOException e) {
                 throw new MyException(SystemEnums.IO_EXCEPTION);
             }
@@ -259,7 +269,12 @@ public class ImageVerificationUtil {
             for (int j = 0; j < templateImageMatrix[0].length; j++) {
                 int rgb = templateImageMatrix[i][j];
                 if (rgb != 16777215 && rgb < 0) {
-                    cutoutImage.setRGB(i, j, interestArea.getRGB(i, j));
+                    try{
+                        cutoutImage.setRGB(i, j, interestArea.getRGB(i, j));
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        throw new MyException(SystemEnums.GET_CAPTCHA_ERROR);
+                    }
                 }
             }
         }

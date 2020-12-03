@@ -29,6 +29,7 @@ public class LedConst {
     public final static String LOCAL_TOPIC_LED_SAVE = "LOCAL_TOPIC_LED_SAVE";//本地订阅云端灯的数据保存
     public final static String LOCAL_TOPIC_LED_UPDATE = "LOCAL_TOPIC_LED_UPDATE";//本地订阅云端灯的数据修改
     public final static String LOCAL_TOPIC_LED_DELETE = "LOCAL_TOPIC_LED_DELETE";//本地订阅云端灯的数据删除
+    public final static String LOCAL_TOPIC_LED_LOCATION = "LOCAL_TOPIC_LED_LOCATION";//云端灯位置修改给本地发消息
 
     public final static String LOCAL_TOPIC_AREA_SAVE = "LOCAL_TOPIC_AREA_SAVE";//云端区域保存给本地发消息
     public final static String LOCAL_TOPIC_AREA_DELETE = "LOCAL_TOPIC_AREA_DELETE";//云端区域删除给本地发消息
